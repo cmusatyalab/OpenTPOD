@@ -1,0 +1,16 @@
+# Contains extra packages needed for development besides packages in environment.yml
+name: opentpod-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip=19.1.1
+  - python>3.4
+  - setuptools
+  - autopep8
+  - autoflake
+  - isort
+  - pudb
+  - rope
+  - pip:
+    - -r local.txt
