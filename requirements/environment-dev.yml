@@ -12,5 +12,6 @@ dependencies:
   - isort
   - pudb
   - rope
+  - nodejs
   - pip:
     - -r local.txt
