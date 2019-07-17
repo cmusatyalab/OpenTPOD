@@ -11,7 +11,7 @@ SECRET_KEY = env(
     default="MhfSgPcnLnYyBhRLV5cvJrc2PHBHYK4xxTCzvIWnJNyBrzsRx1xx9fGikIlja7N8",
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "0.0.0.0", "127.0.0.1"])
 
 # CACHES
 # ------------------------------------------------------------------------------
@@ -57,6 +57,4 @@ INSTALLED_APPS += ["django_extensions"]  # noqa F405
 # ------------------------------------------------------------------------------
 
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-eager-propagates
-CELERY_TASK_EAGER_PROPAGATES = True
-# Your stuff...
-# ------------------------------------------------------------------------------
+CELERY_TASK_EAGER_PROPAGATES = False # True will make celery run tasks in main thread for dev

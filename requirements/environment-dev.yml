@@ -5,8 +5,8 @@ channels:
   - defaults
 dependencies:
   - pip=19.1.1
-  - python>3.4
   - setuptools
+  - psycopg2==2.8.3
   - autopep8
   - autoflake
   - isort
