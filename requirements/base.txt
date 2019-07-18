@@ -18,6 +18,7 @@ django-redis==4.10.0  # https://github.com/niwinz/django-redis
 
 # Django REST Framework
 djangorestframework==3.9.0  # https://github.com/encode/django-rest-framework
+django-rest-auth
 coreapi==2.3.3  # https://github.com/core-api/python-client
 
 # CVAT

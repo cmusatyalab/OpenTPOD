@@ -9,8 +9,9 @@ urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # use CVAT for authentication and labeling
-    path("", include('cvat.apps.engine.urls'))
-    # Your stuff: custom urls includes go here
+    path("", include("cvat.apps.engine.urls")),
+    path("auth/", include("rest_auth.urls")),
+    path("auth/registration/", include('rest_auth.registration.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

@@ -67,13 +67,17 @@ THIRD_PARTY_APPS = [
     "crispy_forms",
     "allauth",
     "allauth.account",
-    "allauth.socialaccount",
+    "allauth.socialaccount", #(TODO: junjuew) this is enabling social account login. do we still want this?
     "rest_framework",
+    "rest_framework.authtoken",
+    "rest_auth",
+    "rest_auth.registration",
     "django_celery_beat",
 ]
 
 LOCAL_APPS = [
     "cvat.apps.engine",
+    "cvat.apps.documentation",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -90,6 +94,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+DJANGO_AUTH_TYPE = 'BASIC'
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 # LOGIN_REDIRECT_URL = "users:redirect"
@@ -124,7 +129,8 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware", # TODO(junjuew): need to make react play nice with django's csrf
+    "opentpod.middleware.DisableCSRFMiddleware", # TODO(junjuew) this is for dev
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -269,15 +275,15 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 # ------------------------------------------------------------------------------
 ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_AUTHENTICATION_METHOD = "username"
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = False
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_ADAPTER = "opentpod.users.adapters.AccountAdapter"
+# ACCOUNT_ADAPTER = "opentpod.users.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-SOCIALACCOUNT_ADAPTER = "opentpod.users.adapters.SocialAccountAdapter"
+# SOCIALACCOUNT_ADAPTER = "opentpod.users.adapters.SocialAccountAdapter"
 
 
 # Your stuff...
