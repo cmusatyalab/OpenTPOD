@@ -8,10 +8,12 @@ from django.views import defaults as default_views
 urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
-    # use CVAT for authentication and labeling
+    # use CVAT for labeling
     path("", include("cvat.apps.engine.urls")),
+    # use rest_auth for authentication and registration
     path("auth/", include("rest_auth.urls")),
-    path("auth/registration/", include('rest_auth.registration.urls'))
+    path("auth/registration/", include('rest_auth.registration.urls')),
+    path("", include("opentpod.object_detector.urls"))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
