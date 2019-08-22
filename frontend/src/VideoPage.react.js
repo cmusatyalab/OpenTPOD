@@ -34,7 +34,6 @@ class VideoPage extends React.Component {
     fetchVideoInfo() {
         fetchJSON(endpoints.tasks, "GET").then(
             resp => {
-                console.log(resp)
                 this.setState({
                     videoInfos: resp,
                     loading: false
@@ -42,6 +41,7 @@ class VideoPage extends React.Component {
             }
         );
     }
+
 
     componentDidMount() {
         this.fetchVideoInfo();
@@ -53,7 +53,7 @@ class VideoPage extends React.Component {
                 <Grid.Col md={4} key={index}>
                     <Card>
                         <Card.Header>
-                            <Card.Title>{item.slug.replace(/(.{10})/g, "$1\n")}</Card.Title>
+                            <Card.Title>{item.name.replace(/(.{10})/g, "$1\n")}</Card.Title>
                             <Card.Options>
                                 <Button
                                     outline
@@ -76,12 +76,11 @@ class VideoPage extends React.Component {
                                     color="danger"
                                     size="sm"
                                     icon="trash"
-                                    action={"/api/video/" + item.id}
                                     method="delete"
                                     onClick={
                                         (e) => {
                                             fetchJSON(
-                                                "/api/videos/" + item.id,
+                                                endpoints.tasks + "/" + item.id,
                                                 "DELETE").then(this.setState(
                                                     {
                                                         videoInfos: this.state.videoInfos.filter(
@@ -100,11 +99,11 @@ class VideoPage extends React.Component {
                                 The video is being processed...<Dimmer active loader />
                             </div> : <div>
                                     <ReactPlayer
-                                        url={"/api/videos/" + item.id + "/raw"}
+                                        url={endpoints.mediaData + item.id + "/.upload/" + item.name}
                                         width="100%"
                                         height="100%"
                                         controls={true}
-                                        light={"/api/videos/" + item.id + "/thumbnail"}
+                                        light={endpoints.tasks + '/' + item.id + "/frames/0"}
                                     />
                                 </div>}
                         </Card.Body>
@@ -123,9 +122,62 @@ class VideoPage extends React.Component {
                                 labelIdle="Drag & Drop videos or Click to Browse."
                                 files={this.state.files}
                                 allowMultiple={true}
-                                // maxFiles={3}
                                 server={{
-                                    process: "./api/videos",
+                                    process: (fieldName, file, metadata, load, error, progress, abort) => {
+                                        // create CVAT task first
+                                        let data = {
+                                            'name': file.name,
+                                            'labels': [],
+                                            'image_quality': 100
+                                        }
+                                        fetchJSON(endpoints.tasks, 'POST', data).then(
+                                            resp => {
+                                                // fieldName is the name of the input field
+                                                // file is the actual file object to send
+                                                console.log(resp);
+                                                debugger;
+                                                const batchOfFiles = new FormData();
+                                                batchOfFiles.append('client_files[0]', file);
+                                                const request = new XMLHttpRequest();
+                                                request.open('POST', endpoints.tasks + "/" + resp["id"] + "/data");
+                                                // Should call the progress method to update the progress to 100% before calling load
+                                                // Setting computable to false switches the loading indicator to infinite mode
+                                                request.upload.onprogress = (e) => {
+                                                    progress(e.lengthComputable, e.loaded, e.total);
+                                                };
+                                                // Should call the load method when done and pass the returned server file id
+                                                // this server file id is then used later on when reverting or restoring a file
+                                                // so your server knows which file to return without exposing that info to the client
+                                                request.onload = function () {
+                                                    if (request.status >= 200 && request.status < 300) {
+                                                        // the load method accepts either a string (id) or an object
+                                                        load(request.responseText);
+                                                    }
+                                                    else {
+                                                        // Can call the error method if something is wrong, should exit after
+                                                        error('oh no');
+                                                    }
+                                                };
+                                                request.send(batchOfFiles);
+                                                // Should expose an abort method so the request can be cancelled
+                                                return {
+                                                    abort: () => {
+                                                        // This function is entered if the user has tapped the cancel button
+                                                        request.abort();
+                                                        // Let FilePond know the request has been cancelled
+                                                        abort();
+                                                    }
+                                                };
+                                            }
+                                        ).catch(
+                                            e => {
+                                                console.error(e);
+                                                error(e)
+                                                abort();
+                                            }
+                                        );
+                                    },
+
                                     fetch: null,
                                     revert: null,
                                     load: null,

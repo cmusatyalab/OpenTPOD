@@ -2,6 +2,8 @@
 Base settings to build other settings files upon.
 """
 
+import os
+
 import environ
 
 ROOT_DIR = (
@@ -72,13 +74,20 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "rest_auth",
     "rest_auth.registration",
+    "django_rq",
     "django_celery_beat",
-    "drf_yasg"  # for rest api swagger
+    "drf_yasg",  # for rest api swagger
+    "cacheops",
+    "sendfile",
+    "dj_pagination",
+    "revproxy",
+    "rules",
+    "django_filters",
 ]
 
 LOCAL_APPS = [
     "cvat.apps.engine",
-    "cvat.apps.documentation",
+    # "cvat.apps.documentation",
     "opentpod.object_detector",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -290,6 +299,54 @@ ACCOUNT_EMAIL_VERIFICATION = "optional"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 # SOCIALACCOUNT_ADAPTER = "opentpod.users.adapters.SocialAccountAdapter"
 
+# Django-RQ
+# https://github.com/rq/django-rq
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': '4h'
+    },
+    'low': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': '24h'
+    }
+}
+RQ_SHOW_ADMIN_LINK = True
+RQ_EXCEPTION_HANDLERS = ['cvat.apps.engine.views.rq_handler']
 
-# Your stuff...
+# Cache DB access (e.g. for engine.task.get_frame)
+# https://github.com/Suor/django-cacheops
+CACHEOPS_REDIS = {
+    'host': 'localhost',  # redis-server is on same machine
+    'port': 6379,        # default redis port
+    'db': 1,             # SELECT non-default redis database
+}
+CACHEOPS = {
+    # Automatically cache any Task.objects.get() calls for 15 minutes
+    # This also includes .first() and .last() calls.
+    'engine.task': {'ops': 'get', 'timeout': 60 * 15},
+
+    # Automatically cache any Job.objects.get() calls for 15 minutes
+    # This also includes .first() and .last() calls.
+    'engine.job': {'ops': 'get', 'timeout': 60 * 15},
+}
+CACHEOPS_DEGRADE_ON_FAILURE = True
+
+# opentpod
 # ------------------------------------------------------------------------------
+BASE_DIR = MEDIA_ROOT
+DATA_ROOT = os.path.join(BASE_DIR, 'data')
+os.makedirs(DATA_ROOT, exist_ok=True)
+SHARE_ROOT = os.path.join(BASE_DIR, 'share')
+os.makedirs(SHARE_ROOT, exist_ok=True)
+MODELS_ROOT = os.path.join(BASE_DIR, 'models')
+os.makedirs(MODELS_ROOT, exist_ok=True)
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None   # this django check disabled
+LOCAL_LOAD_MAX_FILES_COUNT = 500
+LOCAL_LOAD_MAX_FILES_SIZE = 512 * 1024 * 1024  # 512 MB

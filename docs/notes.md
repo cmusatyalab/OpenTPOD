@@ -15,7 +15,7 @@ tpod:admin-test
 ## CVAT workflow
 
 To create a task:
-POST /tasks: {name, labels, image_quality, z_order}
+POST /tasks: {name, labels, image_quality, z_order}, notice there is no slash in the end
 POST /task/<pk>/data: form data binary
 GET /task/<pk>/status 
 DELETE /task/<pk>/status: when server encounters errors

@@ -29,7 +29,11 @@ function fetchJSON(url, method, data = {}) {
 
     return fetch(url, options)
         .then(logFetchErrors)
-        .then(response => response.json());
+        .then(response => {
+            return response.text().then(function (text) {
+                return text ? JSON.parse(text) : {}
+            });
+        })
 }
 
 function checkAuth() {
