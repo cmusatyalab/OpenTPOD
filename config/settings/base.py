@@ -67,12 +67,13 @@ THIRD_PARTY_APPS = [
     "crispy_forms",
     "allauth",
     "allauth.account",
-    "allauth.socialaccount", #(TODO: junjuew) this is enabling social account login. do we still want this?
+    "allauth.socialaccount",  # (TODO: junjuew) this is enabling social account login. do we still want this?
     "rest_framework",
     "rest_framework.authtoken",
     "rest_auth",
     "rest_auth.registration",
     "django_celery_beat",
+    "drf_yasg"  # for rest api swagger
 ]
 
 LOCAL_APPS = [
@@ -131,7 +132,7 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     # "django.middleware.csrf.CsrfViewMiddleware", # TODO(junjuew): need to make react play nice with django's csrf
-    "opentpod.middleware.DisableCSRFMiddleware", # TODO(junjuew) this is for dev
+    "opentpod.middleware.DisableCSRFMiddleware",  # TODO(junjuew) this is for dev
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
