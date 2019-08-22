@@ -19,6 +19,7 @@ function fetchJSON(url, method, data = {}) {
         credentials: 'include', // make sure cookies are sent
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json'
         },
         body: JSON.stringify(data),
     };

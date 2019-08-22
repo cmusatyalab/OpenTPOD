@@ -10,9 +10,10 @@ import React from 'react';
 // Import React FilePond
 import { FilePond, registerPlugin } from "react-filepond";
 import { Button, Card, Dimmer, Grid, Page } from "tabler-react";
-import ReactPlayer from "react-player"
+import ReactPlayer from "react-player";
 import SiteWrapper from "./SiteWrapper.react";
-import { fetchJSON } from "./util"
+import { fetchJSON } from "./util";
+import { endpoints } from "./url";
 import "./VideoPage.css";
 
 registerPlugin(FilePondPluginFileValidateType);
@@ -31,8 +32,9 @@ class VideoPage extends React.Component {
     }
 
     fetchVideoInfo() {
-        fetchJSON("/api/videos", "GET").then(
+        fetchJSON(endpoints.tasks, "GET").then(
             resp => {
+                console.log(resp)
                 this.setState({
                     videoInfos: resp,
                     loading: false

@@ -21,11 +21,6 @@ import "tabler-react/dist/Tabler.css";
 
 type Props = {||};
 
-/**
- * Class representing a route that checks if user is logged in.
- * @extends Route
- */
-
 function App(props: Props): React.Node {
   return (
     <Router>
