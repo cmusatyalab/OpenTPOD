@@ -1,11 +1,15 @@
 
 import * as React from "react";
 import { Alert } from "tabler-react";
+import { endpoints } from "./url"
+
+
 function logFetchErrors(response) {
     if (!response.ok) {
         console.error(response);
+        throw response;
     }
-    throw response;
+    return response
 }
 
 function fetchJSON(url, method, data = {}) {
@@ -28,12 +32,8 @@ function fetchJSON(url, method, data = {}) {
 }
 
 function checkAuth() {
-    fetchJSON('/session/authenticated', 'GET')
-        .then(resp => {
-            return true;
-        }).catch(
-            e => false
-        );
+    fetchJSON(endpoints.user, 'GET')
+        .then(resp => true).catch(e => false);
 }
 
 function withFormikStatus(component, status) {

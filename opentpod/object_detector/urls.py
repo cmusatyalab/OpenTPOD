@@ -12,16 +12,16 @@ from drf_yasg import openapi
 from opentpod.object_detector import views
 
 schema_view = get_schema_view(
-   openapi.Info(
-      title="OpenTPOD REST API",
-      default_version='v1',
-      description="REST API for Opensource Tool For Painless Object Detection (OpenTPOD)",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="junjuew@cs.cmu.edu"),
-      license=openapi.License(name="Apache V2 License"),
-   ),
-   public=True,
-   permission_classes=(permissions.IsAuthenticated,),
+    openapi.Info(
+        title="OpenTPOD REST API",
+        default_version='v1',
+        description="REST API for Opensource Tool For Painless Object Detection (OpenTPOD)",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="junjuew@cs.cmu.edu"),
+        license=openapi.License(name="Apache V2 License"),
+    ),
+    public=True,
+    permission_classes=(permissions.IsAuthenticated,),
 )
 
 router = routers.DefaultRouter(trailing_slash=False)

@@ -5,6 +5,7 @@ import { Formik } from "formik";
 import { LoginPage as TablerLoginPage, Alert } from "tabler-react";
 import { fetchJSON, withFormikStatus } from "../util"
 import { withRouter } from 'react-router';
+import { endpoints } from "../url"
 
 type Props = {||};
 
@@ -23,14 +24,9 @@ class LoginPage extends React.Component {
             password: "",
           }}
           validate={values => {
-            // same as above, but feel free to move this into a class method now.
             let errors = {};
             if (!values.email) {
               errors.email = "Required";
-            } else if (
-              !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)
-            ) {
-              errors.email = "Invalid email address";
             }
             return errors;
           }}
@@ -38,14 +34,22 @@ class LoginPage extends React.Component {
             values,
             actions
           ) => {
+            let email = '';
+            let username = '';
+            if (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
+              email = values.email;
+            } else {
+              username = values.email;
+            }
             const data = {
-              'email': values.email,
+              'username': username,
+              'email': email,
               'password': values.password
             }
-            fetchJSON('/api/session', 'POST', data).then(
+            fetchJSON(endpoints.login, 'POST', data).then(
               resp => {
                 actions.setStatus('Login success: ');
-                this.props.history.push('/home')
+                this.props.history.push(endpoints.video);
               }
             ).catch(e => {
               console.error(e);
