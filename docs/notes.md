@@ -32,3 +32,21 @@ GET /tasks -- represents information for different tasks
 1. finish rest api first. add classifier, job APIs
 2. write tests for these rest apis, combining both CVAT and opentpod.
   1. see CVAT's tests for example
+
+
+## Changes to CVAT
+
+- cvat/apps/engine/urls.py
+
+```
+    # entry point for API
+    #  path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
+    # (junjuew): changed to solve reverse lookup bug
+    path('api/v1/', include((router.urls)))  # https://github.com/encode/django-rest-framework/issues/2760
+```
+
+-  cvat/apps/engine/static/engine/js/annotationUI.js
+
+```
+    // window.history.replaceState(null, null, `${window.location.origin}/?id=${jobData.id}`);
+```

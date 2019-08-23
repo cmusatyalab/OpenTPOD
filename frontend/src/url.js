@@ -8,6 +8,8 @@ const endpoints = {
     mediaData: '/media/data/',
     // front end handled routes
     video: '/video',
-    annotate: '/annotate'
+    label: '/label', // TODO (junjuew): still need this?
+    annotate: '/annotate',
+    train: '/train'
 }
 export { endpoints };

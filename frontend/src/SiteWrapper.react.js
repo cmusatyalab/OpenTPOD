@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { NavLink, withRouter } from "react-router-dom";
+import { endpoints } from "./url"
 
 import {
   Site,
@@ -43,20 +44,20 @@ type navItem = {|
 const navBarItems: Array<navItem> = [
   {
     value: "Video",
-    to: "/home",
+    to: endpoints.video,
     icon: "home",
     LinkComponent: withRouter(NavLink),
     useExact: true,
   },
   {
     value: "Label",
-    to: "/label",
+    to: endpoints.label,
     icon: "edit",
     LinkComponent: withRouter(NavLink),
   },
   {
     value: "Train",
-    to: "/train",
+    to: endpoints.train,
     icon: "code",
     LinkComponent: withRouter(NavLink),
   },
