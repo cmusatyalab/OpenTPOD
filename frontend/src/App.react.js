@@ -28,7 +28,7 @@ function App(props: Props): React.Node {
         <Route exact path="/" component={LoginPage} />
         <Route exact path="/video" component={VideoPage} />
         <Route exact path="/label" component={LabelManagementPage} />
-        <Route exact path="/label/:vid" component={AnnotatePage} />
+        <Route exact path="/annotate/:vid" component={AnnotatePage} />
         <Route exact path="/train" component={TrainPage} />
         <Route exact path="/forgot-password" component={ForgotPasswordPage} />
         <Route exact path="/login" component={LoginPage} />

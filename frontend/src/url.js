@@ -7,6 +7,7 @@ const endpoints = {
     media: '/media/',
     mediaData: '/media/data/',
     // front end handled routes
-    video: '/video'
+    video: '/video',
+    annotate: '/annotate'
 }
 export { endpoints };

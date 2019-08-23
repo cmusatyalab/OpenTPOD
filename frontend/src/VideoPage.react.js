@@ -7,13 +7,13 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 // Import FilePond styles
 import "filepond/dist/filepond.min.css";
 import React from 'react';
-// Import React FilePond
 import { FilePond, registerPlugin } from "react-filepond";
-import { Button, Card, Dimmer, Grid, Page } from "tabler-react";
 import ReactPlayer from "react-player";
+import { Button, Card, Dimmer, Grid, Page } from "tabler-react";
+import URI from 'urijs';
 import SiteWrapper from "./SiteWrapper.react";
-import { fetchJSON } from "./util";
 import { endpoints } from "./url";
+import { fetchJSON } from "./util";
 import "./VideoPage.css";
 
 registerPlugin(FilePondPluginFileValidateType);
@@ -64,7 +64,9 @@ class VideoPage extends React.Component {
                                     onClick={
                                         (e) => {
                                             e.preventDefault();
-                                            this.props.history.push('/label/' + item.id)
+                                            this.props.history.push(
+                                                URI.joinPaths(endpoints.annotate,
+                                                    item.id.toString()).toString());
                                         }
                                     }
                                 >
@@ -80,7 +82,7 @@ class VideoPage extends React.Component {
                                     onClick={
                                         (e) => {
                                             fetchJSON(
-                                                endpoints.tasks + "/" + item.id,
+                                                URI.joinPaths(endpoints.tasks, item.id.toString()),
                                                 "DELETE").then(this.setState(
                                                     {
                                                         videoInfos: this.state.videoInfos.filter(
@@ -99,11 +101,13 @@ class VideoPage extends React.Component {
                                 The video is being processed...<Dimmer active loader />
                             </div> : <div>
                                     <ReactPlayer
-                                        url={endpoints.mediaData + item.id + "/.upload/" + item.name}
+                                        url={URI.joinPaths(
+                                            endpoints.mediaData, item.id.toString(), ".upload", item.name)}
                                         width="100%"
                                         height="100%"
                                         controls={true}
-                                        light={endpoints.tasks + '/' + item.id + "/frames/0"}
+                                        light={URI.joinPaths(
+                                            endpoints.tasks, item.id.toString(), "/frames/0").toString()} // expects string type
                                     />
                                 </div>}
                         </Card.Body>
@@ -134,12 +138,10 @@ class VideoPage extends React.Component {
                                             resp => {
                                                 // fieldName is the name of the input field
                                                 // file is the actual file object to send
-                                                console.log(resp);
-                                                debugger;
                                                 const batchOfFiles = new FormData();
                                                 batchOfFiles.append('client_files[0]', file);
                                                 const request = new XMLHttpRequest();
-                                                request.open('POST', endpoints.tasks + "/" + resp["id"] + "/data");
+                                                request.open('POST', URI.joinPaths(endpoints.tasks, resp["id"], "data"));
                                                 // Should call the progress method to update the progress to 100% before calling load
                                                 // Setting computable to false switches the loading indicator to infinite mode
                                                 request.upload.onprogress = (e) => {
@@ -155,7 +157,8 @@ class VideoPage extends React.Component {
                                                     }
                                                     else {
                                                         // Can call the error method if something is wrong, should exit after
-                                                        error('oh no');
+                                                        error('File Upload Failed');
+                                                        abort();
                                                     }
                                                 };
                                                 request.send(batchOfFiles);
