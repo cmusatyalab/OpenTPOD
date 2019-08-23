@@ -3,6 +3,8 @@ import { Button, Tag, Container, Grid, Page, Card, List, Form } from "tabler-rea
 import SiteWrapper from "./SiteWrapper.react";
 import CreatableSelect from "react-select/creatable";
 import { fetchJSON } from "./util"
+import URI from "urijs";
+import { endpoints } from "./url";
 
 function LabelCard({ labels, onRemove }) {
   const tags = labels.map((curLabel, index) => {
@@ -63,9 +65,10 @@ class LabelManagementPanel extends React.Component {
     rightPanel: "labels"
   };
   updateLabelTags() {
-    fetchJSON("/api/labels", "GET").then(resp => {
+    fetchJSON(URI.joinPaths(endpoints.tasks, this.props.taskID), "GET").then(resp => {
+      console.log(resp);
       this.setState(() => ({
-        labels: resp
+        labels: resp.labels
       }));
     }).catch(e => {
       console.error(e);
@@ -119,7 +122,6 @@ class LabelManagementPanel extends React.Component {
         <div className="my-3 my-md-5">
           <Grid.Row>
             <Grid.Col md={3}>
-              {/* <Page.Title className="mb-5">Actions</Page.Title> */}
               <div>
                 <List.Group transparent={true}>
                   <List.GroupItem

@@ -65,7 +65,11 @@ class VideoPage extends React.Component {
                                         (e) => {
                                             e.preventDefault();
                                             this.props.history.push(
-                                                URI.joinPaths(endpoints.annotate,
+                                                URI.joinPaths(
+                                                    endpoints.annotate,
+                                                    'tasks',
+                                                    item.id.toString(),
+                                                    'jobs',
                                                     item.segments[0].jobs[0].id.toString()).toString()); // only consider 1st job
                                         }
                                     }
@@ -131,7 +135,7 @@ class VideoPage extends React.Component {
                                         // create CVAT task first
                                         let data = {
                                             'name': file.name,
-                                            'labels': [],
+                                            'labels': ["enter an object name"],
                                             'image_quality': 100
                                         }
                                         fetchJSON(endpoints.tasks, 'POST', data).then(

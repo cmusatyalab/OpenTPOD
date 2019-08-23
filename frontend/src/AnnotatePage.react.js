@@ -1,12 +1,13 @@
-import React from 'react';
-import { Button, Avatar, Tag, Grid, Page, Icon, Form } from "tabler-react";
-import SiteWrapper from "./SiteWrapper.react";
-import { CVATAnnotation } from "./CVATHTML"
-import CreatableSelect from 'react-select/creatable';
 import $ from 'jquery';
+import React from 'react';
+import { Page } from "tabler-react";
+import { CVATAnnotation } from "./CVATHTML";
+import './engine/base.css';
+import './engine/stylesheet.css';
+import { LabelManagementPanel } from './Label.react';
+import SiteWrapper from "./SiteWrapper.react";
 
-import './engine/base.css'
-import './engine/stylesheet.css'
+
 
 function load_script(src) {
     return new Promise(function (resolve, reject) {
@@ -111,7 +112,7 @@ class AnnotatePage extends React.Component {
 
     renderAnnotationUIWithCVAT() {
         // finished loading scripts, init UI using cvat 
-        window.callAnnotationUI(this.props.match.params.vid);
+        window.callAnnotationUI(this.props.match.params.jid);
         customizeCVATUI();
     }
 
@@ -139,7 +140,9 @@ class AnnotatePage extends React.Component {
     render() {
         return <SiteWrapper>
             <Page.Content>
-                {/* <LabelPanel /> */}
+                <LabelManagementPanel
+                    taskID={this.props.match.params.tid}
+                />
                 <hr />
                 <CVATAnnotation />
             </Page.Content >
