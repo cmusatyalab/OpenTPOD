@@ -105,32 +105,31 @@ function customizeCVATUI() {
 class AnnotatePage extends React.Component {
     constructor(props) {
         super(props);
-        this.loadExternalJSByIdx = this.loadExternalJSByIdx.bind(this)
-        this.renderAnnotationUIWithCVAT = this.renderAnnotationUIWithCVAT.bind(this)
+        this.loadExternalJSByIdx = this.loadExternalJSByIdx.bind(this);
+        this.renderAnnotationUIWithCVAT = this.renderAnnotationUIWithCVAT.bind(this);
     }
 
     renderAnnotationUIWithCVAT() {
         // finished loading scripts, init UI using cvat 
         window.callAnnotationUI(this.props.match.params.vid);
-        customizeCVATUI()
+        customizeCVATUI();
     }
 
     loadExternalJSByIdx(idx, load_func) {
         load_cvat_js[idx].then(() => {
             if (idx + 1 < load_cvat_js.length) {
-                load_func(idx + 1, load_func)
+                load_func(idx + 1, load_func);
             } else if (idx + 1 == load_cvat_js.length) {
-                this.renderAnnotationUIWithCVAT()
+                this.renderAnnotationUIWithCVAT();
             }
         }).catch(function (e) {
-            console.error('error loading cvat js')
-            console.error(e)
+            console.error('error loading cvat js');
+            console.error(e);
         })
     }
 
     componentDidMount() {
         this.loadExternalJSByIdx(0, this.loadExternalJSByIdx);
-        window.callAnnotationUI(45);
     }
 
     createNewLabel() {

@@ -66,7 +66,7 @@ class VideoPage extends React.Component {
                                             e.preventDefault();
                                             this.props.history.push(
                                                 URI.joinPaths(endpoints.annotate,
-                                                    item.id.toString()).toString());
+                                                    item.segments[0].jobs[0].id.toString()).toString()); // only consider 1st job
                                         }
                                     }
                                 >

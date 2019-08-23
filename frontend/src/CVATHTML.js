@@ -407,9 +407,9 @@ function CVATAnnotation() {
         </div>
 
         <div id="overlayTemplate" hidden>
-            <div class="modal" hidden>
-                <div class="modal-content" >
-                    <label class="regular templateMessage selectable"> </label>
+            <div className="modal" hidden>
+                <div className="modal-content" >
+                    <label className="regular templateMessage selectable"> </label>
                 </div>
             </div>
         </div>
