@@ -104,9 +104,18 @@ function customizeCVATUI() {
     $('#createShapeButton').text('Annotate')
 }
 
+function clearCVATUI() {
+    // CVAT build annotation assumes a clean start for HTML elements
+    // however, react won't render them. leaving side-effects of preivous renders.
+    // this functions clear the CVAT UI for re-build
+    // TODO(junjuew): doesn't seem to be working. the options still have duplicates
+    // need to move this to shapeCreator
+    $("#shapeLabelSelector").empty();
+}
+
 class CVATAnnotation extends React.Component {
     renderAnnotationUIWithCVAT = () => {
-        // finished loading scripts, init UI using cvat js
+        // build CVAT annotation UI using cvat js
         window.callAnnotationUI(this.props.jid);
         customizeCVATUI();
     }
@@ -129,9 +138,8 @@ class CVATAnnotation extends React.Component {
     }
 
     render = () => {
-        return <CVATAnnotationHTML
-            labels={this.props.labels}
-        />
+        this.renderAnnotationUIWithCVAT();
+        return <CVATAnnotationHTML />
     }
 }
 
@@ -170,16 +178,26 @@ class AnnotatePage extends React.Component {
         fetchJSON(URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
             "PATCH", req).then(() => {
                 this.getLabels();
-                this.forceUpdate();
             })
     }
 
-    deleteLabel = (lid) => {
-        fetchJSON("/api/labels/" + lid, "DELETE").then(e => {
-            this.updateLabelTags();
-        }).catch(
-            e => console.error(e)
-        )
+    deleteLabel = (label) => {
+        // TODO (junjuew): CVAT doesn't seem to have support for removing label yet.
+        const curLabels = this.state.labels.filter(
+            (value) => {
+                return value.name !== label;
+            }
+        );
+        console.log(curLabels);
+        const req = {
+            "name": this.taskInfo.name,
+            "labels": curLabels,
+            "image_quality": this.taskInfo.image_quality
+        }
+        fetchJSON(URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
+            "PATCH", req).then(() => {
+                this.getLabels();
+            })
     }
 
     componentDidMount() {

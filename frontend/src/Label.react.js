@@ -10,7 +10,6 @@ function LabelCard({ labels, onRemove }) {
   const tags = labels.map((curLabel, index) => {
     return <Tag remove rounded color="grey-dark" addOnIcon="tag" key={index} onRemoveClick={onRemove}>
       {curLabel.name}
-      <div lid={curLabel.id} id="lid" hidden />
     </Tag>
   })
 
@@ -79,9 +78,8 @@ class LabelManagementPanel extends React.Component {
   }
 
   onLabelTagRemove = (e) => {
-    const lidNode = e.target.parentNode.parentNode.querySelector("#lid");
-    const lid = lidNode.getAttribute("lid");
-    this.props.onDeleteLabel(lid);
+    const label = e.target.parentNode.parentNode.textContent;
+    this.props.onDeleteLabel(label);
   }
 
   render() {

@@ -391,14 +391,11 @@ function AnnotationRightPanel() {
         </div>`
 }
 
-function CVATAnnotationHTML({ labels }) {
+function CVATAnnotationHTML() {
     let centerPanelHTML = Plalyer() + HelpWindow() + SettingWindow() + AnnotationMenu();
     let rightPanelHTML = AnnotationRightPanel();
     let objectLabelHTML = Objectlabel()
-    // this first div is to make sure this component get updated
-    // when the labels change.
     return <>
-        <div hidden>{labels.length}</div>
         <div id="taskAnnotationCenterPanel" dangerouslySetInnerHTML={{ __html: centerPanelHTML }}
             style={{ 'height': '480px' }}
         >
