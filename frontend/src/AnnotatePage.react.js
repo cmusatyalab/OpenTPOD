@@ -1,13 +1,14 @@
 import $ from 'jquery';
 import React from 'react';
-import { Page } from "tabler-react";
-import { CVATAnnotation } from "./CVATHTML";
+import { Dimmer, Page } from "tabler-react";
+import { CVATAnnotationHTML } from "./CVATHTML";
 import './engine/base.css';
 import './engine/stylesheet.css';
 import { LabelManagementPanel } from './Label.react';
 import SiteWrapper from "./SiteWrapper.react";
-
-
+import { fetchJSON } from "./util"
+import URI from "urijs";
+import { endpoints } from "./url";
 
 function load_script(src) {
     return new Promise(function (resolve, reject) {
@@ -65,7 +66,7 @@ var load_cvat_js = cvat_js_files.map(load_script);
 // compiler doesn't complain about function not found
 // this function will be overriden by callAnnotationUI
 // in the engine/js/annotaionUI.js
-window.callAnnotationUI = (e) => { };
+window.callAnnotationUI = () => { };
 
 
 function customizeCVATUI() {
@@ -103,20 +104,14 @@ function customizeCVATUI() {
     $('#createShapeButton').text('Annotate')
 }
 
-class AnnotatePage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.loadExternalJSByIdx = this.loadExternalJSByIdx.bind(this);
-        this.renderAnnotationUIWithCVAT = this.renderAnnotationUIWithCVAT.bind(this);
-    }
-
-    renderAnnotationUIWithCVAT() {
-        // finished loading scripts, init UI using cvat 
-        window.callAnnotationUI(this.props.match.params.jid);
+class CVATAnnotation extends React.Component {
+    renderAnnotationUIWithCVAT = () => {
+        // finished loading scripts, init UI using cvat js
+        window.callAnnotationUI(this.props.jid);
         customizeCVATUI();
     }
 
-    loadExternalJSByIdx(idx, load_func) {
+    loadExternalJSByIdx = (idx, load_func) => {
         load_cvat_js[idx].then(() => {
             if (idx + 1 < load_cvat_js.length) {
                 load_func(idx + 1, load_func);
@@ -129,22 +124,90 @@ class AnnotatePage extends React.Component {
         })
     }
 
-    componentDidMount() {
+    componentDidMount = () => {
         this.loadExternalJSByIdx(0, this.loadExternalJSByIdx);
     }
 
-    createNewLabel() {
-        // create new labels
+    render = () => {
+        return <CVATAnnotationHTML
+            labels={this.props.labels}
+        />
+    }
+}
+
+class AnnotatePage extends React.Component {
+    constructor(props) {
+        super(props);
+        this.getLabels = this.getLabels.bind(this);
+        this.taskInfo = null;
+        this.state = {
+            labels: [],
+            loading: true
+        }
+    }
+
+    getLabels = () => {
+        fetchJSON(URI.joinPaths(endpoints.tasks,
+            this.props.match.params.tid), "GET").then(resp => {
+                this.taskInfo = resp;
+                this.setState(() => ({
+                    labels: resp.labels,
+                    loading: false
+                }));
+            })
+    }
+
+    addLabel = (label) => {
+        const curLabels = this.state.labels.slice(0);
+        curLabels.push({
+            "name": label
+        })
+        const req = {
+            "name": this.taskInfo.name,
+            "labels": curLabels,
+            "image_quality": this.taskInfo.image_quality
+        }
+        fetchJSON(URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
+            "PATCH", req).then(() => {
+                this.getLabels();
+                this.forceUpdate();
+            })
+    }
+
+    deleteLabel = (lid) => {
+        fetchJSON("/api/labels/" + lid, "DELETE").then(e => {
+            this.updateLabelTags();
+        }).catch(
+            e => console.error(e)
+        )
+    }
+
+    componentDidMount() {
+        this.getLabels();
     }
 
     render() {
         return <SiteWrapper>
-            <Page.Content>
-                <LabelManagementPanel
-                    taskID={this.props.match.params.tid}
-                />
-                <hr />
-                <CVATAnnotation />
+            <Page.Content title="What do you want to label?">
+                {
+                    (this.state.loading) ?
+                        <Dimmer active loader /> : <>
+                            <LabelManagementPanel
+                                taskID={this.props.match.params.tid}
+                                labels={this.state.labels}
+                                onAddLabel={this.addLabel}
+                                onDeleteLabel={this.deleteLabel}
+                            />
+                            <hr />
+                            {
+                                this.state.labels.length !== 0 &&
+                                <CVATAnnotation
+                                    jid={this.props.match.params.jid}
+                                    labels={this.state.labels}
+                                />
+                            }
+                        </>
+                }
             </Page.Content >
         </SiteWrapper >
     }

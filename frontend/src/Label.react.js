@@ -24,7 +24,7 @@ function LabelCard({ labels, onRemove }) {
 
   return <Card>
     <Card.Header>
-      <Card.Title>Labels</Card.Title>
+      <Card.Title>Objects in This Video</Card.Title>
     </Card.Header>
     <Card.Body>
       {tagList}
@@ -35,7 +35,7 @@ function LabelCard({ labels, onRemove }) {
 function NewLabelCard({ onCancel, onSave }) {
   return <Card>
     <Card.Header>
-      <Card.Title>New Label</Card.Title>
+      <Card.Title>New Object of Interest</Card.Title>
     </Card.Header>
     <Card.Body>
       <Form onSubmit={onSave}>
@@ -61,54 +61,33 @@ function NewLabelCard({ onCancel, onSave }) {
 
 class LabelManagementPanel extends React.Component {
   state = {
-    labels: [],
     rightPanel: "labels"
   };
-  updateLabelTags() {
-    fetchJSON(URI.joinPaths(endpoints.tasks, this.props.taskID), "GET").then(resp => {
-      console.log(resp);
-      this.setState(() => ({
-        labels: resp.labels
-      }));
-    }).catch(e => {
-      console.error(e);
-    });
-  }
+
   onNewLabelCardCancel = (e) => {
     e.preventDefault();
     this.setState({ rightPanel: "labels" });
   }
+
   onNewLabelCardSave = (e) => {
     e.preventDefault();
-    const labelValue = e.target.labelValue.value
-    fetchJSON("/api/labels", "POST", { 'text': labelValue }).then(e => {
-      this.updateLabelTags();
-    }).catch(e => {
-      console.error(e);
-    });
+    const labelValue = e.target.labelValue.value;
+    this.props.onAddLabel(labelValue);
     this.setState({
       rightPanel: "labels"
     });
   }
+
   onLabelTagRemove = (e) => {
     const lidNode = e.target.parentNode.parentNode.querySelector("#lid");
     const lid = lidNode.getAttribute("lid");
-    fetchJSON("/api/labels/" + lid, "DELETE").then(e => {
-      this.updateLabelTags();
-    }).catch(
-      e => console.error(e)
-    )
+    this.props.onDeleteLabel(lid);
   }
-
-  componentDidMount() {
-    this.updateLabelTags();
-  }
-
 
   render() {
     let rightPanel = null;
     if (this.state.rightPanel === "labels") {
-      rightPanel = <LabelCard labels={this.state.labels}
+      rightPanel = <LabelCard labels={this.props.labels}
         onRemove={this.onLabelTagRemove} />
     } else if (this.state.rightPanel === "newLabel") {
       rightPanel = <NewLabelCard
@@ -134,7 +113,7 @@ class LabelManagementPanel extends React.Component {
                       color="primary"
                       onClick={e => { this.setState({ "rightPanel": "newLabel" }) }}
                     >
-                      Create New Labels
+                      New Objects of Interest
                   </Button>
                   </List.GroupItem>
                 </List.Group>
