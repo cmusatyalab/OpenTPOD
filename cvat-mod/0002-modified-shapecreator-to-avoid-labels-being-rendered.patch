@@ -1,7 +1,7 @@
 From 5471169c6b03b0bcb07f315d6ae4665b55a85b6d Mon Sep 17 00:00:00 2001
 From: junjuew <junjuew@cs.cmu.edu>
 Date: Mon, 26 Aug 2019 14:05:02 -0400
-Subject: [PATCH 2/2] modified shapecreator to avoid labels being rendered
+Subject: [PATCH 2/3] modified shapecreator to avoid labels being rendered
  multiple times
 
 ---
