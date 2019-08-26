@@ -28,13 +28,13 @@ function fetchJSON(url, method, data = {}) {
     }
 
     return fetch(url, options)
-        .then(logFetchErrors)
+        .then(response => logFetchErrors(response))
         .then(response => {
-            return response.text().then(function (text) {
+            return response.text().then(text => {
                 return text ? JSON.parse(text) : {}
             });
         })
-}
+};
 
 function checkAuth() {
     fetchJSON(endpoints.user, 'GET')

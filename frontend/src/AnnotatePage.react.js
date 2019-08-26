@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import React from 'react';
-import { Dimmer, Page } from "tabler-react";
+import { Dimmer, Page, Grid } from "tabler-react";
 import { CVATAnnotationHTML } from "./CVATHTML";
 import { LabelManagementPanel } from './Label.react';
 import SiteWrapper from "./SiteWrapper.react";
@@ -136,7 +136,7 @@ class CVATAnnotation extends React.Component {
     renderAnnotationUIWithCVAT = () => {
         // build CVAT annotation UI using cvat js
         window.callAnnotationUI(this.props.jid);
-        customizeCVATUI();
+        // customizeCVATUI();
     }
 
     loadExternalJSByIdx = (idx, load_func) => {
@@ -163,26 +163,22 @@ class CVATAnnotation extends React.Component {
 }
 
 class AnnotatePage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.getLabels = this.getLabels.bind(this);
-        this.taskInfo = null;
-        this.state = {
-            labels: [],
-            loading: true
-        }
-    }
+    state = {
+        labels: [],
+        loading: true
+    };
+    taskInfo = null;
 
     getLabels = () => {
         fetchJSON(URI.joinPaths(endpoints.tasks,
-            this.props.match.params.tid), "GET").then(resp => {
-                this.taskInfo = resp;
-                console.log(resp);
-                this.setState(() => ({
-                    labels: resp.labels,
-                    loading: false
-                }));
-            })
+            this.props.match.params.tid), "GET").then(
+                resp => {
+                    this.taskInfo = resp;
+                    this.setState({
+                        labels: resp.labels,
+                        loading: false
+                    });
+                });
     }
 
     addLabel = (label) => {
@@ -225,29 +221,34 @@ class AnnotatePage extends React.Component {
     }
 
     render() {
-        return <SiteWrapper>
-            <Page.Content title="What do you want to label?">
-                {
-                    (this.state.loading) ?
-                        <Dimmer active loader /> : <>
-                            <LabelManagementPanel
-                                taskID={this.props.match.params.tid}
-                                labels={this.state.labels}
-                                onAddLabel={this.addLabel}
-                                onDeleteLabel={this.deleteLabel}
-                            />
-                            <hr />
+        return (
+            <SiteWrapper>
+                <Page.Content title="What do you want to label?" style={{ height: "100%" }}>
+                    <Grid.Row>
+                        <section className="container">
                             {
-                                this.state.labels.length !== 0 &&
-                                <CVATAnnotation
-                                    jid={this.props.match.params.jid}
-                                    labels={this.state.labels}
-                                />
+                                (this.state.loading) ?
+                                    <Dimmer active loader /> : <>
+                                        <LabelManagementPanel
+                                            taskID={this.props.match.params.tid}
+                                            labels={this.state.labels}
+                                            onAddLabel={this.addLabel}
+                                            onDeleteLabel={this.deleteLabel}
+                                        />
+                                        {
+                                            this.state.labels.length !== 0 &&
+                                            <CVATAnnotation
+                                                jid={this.props.match.params.jid}
+                                                labels={this.state.labels}
+                                            />
+                                        }
+                                    </>
                             }
-                        </>
-                }
-            </Page.Content >
-        </SiteWrapper >
+                        </section>
+                    </Grid.Row>
+                </Page.Content>
+            </SiteWrapper>
+        )
     }
 }
 

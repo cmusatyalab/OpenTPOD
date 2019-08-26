@@ -133,7 +133,7 @@ function HelpWindow() {
     </div>`
 }
 
-function Plalyer() {
+function Player() {
     return `<div id="player">
         <div id="playerFrame">
             <div id="rotationWrapper">
@@ -206,6 +206,56 @@ function Plalyer() {
             </svg>
             <input type="range" id="playerProgress" />
         </div>
+    </div>`
+}
+
+// replacement for playertoolbar and action menu
+function RevisedPlayerToolBar() {
+    return `
+        <div style="width: 100%; height: 100%;" >
+            <button class="regular h2" id="undoButton" disabled> &#x27F2; </button>
+            <button class="regular h2" id="redoButton" disabled> &#10227; </button>
+            <label id="propagateLabel" class="regular h2" style="margin-left: 15px;"> Propagation </label>
+            <input type="number" id="propagateFramesInput" style="width: 3em" min="1" max="10000" value="50" class="regular h2" />
+            <label class="regular h2" style="margin-left: 15px;"> Rotation </label>
+            <button class="regular h2" id="clockwiseRotation" title="Clockwise rotation"> &#10227; </button>
+            <button class="regular h2" id="counterClockwiseRotation" title="Counter clockwise rotation"> &#10226; </button>
+            <div style="float: right;">
+                <label class="regular h2"> Frame </label>
+                <input class="regular h2" style="width: 3.5em;" type="number" id="frameNumber" />
+            </div>
+            <select id="downloadAnnotationButton" class="semiBold h2" style="text-align-last: center;">
+                <option selected disabled> Dump Annotation </option>
+            </select>
+            <select id="uploadAnnotationButton" class="semiBold h2" style="text-align-last: center;">
+                    <option selected disabled> Upload Annotation </option>
+            </select>
+            <button id="removeAnnotationButton" class="semiBold h2"> Remove Annotation </button>
+            <button id="fullScreenButton" class="semiBold h2"> Fullscreen Player </button>
+            <button id="helpButton" class="semiBold h2"> Help </button>
+            <br/>
+            <button id="saveButton" class="semiBold h2"> Save Work </button>
+            <input type="file" id="annotationFileSelector" style="display: none" />
+            <center> <label class="semiBold h2"> Statistic </label> </center>
+            <div style="text-align: center; max-height: 250px; overflow: auto; display: block;">
+                <table id="annotationStatisticTable" cellspacing="3" cellpadding="3">
+                    <tr class="semiBold">
+                        <td> Label </td>
+                        <td colspan="2"> Boxes </td>
+                        <td colspan="2"> Points </td>
+                        <td> Manually </td>
+                        <td> Interpolated </td>
+                        <td> Total </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    `
+}
+
+
+function PlayerToolBar() {
+    return `
         <div style="margin-top: 20px">
         <br/>
             <button id="menuButton" class="regular h2"> Open Menu </button>
@@ -271,14 +321,19 @@ function Plalyer() {
                 </tr>
             </table>
         </div>
-    </div>`
+    `
 }
 
-function AnnotationMenu() {
+function ActionMenu() {
     return `<div id="annotationMenu" class="hidden regular">
         <center style="float:left; width: 28%; height: 100%;" id="engineMenuButtons">
-            <button id="downloadAnnotationButton" class="menuButton semiBold h2"> Dump Annotation </button>
-            <button id="uploadAnnotationButton" class="menuButton semiBold h2"> Upload Annotation </button>
+            <select id="downloadAnnotationButton" class="menuButton semiBold h2" style="text-align-last: center;">
+                <option selected disabled> Dump Annotation </option>
+            </select>
+
+            <select id="uploadAnnotationButton" class="menuButton semiBold h2" style="text-align-last: center;">
+                    <option selected disabled> Upload Annotation </option>
+            </select>
             <button id="removeAnnotationButton" class="menuButton semiBold h2"> Remove Annotation </button>
             <button id="settingsButton" class="menuButton semiBold h2"> Settings </button>
             <button id="fullScreenButton" class="menuButton semiBold h2"> Fullscreen Player </button>
@@ -391,13 +446,27 @@ function AnnotationRightPanel() {
         </div>`
 }
 
+function RevisedAnnotationRightPanel() {
+    return `<div id="uiContent"> </div>
+        <div id="labelsContent" class="hidden"> </div>
+        <div id="trackManagement">
+            <button id="createShapeButton" class="regular h2" style="width: 80%;">New</button>
+            <select id="shapeLabelSelector" class="regular h2"></select>
+            <select id="shapeModeSelector" class="regular h2">
+                <option value="annotation" class="regular"> Annotation </option>
+                <option value="interpolation" class="regular"> Interpolation </option>
+            </select>
+        </div>
+        `
+}
+
 function CVATAnnotationHTML() {
-    let centerPanelHTML = Plalyer() + HelpWindow() + SettingWindow() + AnnotationMenu();
-    let rightPanelHTML = AnnotationRightPanel();
+    let centerPanelHTML = Player() + HelpWindow() + SettingWindow() + RevisedPlayerToolBar();
+    let rightPanelHTML = RevisedAnnotationRightPanel();
     let objectLabelHTML = Objectlabel()
-    return <>
+    return <div style={{ minHeight: '1000px' }}>
         <div id="taskAnnotationCenterPanel" dangerouslySetInnerHTML={{ __html: centerPanelHTML }}
-            style={{ 'height': '480px' }}
+            style={{ height: '480px' }}
         >
         </div>
         <div dangerouslySetInnerHTML={{ __html: objectLabelHTML }}>
@@ -413,7 +482,7 @@ function CVATAnnotationHTML() {
                 </div>
             </div>
         </div>
-    </>
+    </div>
 }
 
-export { SettingWindow, HelpWindow, Plalyer, AnnotationMenu, AnnotationRightPanel, Objectlabel, CVATAnnotationHTML as CVATAnnotationHTML }
+export { SettingWindow, HelpWindow, Player as Plalyer, ActionMenu as AnnotationMenu, AnnotationRightPanel, Objectlabel, CVATAnnotationHTML as CVATAnnotationHTML }
