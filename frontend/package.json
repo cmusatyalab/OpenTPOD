@@ -36,7 +36,7 @@
   "proxy": "http://localhost:5000",
   "scripts": {
     "start": "react-scripts start",
-    "watch": "HOST='128.2.210.252' react-scripts start --watch",
+    "watch": "react-scripts start --watch",
     "dev-build": "dotenv -e .env.development react-scripts build",
     "dev": "watch 'npm run dev-build' src",
     "build": "react-scripts build && rm -rf ../opentpod/static/build && cp -r build ../opentpod/static/",

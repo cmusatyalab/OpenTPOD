@@ -277,7 +277,6 @@ opentpod/media/
 .env
 .envs/*
 
-cvat
 keys/*
 unused
 
