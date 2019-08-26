@@ -2,20 +2,37 @@ import $ from 'jquery';
 import React from 'react';
 import { Dimmer, Page } from "tabler-react";
 import { CVATAnnotationHTML } from "./CVATHTML";
-import './engine/base.css';
-import './engine/stylesheet.css';
 import { LabelManagementPanel } from './Label.react';
 import SiteWrapper from "./SiteWrapper.react";
 import { fetchJSON } from "./util"
 import URI from "urijs";
 import { endpoints } from "./url";
 
+function get_url_extension(url) {
+    return url.split(/\#|\?/)[0].split('.').pop().trim();
+}
+
 function load_script(src) {
+    let ext = get_url_extension(src)
     return new Promise(function (resolve, reject) {
-        var script = document.createElement('script');
-        script.src = src;
-        script.async = false;
-        document.body.appendChild(script);
+        let script = null;
+        if (ext === 'js') {
+            script = document.createElement('script');
+            script.src = src;
+            script.async = false;
+            document.body.appendChild(script);
+        } else if (ext === 'css') {
+            let head = document.getElementsByTagName('head')[0];
+            script = document.createElement('link');
+            script.rel = 'stylesheet';
+            script.type = 'text/css';
+            script.href = src;
+            script.media = 'all';
+            head.appendChild(script);
+        } else {
+            throw "Unsupported file type to load dynamically (" + src + ")."
+
+        }
         script.addEventListener('load', function () {
             resolve();
         });
@@ -26,6 +43,8 @@ function load_script(src) {
 };
 
 var cvat_js_files = [
+    'static/engine/base.css',
+    'static/engine/stylesheet.css',
     'static/engine/js/3rdparty/jquery-3.3.1.js',
     'static/engine/js/3rdparty/jquery.fullscreen.js',
     'static/engine/js/3rdparty/js.cookie.js',
@@ -158,6 +177,7 @@ class AnnotatePage extends React.Component {
         fetchJSON(URI.joinPaths(endpoints.tasks,
             this.props.match.params.tid), "GET").then(resp => {
                 this.taskInfo = resp;
+                console.log(resp);
                 this.setState(() => ({
                     labels: resp.labels,
                     loading: false

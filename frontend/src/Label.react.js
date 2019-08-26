@@ -85,8 +85,10 @@ class LabelManagementPanel extends React.Component {
   render() {
     let rightPanel = null;
     if (this.state.rightPanel === "labels") {
-      rightPanel = <LabelCard labels={this.props.labels}
-        onRemove={this.onLabelTagRemove} />
+      rightPanel = <LabelCard
+        labels={this.props.labels}
+        onRemove={this.onLabelTagRemove}
+      />
     } else if (this.state.rightPanel === "newLabel") {
       rightPanel = <NewLabelCard
         onCancel={this.onNewLabelCardCancel}
