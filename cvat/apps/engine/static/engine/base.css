@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
-
+/* junjuew: remove conflicting styles
 html {
     background-color: #FFFFFF;
     margin: 0px auto;
@@ -114,7 +114,7 @@ html {
   .close:after {
     transform: rotate(-45deg);
   }
-
+*/
 .tab {
     overflow: hidden;
     border: 1px solid black;
