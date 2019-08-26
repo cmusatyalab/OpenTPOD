@@ -207,6 +207,8 @@ class ShapeCreatorView {
             ${shortkeys['change_default_label'].view_value} - ${shortkeys['change_default_label'].description}`);
 
         let labels = window.cvat.labelsInfo.labels();
+        // junjuew: clear the select to avoid rendering labels multiple times
+        this._labelSelector.empty();
         for (let labelId in labels) {
             let option = $(`<option value=${labelId}> ${labels[labelId].normalize()} </option>`);
             option.appendTo(this._labelSelector);
