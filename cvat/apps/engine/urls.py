@@ -41,5 +41,9 @@ urlpatterns = [
 
     # entry point for API
     path('api/v1/auth/', include('cvat.apps.authentication.api_urls')),
-    path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
+
+    # junjuew: remove the cvat namespace as it creates problems for back_ref
+    # path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
+    # https://github.com/encode/django-rest-framework/issues/2760
+    path('api/v1/', include((router.urls)))
 ]

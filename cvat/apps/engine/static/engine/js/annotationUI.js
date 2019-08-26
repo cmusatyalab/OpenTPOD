@@ -538,8 +538,9 @@ function buildAnnotationUI(jobData, taskData, imageMetaData, annotationData, ann
         },
     };
 
-    // Remove external search parameters from url
-    window.history.replaceState(null, null, `${window.location.origin}/?id=${jobData.id}`);
+    // orig comment: Remove external search parameters from url
+    // junjuew: prevent url changes
+    // window.history.replaceState(null, null, `${window.location.origin}/?id=${jobData.id}`);
 
     window.cvat.config = new Config();
 
