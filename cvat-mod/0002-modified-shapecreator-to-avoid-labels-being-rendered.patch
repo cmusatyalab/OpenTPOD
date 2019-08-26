@@ -1,0 +1,26 @@
+From 5471169c6b03b0bcb07f315d6ae4665b55a85b6d Mon Sep 17 00:00:00 2001
+From: junjuew <junjuew@cs.cmu.edu>
+Date: Mon, 26 Aug 2019 14:05:02 -0400
+Subject: [PATCH 2/2] modified shapecreator to avoid labels being rendered
+ multiple times
+
+---
+ cvat/apps/engine/static/engine/js/shapeCreator.js | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/cvat/apps/engine/static/engine/js/shapeCreator.js b/cvat/apps/engine/static/engine/js/shapeCreator.js
+index 78d3b15..d3bfd6c 100644
+--- a/cvat/apps/engine/static/engine/js/shapeCreator.js
++++ b/cvat/apps/engine/static/engine/js/shapeCreator.js
+@@ -207,6 +207,8 @@ class ShapeCreatorView {
+             ${shortkeys['change_default_label'].view_value} - ${shortkeys['change_default_label'].description}`);
+ 
+         let labels = window.cvat.labelsInfo.labels();
++        // junjuew: clear the select to avoid rendering labels multiple times
++        this._labelSelector.empty();
+         for (let labelId in labels) {
+             let option = $(`<option value=${labelId}> ${labels[labelId].normalize()} </option>`);
+             option.appendTo(this._labelSelector);
+-- 
+2.21.0
+
