@@ -32,7 +32,9 @@ router.register('plugins', views.PluginViewSet)
 
 urlpatterns = [
     # Entry point for a client
-    path('', views.dispatch_request),
+    # path('', views.dispatch_request),
+    # junjuew: add cvat url prefix to differentiate
+    path('cvat/', views.dispatch_request),
 
     # documentation for API
     path('api/swagger.<slug:format>$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -40,5 +42,7 @@ urlpatterns = [
     path('api/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # entry point for API
-    path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
+    # path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
+    # junjuew: drf is having trouble resolving urls with namespace
+    path('api/v1/', include((router.urls)))
 ]
