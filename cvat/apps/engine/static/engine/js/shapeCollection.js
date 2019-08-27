@@ -1453,7 +1453,6 @@ class ShapeCollectionView {
         let newModels = newShapes.map((el) => el.model);
 
         const frameChanged = this._frameMarker !== window.cvat.player.frames.current;
-        this._scale = window.cvat.player.geometry.scale;
 
         if (frameChanged) {
             this._frameContent.node.parent = null;

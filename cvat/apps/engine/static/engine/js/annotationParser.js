@@ -16,6 +16,7 @@ class AnnotationParser {
         this._parser = new DOMParser();
         this._startFrame = job.start;
         this._stopFrame = job.stop;
+        this._flipped = job.flipped;
         this._im_meta = job.image_meta_data;
         this._labelsInfo = labelsInfo;
     }
@@ -42,6 +43,15 @@ class AnnotationParser {
             throw Error(message);
         }
 
+        if (this._flipped) {
+            [xtl, ytl, xbr, ybr] = [
+                imWidth - xbr,
+                imWidth - xtl,
+                imHeight - ybr,
+                imHeight - ytl,
+            ];
+        }
+
         const occluded = box.getAttribute('occluded');
         const zOrder = box.getAttribute('z_order') || '0';
         return [[xtl, ytl, xbr, ybr], +occluded, +zOrder];
@@ -59,6 +69,11 @@ class AnnotationParser {
                 const message = `Incorrect point found in annotation file x=${point.x} `
                     + `y=${point.y}. Point out of range ${imWidth}x${imHeight}`;
                 throw Error(message);
+            }
+
+            if (this._flipped) {
+                point.x = imWidth - point.x;
+                point.y = imHeight - point.y;
             }
         }
 
@@ -312,7 +327,7 @@ class AnnotationParser {
                 shapes: [],
             };
 
-            if (path.frame > this._stopFrame) {
+            if (path.frame < this._startFrame || path.frame > this._stopFrame) {
                 continue;
             }
 

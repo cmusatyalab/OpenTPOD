@@ -130,18 +130,14 @@ class AAMModel extends Listener {
     _activate() {
         if (this._activeAAM && this._active) {
             const { label } = this._active;
-
+            const attrId = +this._attrIdByIdx(label, this._attrNumberByLabel[label].current);
 
             const [xtl, ytl, xbr, ybr] = this._bbRect(this._currentShapes[this._activeIdx]
                 .interpolation.position);
             this._focus(xtl - this._margin, xbr + this._margin,
                 ytl - this._margin, ybr + this._margin);
             this.notify();
-
-            if (typeof (this._attrNumberByLabel[label]) !== 'undefined') {
-                const attrId = +this._attrIdByIdx(label, this._attrNumberByLabel[label].current);
-                this._active.activeAttribute = attrId;
-            }
+            this._active.activeAttribute = attrId;
         } else {
             this.notify();
         }
@@ -215,9 +211,6 @@ class AAMModel extends Listener {
         }
 
         const curAttr = this._attrNumberByLabel[this._active.label];
-        if (typeof (curAttr) === 'undefined') {
-            return;
-        }
 
         if (curAttr.end < 2) {
             return;
@@ -245,10 +238,6 @@ class AAMModel extends Listener {
         }
         const { label } = this._active;
         const frame = window.cvat.player.frames.current;
-        if (typeof (this._attrNumberByLabel[label]) === 'undefined') {
-            return;
-        }
-
         const attrId = this._attrIdByIdx(label, this._attrNumberByLabel[label].current);
         const attrInfo = window.cvat.labelsInfo.attrInfo(attrId);
         if (key >= attrInfo.values.length) {
@@ -277,11 +266,8 @@ class AAMModel extends Listener {
     generateHelps() {
         if (this._active) {
             const { label } = this._active;
-            if (typeof (this._attrNumberByLabel[label]) !== 'undefined') {
-                const attrId = +this._attrIdByIdx(label, this._attrNumberByLabel[label].current);
-                return [this._helps[attrId].title, this._helps[attrId].help, `${this._activeIdx + 1}/${this._currentShapes.length}`];
-            }
-            return ['No Attributes Found', '', `${this._activeIdx + 1}/${this._currentShapes.length}`];
+            const attrId = +this._attrIdByIdx(label, this._attrNumberByLabel[label].current);
+            return [this._helps[attrId].title, this._helps[attrId].help, `${this._activeIdx + 1}/${this._currentShapes.length}`];
         }
         return ['No Shapes Found', '', '0/0'];
     }

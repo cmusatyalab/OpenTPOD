@@ -32,9 +32,7 @@ router.register('plugins', views.PluginViewSet)
 
 urlpatterns = [
     # Entry point for a client
-    # junjuew: add url prefix for cvat annotation page
-    # path('', views.dispatch_request),
-    path('cvat/', views.dispatch_request),
+    path('', views.dispatch_request),
 
     # documentation for API
     path('api/swagger.<slug:format>$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -42,10 +40,5 @@ urlpatterns = [
     path('api/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
     # entry point for API
-    path('api/v1/auth/', include('cvat.apps.authentication.api_urls')),
-
-    # junjuew: remove the cvat namespace as it creates problems for back_ref
-    # path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
-    # https://github.com/encode/django-rest-framework/issues/2760
-    path('api/v1/', include((router.urls)))
+    path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
 ]

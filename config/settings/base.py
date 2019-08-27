@@ -88,7 +88,6 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "cvat.apps.engine",
-    "cvat.apps.annotation",
     "cvat.apps.tf_annotation",
     "opentpod.object_detector",
 ]

@@ -13,7 +13,6 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from cvat.apps.engine.models import (Task, Segment, Job, StatusChoice,
     AttributeType)
-from cvat.apps.annotation.models import AnnotationFormat
 from unittest import mock
 import io
 import xml.etree.ElementTree as ET
@@ -196,9 +195,9 @@ class JobGetAPITestCase(APITestCase):
 
     def test_api_v1_jobs_id_no_auth(self):
         response = self._run_api_v1_jobs_id(self.job.id, None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         response = self._run_api_v1_jobs_id(self.job.id + 10, None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class JobUpdateAPITestCase(APITestCase):
@@ -266,9 +265,9 @@ class JobUpdateAPITestCase(APITestCase):
     def test_api_v1_jobs_id_no_auth(self):
         data = {"status": StatusChoice.ANNOTATION, "assignee": self.user.id}
         response = self._run_api_v1_jobs_id(self.job.id, None, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         response = self._run_api_v1_jobs_id(self.job.id + 10, None, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class JobPartialUpdateAPITestCase(JobUpdateAPITestCase):
     def _run_api_v1_jobs_id(self, jid, user, data):
@@ -317,7 +316,7 @@ class ServerAboutAPITestCase(APITestCase):
 
     def test_api_v1_server_about_no_auth(self):
         response = self._run_api_v1_server_about(None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class ServerExceptionAPITestCase(APITestCase):
     def setUp(self):
@@ -360,7 +359,7 @@ class ServerExceptionAPITestCase(APITestCase):
 
     def test_api_v1_server_exception_no_auth(self):
         response = self._run_api_v1_server_exception(None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class ServerLogsAPITestCase(APITestCase):
@@ -408,7 +407,7 @@ class ServerLogsAPITestCase(APITestCase):
 
     def test_api_v1_server_logs_no_auth(self):
         response = self._run_api_v1_server_logs(None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class UserListAPITestCase(APITestCase):
@@ -438,7 +437,7 @@ class UserListAPITestCase(APITestCase):
 
     def test_api_v1_users_no_auth(self):
         response = self._run_api_v1_users(None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class UserSelfAPITestCase(APITestCase):
     def setUp(self):
@@ -473,7 +472,7 @@ class UserSelfAPITestCase(APITestCase):
 
     def test_api_v1_users_self_no_auth(self):
         response = self._run_api_v1_users_self(None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class UserGetAPITestCase(APITestCase):
     def setUp(self):
@@ -520,7 +519,7 @@ class UserGetAPITestCase(APITestCase):
 
     def test_api_v1_users_id_no_auth(self):
         response = self._run_api_v1_users_id(None, self.user.id)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class UserUpdateAPITestCase(APITestCase):
     def setUp(self):
@@ -559,7 +558,7 @@ class UserUpdateAPITestCase(APITestCase):
         data = {"username": "user12", "groups": ["user", "observer"],
             "first_name": "my name"}
         response = self._run_api_v1_users_id(None, self.user.id, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class UserPartialUpdateAPITestCase(UserUpdateAPITestCase):
     def _run_api_v1_users_id(self, user, user_id, data):
@@ -585,7 +584,7 @@ class UserPartialUpdateAPITestCase(UserUpdateAPITestCase):
     def test_api_v1_users_id_no_auth_partial(self):
         data = {"username": "user12"}
         response = self._run_api_v1_users_id(None, self.user.id, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class TaskListAPITestCase(APITestCase):
     def setUp(self):
@@ -626,7 +625,7 @@ class TaskListAPITestCase(APITestCase):
 
     def test_api_v1_tasks_no_auth(self):
         response = self._run_api_v1_tasks(None)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class TaskGetAPITestCase(APITestCase):
     def setUp(self):
@@ -667,10 +666,8 @@ class TaskGetAPITestCase(APITestCase):
             response = self._run_api_v1_tasks_id(db_task.id, user)
             if user and user.has_perm("engine.task.access", db_task):
                 self._check_response(response, db_task)
-            elif user:
-                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             else:
-                self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_api_v1_tasks_id_admin(self):
         self._check_api_v1_tasks_id(self.admin)
@@ -704,10 +701,8 @@ class TaskDeleteAPITestCase(APITestCase):
             response = self._run_api_v1_tasks_id(db_task.id, user)
             if user and user.has_perm("engine.task.delete", db_task):
                 self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-            elif user:
-                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             else:
-                self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_api_v1_tasks_id_admin(self):
         self._check_api_v1_tasks_id(self.admin)
@@ -773,10 +768,8 @@ class TaskUpdateAPITestCase(APITestCase):
             response = self._run_api_v1_tasks_id(db_task.id, user, data)
             if user and user.has_perm("engine.task.change", db_task):
                 self._check_response(response, db_task, data)
-            elif user:
-                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
             else:
-                self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_api_v1_tasks_id_admin(self):
         data = {
@@ -927,10 +920,8 @@ class TaskCreateAPITestCase(APITestCase):
         response = self._run_api_v1_tasks(user, data)
         if user and user.has_perm("engine.task.create"):
             self._check_response(response, user, data)
-        elif user:
-            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         else:
-            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_api_v1_tasks_admin(self):
         data = {
@@ -1134,7 +1125,7 @@ class TaskDataAPITestCase(APITestCase):
             ]
         }
         response = self._create_task(None, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 def compare_objects(self, obj1, obj2, ignore_keys):
     if isinstance(obj1, dict):
@@ -1177,7 +1168,7 @@ class JobAnnotationAPITestCase(APITestCase):
                             "mutable": False,
                             "input_type": "select",
                             "default_value": "mazda",
-                            "values": ["bmw", "mazda", "renault"]
+                            "values": ["bmw", "mazda", "reno"]
                         },
                         {
                             "name": "parked",
@@ -1212,27 +1203,6 @@ class JobAnnotationAPITestCase(APITestCase):
 
         return (task, jobs)
 
-    @staticmethod
-    def _get_default_attr_values(task):
-        default_attr_values = {}
-        for label in task["labels"]:
-            default_attr_values[label["id"]] = {
-                "mutable": [],
-                "immutable": [],
-                "all": [],
-            }
-            for attr in label["attributes"]:
-                default_value = {
-                    "spec_id": attr["id"],
-                    "value": attr["default_value"],
-                }
-                if attr["mutable"]:
-                    default_attr_values[label["id"]]["mutable"].append(default_value)
-                else:
-                    default_attr_values[label["id"]]["immutable"].append(default_value)
-                default_attr_values[label["id"]]["all"].append(default_value)
-        return default_attr_values
-
     def _put_api_v1_jobs_id_data(self, jid, user, data):
         with ForceLogin(user, self.client):
             response = self.client.put("/api/v1/jobs/{}/annotations".format(jid),
@@ -1262,8 +1232,7 @@ class JobAnnotationAPITestCase(APITestCase):
         return response
 
     def _check_response(self, response, data):
-        if not response.status_code in [
-            status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if response.status_code != status.HTTP_403_FORBIDDEN:
             compare_objects(self, data, response.data, ignore_keys=["id"])
 
     def _run_api_v1_jobs_id_annotations(self, owner, assignee, annotator):
@@ -1273,9 +1242,9 @@ class JobAnnotationAPITestCase(APITestCase):
             HTTP_204_NO_CONTENT = status.HTTP_204_NO_CONTENT
             HTTP_400_BAD_REQUEST = status.HTTP_400_BAD_REQUEST
         else:
-            HTTP_200_OK = status.HTTP_401_UNAUTHORIZED
-            HTTP_204_NO_CONTENT = status.HTTP_401_UNAUTHORIZED
-            HTTP_400_BAD_REQUEST = status.HTTP_401_UNAUTHORIZED
+            HTTP_200_OK = status.HTTP_403_FORBIDDEN
+            HTTP_204_NO_CONTENT = status.HTTP_403_FORBIDDEN
+            HTTP_400_BAD_REQUEST = status.HTTP_403_FORBIDDEN
 
         job = jobs[0]
         data = {
@@ -1309,7 +1278,7 @@ class JobAnnotationAPITestCase(APITestCase):
                         },
                         {
                             "spec_id": task["labels"][0]["attributes"][1]["id"],
-                            "value": task["labels"][0]["attributes"][1]["default_value"]
+                            "value": task["labels"][0]["attributes"][0]["default_value"]
                         }
                     ],
                     "points": [1.0, 2.1, 100, 300.222],
@@ -1331,12 +1300,7 @@ class JobAnnotationAPITestCase(APITestCase):
                     "frame": 0,
                     "label_id": task["labels"][0]["id"],
                     "group": None,
-                    "attributes": [
-                        {
-                            "spec_id": task["labels"][0]["attributes"][0]["id"],
-                            "value": task["labels"][0]["attributes"][0]["values"][0]
-                        },
-                    ],
+                    "attributes": [],
                     "shapes": [
                         {
                             "frame": 0,
@@ -1346,9 +1310,13 @@ class JobAnnotationAPITestCase(APITestCase):
                             "outside": False,
                             "attributes": [
                                 {
-                                    "spec_id": task["labels"][0]["attributes"][1]["id"],
-                                    "value": task["labels"][0]["attributes"][1]["default_value"]
+                                    "spec_id": task["labels"][0]["attributes"][0]["id"],
+                                    "value": task["labels"][0]["attributes"][0]["values"][0]
                                 },
+                                {
+                                    "spec_id": task["labels"][0]["attributes"][1]["id"],
+                                    "value": task["labels"][0]["attributes"][0]["default_value"]
+                                }
                             ]
                         },
                         {
@@ -1379,8 +1347,6 @@ class JobAnnotationAPITestCase(APITestCase):
                 },
             ]
         }
-
-        default_attr_values = self._get_default_attr_values(task)
         response = self._put_api_v1_jobs_id_data(job["id"], annotator, data)
         data["version"] += 1 # need to update the version
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -1388,9 +1354,6 @@ class JobAnnotationAPITestCase(APITestCase):
 
         response = self._get_api_v1_jobs_id_data(job["id"], annotator)
         self.assertEqual(response.status_code, HTTP_200_OK)
-        # server should add default attribute values if puted data doesn't contain it
-        data["tags"][0]["attributes"] = default_attr_values[data["tags"][0]["label_id"]]["all"]
-        data["tracks"][0]["shapes"][1]["attributes"] = default_attr_values[data["tracks"][0]["label_id"]]["mutable"]
         self._check_response(response, data)
 
         response = self._delete_api_v1_jobs_id_data(job["id"], annotator)
@@ -1429,7 +1392,7 @@ class JobAnnotationAPITestCase(APITestCase):
                         },
                         {
                             "spec_id": task["labels"][0]["attributes"][1]["id"],
-                            "value": task["labels"][0]["attributes"][1]["default_value"]
+                            "value": task["labels"][0]["attributes"][0]["default_value"]
                         }
                     ],
                     "points": [1.0, 2.1, 100, 300.222],
@@ -1451,12 +1414,7 @@ class JobAnnotationAPITestCase(APITestCase):
                     "frame": 0,
                     "label_id": task["labels"][0]["id"],
                     "group": None,
-                    "attributes": [
-                        {
-                            "spec_id": task["labels"][0]["attributes"][0]["id"],
-                            "value": task["labels"][0]["attributes"][0]["values"][0]
-                        },
-                    ],
+                    "attributes": [],
                     "shapes": [
                         {
                             "frame": 0,
@@ -1466,9 +1424,13 @@ class JobAnnotationAPITestCase(APITestCase):
                             "outside": False,
                             "attributes": [
                                 {
-                                    "spec_id": task["labels"][0]["attributes"][1]["id"],
-                                    "value": task["labels"][0]["attributes"][1]["default_value"]
+                                    "spec_id": task["labels"][0]["attributes"][0]["id"],
+                                    "value": task["labels"][0]["attributes"][0]["values"][0]
                                 },
+                                {
+                                    "spec_id": task["labels"][0]["attributes"][1]["id"],
+                                    "value": task["labels"][0]["attributes"][0]["default_value"]
+                                }
                             ]
                         },
                         {
@@ -1507,14 +1469,10 @@ class JobAnnotationAPITestCase(APITestCase):
 
         response = self._get_api_v1_jobs_id_data(job["id"], annotator)
         self.assertEqual(response.status_code, HTTP_200_OK)
-        # server should add default attribute values if puted data doesn't contain it
-        data["tags"][0]["attributes"] = default_attr_values[data["tags"][0]["label_id"]]["all"]
-        data["tracks"][0]["shapes"][1]["attributes"] = default_attr_values[data["tracks"][0]["label_id"]]["mutable"]
         self._check_response(response, data)
 
         data = response.data
-        if not response.status_code in [
-            status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if response.status_code != status.HTTP_403_FORBIDDEN:
             data["tags"][0]["label_id"] = task["labels"][0]["id"]
             data["shapes"][0]["points"] = [1, 2, 3.0, 100, 120, 1, 2, 4.0]
             data["shapes"][0]["type"] = "polygon"
@@ -1607,7 +1565,7 @@ class JobAnnotationAPITestCase(APITestCase):
                                 },
                                 {
                                     "spec_id": task["labels"][0]["attributes"][1]["id"],
-                                    "value": task["labels"][0]["attributes"][1]["default_value"]
+                                    "value": task["labels"][0]["attributes"][0]["default_value"]
                                 }
                             ]
                         },
@@ -1678,7 +1636,7 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
     def _dump_api_v1_tasks_id_annotations(self, pk, user, query_params=""):
         with ForceLogin(user, self.client):
             response = self.client.get(
-                "/api/v1/tasks/{0}/annotations/my_task_{0}?{1}".format(pk, query_params))
+                "/api/v1/tasks/{0}/annotations/my_task_{0}{1}".format(pk, query_params))
 
         return response
 
@@ -1691,8 +1649,7 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
         return response
 
     def _check_response(self, response, data):
-        if not response.status_code in [
-            status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]:
+        if response.status_code != status.HTTP_403_FORBIDDEN:
             compare_objects(self, data, response.data, ignore_keys=["id"])
 
     def _run_api_v1_tasks_id_annotations(self, owner, assignee, annotator):
@@ -1704,11 +1661,11 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
             HTTP_202_ACCEPTED = status.HTTP_202_ACCEPTED
             HTTP_201_CREATED = status.HTTP_201_CREATED
         else:
-            HTTP_200_OK = status.HTTP_401_UNAUTHORIZED
-            HTTP_204_NO_CONTENT = status.HTTP_401_UNAUTHORIZED
-            HTTP_400_BAD_REQUEST = status.HTTP_401_UNAUTHORIZED
-            HTTP_202_ACCEPTED = status.HTTP_401_UNAUTHORIZED
-            HTTP_201_CREATED = status.HTTP_401_UNAUTHORIZED
+            HTTP_200_OK = status.HTTP_403_FORBIDDEN
+            HTTP_204_NO_CONTENT = status.HTTP_403_FORBIDDEN
+            HTTP_400_BAD_REQUEST = status.HTTP_403_FORBIDDEN
+            HTTP_202_ACCEPTED = status.HTTP_403_FORBIDDEN
+            HTTP_201_CREATED = status.HTTP_403_FORBIDDEN
 
         data = {
             "version": 0,
@@ -1764,12 +1721,7 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
                     "frame": 0,
                     "label_id": task["labels"][0]["id"],
                     "group": None,
-                    "attributes": [
-                        {
-                            "spec_id": task["labels"][0]["attributes"][0]["id"],
-                            "value": task["labels"][0]["attributes"][0]["values"][0]
-                        },
-                    ],
+                    "attributes": [],
                     "shapes": [
                         {
                             "frame": 0,
@@ -1779,8 +1731,12 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
                             "outside": False,
                             "attributes": [
                                 {
+                                    "spec_id": task["labels"][0]["attributes"][0]["id"],
+                                    "value": task["labels"][0]["attributes"][0]["values"][0]
+                                },
+                                {
                                     "spec_id": task["labels"][0]["attributes"][1]["id"],
-                                    "value": task["labels"][0]["attributes"][1]["default_value"]
+                                    "value": task["labels"][0]["attributes"][0]["default_value"]
                                 }
                             ]
                         },
@@ -1814,15 +1770,10 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
         }
         response = self._put_api_v1_tasks_id_annotations(task["id"], annotator, data)
         data["version"] += 1
-
         self.assertEqual(response.status_code, HTTP_200_OK)
         self._check_response(response, data)
 
-        default_attr_values = self._get_default_attr_values(task)
         response = self._get_api_v1_tasks_id_annotations(task["id"], annotator)
-        # server should add default attribute values if puted data doesn't contain it
-        data["tags"][0]["attributes"] = default_attr_values[data["tags"][0]["label_id"]]["all"]
-        data["tracks"][0]["shapes"][1]["attributes"] = default_attr_values[data["tracks"][0]["label_id"]]["mutable"]
         self.assertEqual(response.status_code, HTTP_200_OK)
         self._check_response(response, data)
 
@@ -1884,12 +1835,7 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
                     "frame": 0,
                     "label_id": task["labels"][0]["id"],
                     "group": None,
-                    "attributes": [
-                        {
-                            "spec_id": task["labels"][0]["attributes"][0]["id"],
-                            "value": task["labels"][0]["attributes"][0]["values"][0]
-                        },
-                    ],
+                    "attributes": [],
                     "shapes": [
                         {
                             "frame": 0,
@@ -1899,8 +1845,12 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
                             "outside": False,
                             "attributes": [
                                 {
+                                    "spec_id": task["labels"][0]["attributes"][0]["id"],
+                                    "value": task["labels"][0]["attributes"][0]["values"][0]
+                                },
+                                {
                                     "spec_id": task["labels"][0]["attributes"][1]["id"],
-                                    "value": task["labels"][0]["attributes"][1]["default_value"]
+                                    "value": task["labels"][0]["attributes"][0]["default_value"]
                                 }
                             ]
                         },
@@ -1939,15 +1889,11 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
         self._check_response(response, data)
 
         response = self._get_api_v1_tasks_id_annotations(task["id"], annotator)
-        # server should add default attribute values if puted data doesn't contain it
-        data["tags"][0]["attributes"] = default_attr_values[data["tags"][0]["label_id"]]["all"]
-        data["tracks"][0]["shapes"][1]["attributes"] = default_attr_values[data["tracks"][0]["label_id"]]["mutable"]
         self.assertEqual(response.status_code, HTTP_200_OK)
         self._check_response(response, data)
 
         data = response.data
-        if not response.status_code in [
-            status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if response.status_code != status.HTTP_403_FORBIDDEN:
             data["tags"][0]["label_id"] = task["labels"][0]["id"]
             data["shapes"][0]["points"] = [1, 2, 3.0, 100, 120, 1, 2, 4.0]
             data["shapes"][0]["type"] = "polygon"
@@ -2076,20 +2022,15 @@ class TaskAnnotationAPITestCase(JobAnnotationAPITestCase):
             "create", data)
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
-        cvat_format = AnnotationFormat.objects.get(name="CVAT")
-        for annotation_handler in cvat_format.annotationdumper_set.all():
-            response = self._dump_api_v1_tasks_id_annotations(task["id"], annotator,
-                "format={}".format(annotation_handler.display_name))
-            self.assertEqual(response.status_code, HTTP_202_ACCEPTED)
+        response = self._dump_api_v1_tasks_id_annotations(task["id"], annotator)
+        self.assertEqual(response.status_code, HTTP_202_ACCEPTED)
 
-            response = self._dump_api_v1_tasks_id_annotations(task["id"], annotator,
-                "format={}".format(annotation_handler.display_name))
-            self.assertEqual(response.status_code, HTTP_201_CREATED)
+        response = self._dump_api_v1_tasks_id_annotations(task["id"], annotator)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
 
-            response = self._dump_api_v1_tasks_id_annotations(task["id"], annotator,
-                "action=download&format={}".format(annotation_handler.display_name))
-            self.assertEqual(response.status_code, HTTP_200_OK)
-            self._check_dump_response(response, task, jobs, data)
+        response = self._dump_api_v1_tasks_id_annotations(task["id"], annotator, "?action=download")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self._check_dump_response(response, task, jobs, data)
 
     def _check_dump_response(self, response, task, jobs, data):
         if response.status_code == status.HTTP_200_OK:
@@ -2250,4 +2191,4 @@ class ServerShareAPITestCase(APITestCase):
 
     def test_api_v1_server_share_no_auth(self):
         response = self._run_api_v1_server_share(None, "/")
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

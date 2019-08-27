@@ -1,3 +1,4 @@
+
 # Copyright (C) 2018 Intel Corporation
 #
 # SPDX-License-Identifier: MIT
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth import login, authenticate
 
 from . import forms
+
 
 def register_user(request):
     if request.method == 'POST':

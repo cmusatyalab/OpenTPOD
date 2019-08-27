@@ -341,8 +341,8 @@ class ShapeModel extends Listener {
     }
 
     switchOutside(frame) {
-        // Only for interpolation shapes
-        if (this._type.split('_')[0] !== 'interpolation') {
+        // Only for interpolation boxes
+        if (this._type != 'interpolation_box') {
             return;
         }
 
@@ -379,7 +379,7 @@ class ShapeModel extends Listener {
         if (frame < this._frame) {
             if (this._frame in this._attributes.mutable) {
                 this._attributes.mutable[frame] = this._attributes.mutable[this._frame];
-                delete (this._attributes.mutable[this._frame]);
+                delete(this._attributes.mutable[this._frame]);
             }
             this._frame = frame;
         }
@@ -388,17 +388,17 @@ class ShapeModel extends Listener {
     }
 
     switchKeyFrame(frame) {
-        // Only for interpolation shapes
-        if (this._type.split('_')[0] !== 'interpolation') {
+        // Only for interpolation boxes
+        if (this._type != 'interpolation_box') {
             return;
         }
 
         // Undo/redo code
-        const oldPos = Object.assign({}, this._positions[frame]);
+        let oldPos = Object.assign({}, this._positions[frame]);
         window.cvat.addAction('Change Keyframe', () => {
             this.switchKeyFrame(frame);
-            if (frame in this._positions) {
-                this.updatePosition(frame, oldPos);
+            if (Object.keys(oldPos).length && oldPos.outside) {
+                this.switchOutside(frame);
             }
         }, () => {
             this.switchKeyFrame(frame);
@@ -411,18 +411,19 @@ class ShapeModel extends Listener {
                 this._frame = Object.keys(this._positions).map((el) => +el).sort((a,b) => a - b)[1];
                 if (frame in this._attributes.mutable) {
                     this._attributes.mutable[this._frame] = this._attributes.mutable[frame];
-                    delete (this._attributes.mutable[frame]);
+                    delete(this._attributes.mutable[frame]);
                 }
             }
-            delete (this._positions[frame]);
-        } else {
+            delete(this._positions[frame]);
+        }
+        else {
             let position = this._interpolatePosition(frame);
             this.updatePosition(frame, position, true);
 
             if (frame < this._frame) {
                 if (this._frame in this._attributes.mutable) {
                     this._attributes.mutable[frame] = this._attributes.mutable[this._frame];
-                    delete (this._attributes.mutable[this._frame]);
+                    delete(this._attributes.mutable[this._frame]);
                 }
                 this._frame = frame;
             }
@@ -916,7 +917,7 @@ class PolyShapeModel extends ShapeModel {
         }
 
         return Object.assign({}, leftPos, {
-            outside: leftPos.outside || leftFrame !== frame,
+            outside: leftFrame != frame,
         });
     }
 
@@ -951,14 +952,9 @@ class PolyShapeModel extends ShapeModel {
         if (this._verifyArea(box)) {
             if (!silent) {
                 // Undo/redo code
-                const oldPos = Object.assign({}, this._positions[frame]);
+                let oldPos = Object.assign({}, this._positions[frame]);
                 window.cvat.addAction('Change Position', () => {
-                    if (!Object.keys(oldPos).length) {
-                        delete this._positions[frame];
-                        this.notify('position');
-                    } else {
-                        this.updatePosition(frame, oldPos, false);
-                    }
+                    this.updatePosition(frame, oldPos, false);
                 }, () => {
                     this.updatePosition(frame, pos, false);
                 }, frame);
@@ -966,7 +962,7 @@ class PolyShapeModel extends ShapeModel {
             }
 
             if (this._type.startsWith('annotation')) {
-                if (this._frame !== frame) {
+                if (this._frame != frame) {
                     throw Error(`Got bad frame for annotation poly shape during update position: ${frame}. Own frame is ${this._frame}`);
                 }
                 this._positions[frame] = pos;
@@ -1147,60 +1143,6 @@ class PointsModel extends PolyShapeModel {
     constructor(data, type, clientID, color) {
         super(data, type, clientID, color);
         this._minPoints = 1;
-    }
-
-    _interpolatePosition(frame) {
-        if (this._type.startsWith('annotation')) {
-            return Object.assign({}, this._positions[this._frame], {
-                outside: this._frame !== frame,
-            });
-        }
-
-        let [leftFrame, rightFrame] = this._neighboringFrames(frame);
-        if (frame in this._positions) {
-            leftFrame = frame;
-        }
-
-        let leftPos = null;
-        let rightPos = null;
-
-        if (leftFrame != null) leftPos = this._positions[leftFrame];
-        if (rightFrame != null) rightPos = this._positions[rightFrame];
-
-        if (!leftPos) {
-            if (rightPos) {
-                return Object.assign({}, rightPos, {
-                    outside: true,
-                });
-            }
-
-            return {
-                outside: true,
-            };
-        }
-
-        if (frame === leftFrame || leftPos.outside || !rightPos || rightPos.outside) {
-            return Object.assign({}, leftPos);
-        }
-
-        const rightPoints = PolyShapeModel.convertStringToNumberArray(rightPos.points);
-        const leftPoints = PolyShapeModel.convertStringToNumberArray(leftPos.points);
-
-        if (rightPoints.length === leftPoints.length && leftPoints.length === 1) {
-            const moveCoeff = (frame - leftFrame) / (rightFrame - leftFrame);
-            const interpolatedPoints = [{
-                x: leftPoints[0].x + (rightPoints[0].x - leftPoints[0].x) * moveCoeff,
-                y: leftPoints[0].y + (rightPoints[0].y - leftPoints[0].y) * moveCoeff,
-            }];
-
-            return Object.assign({}, leftPos, {
-                points: PolyShapeModel.convertNumberArrayToString(interpolatedPoints),
-            });
-        }
-
-        return Object.assign({}, leftPos, {
-            outside: true,
-        });
     }
 
     distance(mousePos, frame) {
@@ -2016,17 +1958,19 @@ class ShapeView extends Listener {
             if (type.split('_')[0] == 'interpolation') {
                 let interpolationCenter = document.createElement('center');
 
-                let outsideButton = document.createElement('button');
-                outsideButton.classList.add('graphicButton', 'outsideButton');
+                if (type.split('_')[1] == 'box') {
+                    let outsideButton = document.createElement('button');
+                    outsideButton.classList.add('graphicButton', 'outsideButton');
 
-                let keyframeButton = document.createElement('button');
-                keyframeButton.classList.add('graphicButton', 'keyFrameButton');
+                    let keyframeButton = document.createElement('button');
+                    keyframeButton.classList.add('graphicButton', 'keyFrameButton');
 
-                interpolationCenter.appendChild(outsideButton);
-                interpolationCenter.appendChild(keyframeButton);
+                    interpolationCenter.appendChild(outsideButton);
+                    interpolationCenter.appendChild(keyframeButton);
 
-                this._uis.buttons['outside'] = outsideButton;
-                this._uis.buttons['keyframe'] = keyframeButton;
+                    this._uis.buttons['outside'] = outsideButton;
+                    this._uis.buttons['keyframe'] = keyframeButton;
+                }
 
                 let prevKeyFrameButton = document.createElement('button');
                 prevKeyFrameButton.classList.add('graphicButton', 'prevKeyFrameButton');
@@ -2984,11 +2928,6 @@ class PolyShapeView extends ShapeView {
                 });
 
                 point.on('dblclick.polyshapeEditor', (e) => {
-                    if (this._controller.type === 'interpolation_points') {
-                        // Not available for interpolation points
-                        return;
-                    }
-
                     if (e.shiftKey) {
                         if (!window.cvat.mode) {
                             // Get index before detach shape from DOM
@@ -3186,7 +3125,7 @@ class PointsView extends PolyShapeView {
 
 
     _drawPointMarkers(position) {
-        if (this._uis.points || position.outside) {
+        if (this._uis.points) {
             return;
         }
 
