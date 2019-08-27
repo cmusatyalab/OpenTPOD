@@ -135,7 +135,7 @@ class VideoPage extends React.Component {
                                         // create CVAT task first
                                         let data = {
                                             'name': file.name,
-                                            'labels': ["enter an object name"],
+                                            'labels': [],
                                             'image_quality': 100
                                         }
                                         fetchJSON(endpoints.tasks, 'POST', data).then(
@@ -145,7 +145,7 @@ class VideoPage extends React.Component {
                                                 const batchOfFiles = new FormData();
                                                 batchOfFiles.append('client_files[0]', file);
                                                 const request = new XMLHttpRequest();
-                                                request.open('POST', URI.joinPaths(endpoints.tasks, resp["id"], "data"));
+                                                request.open('POST', URI.joinPaths(endpoints.tasks, resp.id.toString(), "data"));
                                                 // Should call the progress method to update the progress to 100% before calling load
                                                 // Setting computable to false switches the loading indicator to infinite mode
                                                 request.upload.onprogress = (e) => {
