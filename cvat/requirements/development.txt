@@ -10,5 +10,5 @@ rope==0.11
 six==1.11.0
 wrapt==1.10.11
 django-extensions==2.0.6
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 snakeviz==0.4.2
