@@ -376,12 +376,12 @@ CACHEOPS_DEGRADE_ON_FAILURE = True
 
 # opentpod
 # ------------------------------------------------------------------------------
-BASE_DIR = MEDIA_ROOT
-DATA_ROOT = os.path.join(BASE_DIR, 'data')
+BASE_DIR = ROOT_DIR
+DATA_ROOT = os.path.join(MEDIA_ROOT, 'data')
 os.makedirs(DATA_ROOT, exist_ok=True)
-SHARE_ROOT = os.path.join(BASE_DIR, 'share')
+SHARE_ROOT = os.path.join(MEDIA_ROOT, 'share')
 os.makedirs(SHARE_ROOT, exist_ok=True)
-MODELS_ROOT = os.path.join(BASE_DIR, 'models')
+MODELS_ROOT = os.path.join(MEDIA_ROOT, 'models')
 os.makedirs(MODELS_ROOT, exist_ok=True)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB

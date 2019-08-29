@@ -34,8 +34,9 @@ class VideoPage extends React.Component {
     fetchVideoInfo() {
         fetchJSON(endpoints.tasks, "GET").then(
             resp => {
+                console.debug("video info: " + resp);
                 this.setState({
-                    videoInfos: resp,
+                    videoInfos: resp.results,
                     loading: false
                 });
             }
