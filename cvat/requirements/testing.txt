@@ -1,2 +1,0 @@
--f development.txt
-fakeredis==1.0.3
