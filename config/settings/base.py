@@ -88,7 +88,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "cvat.apps.engine",
-    "cvat.apps.tf_annotation",
+    "cvat.apps.annotation",
     "opentpod.object_detector",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -146,6 +146,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'dj_pagination.middleware.PaginationMiddleware',
 ]
 
 # STATIC
@@ -220,6 +221,42 @@ CSRF_COOKIE_HTTPONLY = True
 SECURE_BROWSER_XSS_FILTER = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+# DRF
+# ------------------------------------------------------------------------------
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication'
+    ],
+    'DEFAULT_VERSIONING_CLASS':
+        # Don't try to use URLPathVersioning. It will give you /api/{version}
+        # in path and '/api/docs' will not collapse similar items (flat list
+        # of all possible methods isn't readable).
+        'rest_framework.versioning.NamespaceVersioning',
+    # Need to add 'api-docs' here as a workaround for include_docs_urls.
+    'ALLOWED_VERSIONS': ('v1', 'api-docs'),
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.SearchFilter',
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter'),
+
+    # Disable default handling of the 'format' query parameter by REST framework
+    'URL_FORMAT_OVERRIDE': None,
+}
+
+# rest auth
+# ------------------------------------------------------------------------------
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'cvat.apps.authentication.serializers.RegisterSerializerEx'
+}
 
 # EMAIL
 # ------------------------------------------------------------------------------
