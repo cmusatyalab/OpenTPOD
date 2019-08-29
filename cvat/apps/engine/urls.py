@@ -32,7 +32,9 @@ router.register('plugins', views.PluginViewSet)
 
 urlpatterns = [
     # Entry point for a client
-    path('', views.dispatch_request),
+    # path('', views.dispatch_request),
+    # junjuew: add url prefix
+    path('cvat/', views.dispatch_request),
 
     # documentation for API
     path('api/swagger.<slug:format>$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
@@ -41,5 +43,7 @@ urlpatterns = [
 
     # entry point for API
     path('api/v1/auth/', include('cvat.apps.authentication.api_urls')),
-    path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
+    # path('api/v1/', include((router.urls, 'cvat'), namespace='v1'))
+    # junjuew: remove namespace for reverse url lookup
+    path('api/v1/', include((router.urls)))
 ]
