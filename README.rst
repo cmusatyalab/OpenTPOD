@@ -13,6 +13,18 @@ Open Toolkit for Painless Object Detection
 
 :License: Apache Software License 2.0
 
+Installation
+--------
+
+    $ conda env create -f requirements/environment-dev.yml
+    $ docker-compose up -d
+    $ python manage.py migrate
+    $ python manage.py createsuperuser
+    $ python manage.py runserver 0.0.0.0:5000
+    $ cd frontend
+    $ npm i
+    $ npm run-script watch
+
 
 Settings
 --------

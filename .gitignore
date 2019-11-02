@@ -277,7 +277,7 @@ opentpod/media/
 .env
 .envs/*
 
-keys/*
+keys/secret_keys.py
 unused
 
 # Ignore development npm files

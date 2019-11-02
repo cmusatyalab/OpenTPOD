@@ -3,7 +3,7 @@ volumes:
   opentpod-data:
 services:
   opentpod-db:
-    image: postgres:10.3-alpine
+    image: postgres:12.0-alpine
     container_name: opentpod-db
     restart: always
     ports:
@@ -12,8 +12,8 @@ services:
       - opentpod-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: root
-      POSTGRES_DB: ${TPOD_DB_NAME}
-      POSTGRES_PASSWORD: ${TPOD_DB_PASSWORD}
+      POSTGRES_DB: ${OPENTPOD_DB}
+      POSTGRES_PASSWORD: ${OPENTPOD_DB_PASSWORD}
   opentpod-db-viewer:
     image: adminer
     container_name: opentpod-db-viewer
@@ -24,17 +24,12 @@ services:
       - 8080:8080
   opentpod-broker:
     image: rabbitmq
-    hostname: tpod-broker
+    hostname: opentpod-broker
     ports:
       - 5672:5672
     environment:
-      RABBITMQ_DEFAULT_USER: ${TPOD_RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${TPOD_RABBITMQ_PASSWORD}
-  opentpod-mailserver: # debug purposes only
-    image: mailhog/mailhog
-    ports: 
-      - 1025:1025 # smtp server
-      - 8025:8025 # web ui
+      RABBITMQ_DEFAULT_USER: ${OPENTPOD_RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${OPENTPOD_RABBITMQ_PASSWORD}
   opentpod-redis:
     container_name: opentpod-redis
     image: redis:4.0.5-alpine
