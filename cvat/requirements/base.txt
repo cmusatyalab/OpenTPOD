@@ -1,5 +1,5 @@
 click==6.7
-Django==2.2.4
+Django==2.2.6
 django-appconf==1.0.2
 django-auth-ldap==1.4.0
 django-cacheops==4.0.6
@@ -7,7 +7,7 @@ django-compressor==2.2
 django-rq==2.0.0
 EasyProcess==0.2.3
 ffmpy==0.2.2
-Pillow==5.1.0
+Pillow==6.2.0
 numpy==1.16.2
 patool==1.12
 python-ldap==3.0.0
