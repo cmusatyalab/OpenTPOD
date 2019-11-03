@@ -7,7 +7,7 @@ services:
     container_name: opentpod-db
     restart: always
     ports:
-      - 5432:5432
+      - ${OPENTPOD_DB_PORT}:5432
     volumes:
       - opentpod-data:/var/lib/postgresql/data
     environment:
@@ -21,12 +21,12 @@ services:
     depends_on:
       - opentpod-db
     ports:
-      - 8080:8080
+      - ${OPENTPOD_DB_VIEWER_PORT}:8080
   opentpod-broker:
     image: rabbitmq
     hostname: opentpod-broker
     ports:
-      - 5672:5672
+      - ${OPENTPOD_BROKER_PORT}:5672
     environment:
       RABBITMQ_DEFAULT_USER: ${OPENTPOD_RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${OPENTPOD_RABBITMQ_PASSWORD}
@@ -34,4 +34,4 @@ services:
     container_name: opentpod-redis
     image: redis:4.0.5-alpine
     ports:
-      - 6379:6379
+      - ${OPENTPOD_REDIS_PORT}:6379
