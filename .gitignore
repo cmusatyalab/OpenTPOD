@@ -285,7 +285,7 @@ package-lock.json
 node_modules
 
 # cvat dir
-cvat
+cvat*
 opentpod/media
 data
 share
