@@ -17,6 +17,7 @@ Installation
 --------
 
     $ conda env create -f requirements/environment-dev.yml
+    $ ln -s third_party/cvat/cvat cvat
     $ docker-compose up -d
     $ python manage.py migrate
     $ python manage.py createsuperuser
