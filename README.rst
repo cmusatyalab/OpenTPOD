@@ -21,6 +21,8 @@ Installation
     $ docker-compose up -d
     $ python manage.py migrate
     $ python manage.py createsuperuser
+    $ python manage.py collectstatic
+    $ python manage.py rqworker default low
     $ python manage.py runserver 0.0.0.0:5000
     $ cd frontend
     $ npm i

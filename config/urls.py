@@ -10,9 +10,11 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # use CVAT for labeling
     path("", include("cvat.apps.engine.urls")),
+    path("cvat-ui/", include("opentpod.cvat_ui_adapter.urls")),
     # use rest_auth for authentication and registration
     path("auth/", include("rest_auth.urls")),
     path("auth/registration/", include('rest_auth.registration.urls')),
+    path('django-rq/', include('django_rq.urls')),
     path("", include("opentpod.object_detector.urls"))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

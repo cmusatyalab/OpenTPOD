@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
 import { Dimmer, Page, Grid } from "tabler-react";
-import { LabelManagementPanel } from './Label.react';
+import { LabelManagementPanel } from "./Label.react";
 import SiteWrapper from "./SiteWrapper.react";
-import { fetchJSON } from "./util"
+import { fetchJSON } from "./util";
 import URI from "urijs";
 import { endpoints } from "./url";
-import Iframe from 'react-iframe'
+import Iframe from "react-iframe";
 
 class AnnotatePage extends React.Component {
     state = {
@@ -15,53 +15,58 @@ class AnnotatePage extends React.Component {
     taskInfo = null;
 
     getLabels = () => {
-        fetchJSON(URI.joinPaths(endpoints.tasks,
-            this.props.match.params.tid), "GET").then(
-                resp => {
-                    this.taskInfo = resp;
-                    this.setState({
-                        labels: resp.labels,
-                        loading: false
-                    });
-                });
-    }
+        fetchJSON(
+            URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
+            "GET"
+        ).then(resp => {
+            this.taskInfo = resp;
+            this.setState({
+                labels: resp.labels,
+                loading: false
+            });
+        });
+    };
 
-    addLabel = (label) => {
+    addLabel = label => {
         const curLabels = this.state.labels.slice(0);
         curLabels.push({
-            "name": label
-        })
+            name: label
+        });
         const req = {
-            "name": this.taskInfo.name,
-            "labels": curLabels,
-            "image_quality": this.taskInfo.image_quality
-        }
-        fetchJSON(URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
-            "PATCH", req).then(() => {
-                this.getLabels();
-                // force iframe update
-                window.location.reload();
-            })
-    }
+            name: this.taskInfo.name,
+            labels: curLabels,
+            image_quality: this.taskInfo.image_quality
+        };
+        fetchJSON(
+            URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
+            "PATCH",
+            req
+        ).then(() => {
+            this.getLabels();
+            // force iframe update
+            window.location.reload();
+        });
+    };
 
-    deleteLabel = (label) => {
+    deleteLabel = label => {
         // TODO (junjuew): CVAT doesn't seem to have support for removing label yet.
-        const curLabels = this.state.labels.filter(
-            (value) => {
-                return value.name !== label;
-            }
-        );
+        const curLabels = this.state.labels.filter(value => {
+            return value.name !== label;
+        });
         console.log(curLabels);
         const req = {
-            "name": this.taskInfo.name,
-            "labels": curLabels,
-            "image_quality": this.taskInfo.image_quality
-        }
-        fetchJSON(URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
-            "PATCH", req).then(() => {
-                this.getLabels();
-            })
-    }
+            name: this.taskInfo.name,
+            labels: curLabels,
+            image_quality: this.taskInfo.image_quality
+        };
+        fetchJSON(
+            URI.joinPaths(endpoints.tasks, this.props.match.params.tid),
+            "PATCH",
+            req
+        ).then(() => {
+            this.getLabels();
+        });
+    };
 
     componentDidMount() {
         this.getLabels();
@@ -69,36 +74,41 @@ class AnnotatePage extends React.Component {
 
     render() {
         let curHost = window.location.protocol + "//" + window.location.host;
-        let cvatURL = curHost + "/cvat/?id=" + this.props.match.params.jid.toString();
+        let cvatURL =
+            curHost + "/cvat-ui/?id=" + this.props.match.params.jid.toString();
         return (
             <SiteWrapper>
-                <Page.Content title="What do you want to label?" style={{ height: "100%" }}>
+                <Page.Content
+                    title="What do you want to label?"
+                    style={{ height: "100%" }}
+                >
                     <Grid.Row>
                         <section className="container">
-                            {
-                                (this.state.loading) ?
-                                    <Dimmer active loader /> : <>
-                                        <LabelManagementPanel
-                                            taskID={this.props.match.params.tid}
-                                            labels={this.state.labels}
-                                            onAddLabel={this.addLabel}
-                                            onDeleteLabel={this.deleteLabel}
+                            {this.state.loading ? (
+                                <Dimmer active loader />
+                            ) : (
+                                <>
+                                    <LabelManagementPanel
+                                        taskID={this.props.match.params.tid}
+                                        labels={this.state.labels}
+                                        onAddLabel={this.addLabel}
+                                        onDeleteLabel={this.deleteLabel}
+                                    />
+                                    {this.state.labels.length !== 0 && (
+                                        <Iframe
+                                            url={cvatURL}
+                                            width="100%"
+                                            height="800px"
+                                            id="cvat-iframe"
                                         />
-                                        {
-                                            this.state.labels.length !== 0 &&
-                                            <Iframe url={cvatURL}
-                                                width="100%"
-                                                height="800px"
-                                                id="cvat-iframe"
-                                            />
-                                        }
-                                    </>
-                            }
+                                    )}
+                                </>
+                            )}
                         </section>
                     </Grid.Row>
                 </Page.Content>
             </SiteWrapper>
-        )
+        );
     }
 }
 

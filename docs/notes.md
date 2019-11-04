@@ -17,6 +17,8 @@ tpod:admin-test
 To create a task:
 POST /tasks: {name, labels, image_quality, z_order}, notice there is no slash in the end
 POST /task/<pk>/data: form data binary
+  * calling engine/views.py "task.create" in TaskViewSet-->data
+  * calling engine/task.py _create_thread in rq
 GET /task/<pk>/status 
 DELETE /task/<pk>/status: when server encounters errors
 

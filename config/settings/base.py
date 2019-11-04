@@ -103,6 +103,7 @@ MIGRATION_MODULES = {"sites": "opentpod.contrib.sites.migrations"}
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = [
+    "rules.permissions.ObjectPermissionBackend",
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
@@ -110,8 +111,9 @@ DJANGO_AUTH_TYPE = 'BASIC'
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 # LOGIN_REDIRECT_URL = "users:redirect"
+LOGIN_REDIRECT_URL = "/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
-# LOGIN_URL = "account_login"
+LOGIN_URL = "login"
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
@@ -152,18 +154,20 @@ MIDDLEWARE = [
 # STATIC
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-STATIC_ROOT = str(ROOT_DIR("staticfiles"))
+STATIC_ROOT = str(ROOT_DIR("static"))
+os.makedirs(STATIC_ROOT, exist_ok=True)
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [
-    str(APPS_DIR.path("static")),
-    str(ROOT_DIR.path("cvat/apps/engine/static"))  # for cvat's static files
-]
+# STATICFILES_DIRS = [
+#     str(APPS_DIR.path("static")),
+#     str(ROOT_DIR.path("cvat/apps/engine/static"))  # for cvat's static files
+# ]
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    'compressor.finders.CompressorFinder',
 ]
 
 # MEDIA
@@ -255,7 +259,7 @@ REST_FRAMEWORK = {
 # rest auth
 # ------------------------------------------------------------------------------
 REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'cvat.apps.authentication.serializers.RegisterSerializerEx'
+    # 'REGISTER_SERIALIZER': 'cvat.apps.authentication.serializers.RegisterSerializerEx'
 }
 
 # EMAIL
