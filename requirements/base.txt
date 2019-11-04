@@ -21,7 +21,7 @@ djangorestframework==3.9.0  # https://github.com/encode/django-rest-framework
 django-rest-auth
 coreapi==2.3.3  # https://github.com/core-api/python-client
 
-# CVAT
+# cvat requirements
 click==6.7
 django-appconf==1.0.2
 django-cacheops==4.0.6
@@ -48,5 +48,10 @@ coreapi==2.3.3
 django-filter==2.0.0
 Markdown==3.0.1
 Pygments==2.3.1
-drf-yasg==1.15.0
+drf-yasg==1.16.0
 Shapely==1.6.4.post2
+furl==2.0.0
+pascal_voc_writer==0.1.4
+pdf2image==1.6.0
+scikit-image>=0.14.0
+# python-ldap==3.0.0 # is causing trouble. need ldap2-dev package
