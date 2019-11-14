@@ -6,6 +6,7 @@ import { fetchJSON } from "./util";
 import URI from "urijs";
 import { endpoints } from "./url";
 import Iframe from "react-iframe";
+import windowSize from "react-window-size";
 
 class AnnotatePage extends React.Component {
     state = {
@@ -94,22 +95,22 @@ class AnnotatePage extends React.Component {
                                         onAddLabel={this.addLabel}
                                         onDeleteLabel={this.deleteLabel}
                                     />
-                                    {this.state.labels.length !== 0 && (
-                                        <Iframe
-                                            url={cvatURL}
-                                            width="100%"
-                                            height="800px"
-                                            id="cvat-iframe"
-                                        />
-                                    )}
                                 </>
                             )}
                         </section>
                     </Grid.Row>
                 </Page.Content>
+                {!this.state.loading && this.state.labels.length !== 0 && (
+                    <Iframe
+                        url={cvatURL}
+                        width={this.props.windowWidth}
+                        height={0.8 * this.props.windowWidth}
+                        id="cvat-iframe"
+                    />
+                )}
             </SiteWrapper>
         );
     }
 }
 
-export default AnnotatePage;
+export default windowSize(AnnotatePage);
