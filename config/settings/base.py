@@ -113,7 +113,7 @@ DJANGO_AUTH_TYPE = 'BASIC'
 # LOGIN_REDIRECT_URL = "users:redirect"
 LOGIN_REDIRECT_URL = "/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
-LOGIN_URL = "login"
+LOGIN_URL = "/auth/login"
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ STATIC_URL = "/static/"
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    'compressor.finders.CompressorFinder',
+    "compressor.finders.CompressorFinder",
 ]
 
 # MEDIA
@@ -343,16 +343,17 @@ ACCOUNT_EMAIL_VERIFICATION = "optional"
 
 # Django-RQ
 # https://github.com/rq/django-rq
+RQ_REDIS_PORT = env.int("OPENTPOD_REDIS_PORT")
 RQ_QUEUES = {
     'default': {
         'HOST': 'localhost',
-        'PORT': 6379,
+        'PORT': RQ_REDIS_PORT,
         'DB': 0,
         'DEFAULT_TIMEOUT': '4h'
     },
     'low': {
         'HOST': 'localhost',
-        'PORT': 6379,
+        'PORT': RQ_REDIS_PORT,
         'DB': 0,
         'DEFAULT_TIMEOUT': '24h'
     }
@@ -364,7 +365,7 @@ RQ_EXCEPTION_HANDLERS = ['cvat.apps.engine.views.rq_handler']
 # https://github.com/Suor/django-cacheops
 CACHEOPS_REDIS = {
     'host': 'localhost',  # redis-server is on same machine
-    'port': 6379,        # default redis port
+    'port': RQ_REDIS_PORT,
     'db': 1,             # SELECT non-default redis database
 }
 CACHEOPS = {
