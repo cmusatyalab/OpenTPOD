@@ -5,6 +5,10 @@ from rest_framework import permissions, viewsets
 from cvat.apps.authentication import auth
 from opentpod.object_detector import models, serializers
 
+class TrainSetViewSet(viewsets.ModelViewSet):
+    queryset = models.TrainSet.objects.all()
+    serializer_class = serializers.TrainSetSerializer
+    search_fields = ("name", "owner__username")
 
 class DetectorViewSet(viewsets.ModelViewSet):
     queryset = models.Detector.objects.all()

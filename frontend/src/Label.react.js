@@ -186,7 +186,8 @@ class LabelManagementPage extends React.Component {
         return (
             <SiteWrapper>
                 <Page.Content title="Label Dashboard">
-                    <LabelManagementPanel />
+                    {// used by annotatepage.react.js
+                    /* <LabelManagementPanel /> */}
                 </Page.Content>
             </SiteWrapper>
         );

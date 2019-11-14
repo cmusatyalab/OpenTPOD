@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.contrib.auth.models import User
 from django.db import models
+from cvat.apps.engine.models import Video
 
 
 class Status(Enum):
@@ -15,6 +16,17 @@ class Status(Enum):
 
     def __str__(self):
         return self.value
+
+class TrainSet(models.Model):
+    name = models.CharField(max_length=256)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)
+    videos = models.ManyToManyField(Video)
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 class Detector(models.Model):
     name = models.CharField(max_length=256)

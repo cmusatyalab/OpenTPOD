@@ -3,20 +3,20 @@ Base settings to build other settings files upon.
 """
 
 import os
+import pathlib
 
 import environ
 
-ROOT_DIR = (
-    environ.Path(__file__) - 3
-)  # (opentpod/config/settings/base.py - 3 = opentpod/)
-APPS_DIR = ROOT_DIR.path("opentpod")
+# (opentpod/config/settings/base.py - 3 = opentpod/)
+ROOT_DIR = pathlib.Path(__file__).parents[2]
+APPS_DIR = ROOT_DIR / "opentpod"
 
 env = environ.Env()
 
 READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
 if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
-    env.read_env(str(ROOT_DIR.path(".env")))
+    env.read_env(ROOT_DIR / ".env")
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ USE_L10N = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#use-tz
 USE_TZ = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#locale-paths
-LOCALE_PATHS = [ROOT_DIR.path("locale")]
+LOCALE_PATHS = [ROOT_DIR / "locale"]
 
 # DATABASES
 # ------------------------------------------------------------------------------
@@ -154,14 +154,14 @@ MIDDLEWARE = [
 # STATIC
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-STATIC_ROOT = str(ROOT_DIR("static"))
+STATIC_ROOT = ROOT_DIR / "static"
 os.makedirs(STATIC_ROOT, exist_ok=True)
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 # STATICFILES_DIRS = [
-#     str(APPS_DIR.path("static")),
-#     str(ROOT_DIR.path("cvat/apps/engine/static"))  # for cvat's static files
+#     APPS_DIR / "static",
+#     ROOT_DIR / "cvat/apps/engine/static"  # for cvat's static files
 # ]
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
@@ -173,7 +173,7 @@ STATICFILES_FINDERS = [
 # MEDIA
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = str(APPS_DIR("media"))
+MEDIA_ROOT = APPS_DIR / "media"
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = "/media/"
 
@@ -185,7 +185,7 @@ TEMPLATES = [
         # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATES-BACKEND
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
-        "DIRS": [str(APPS_DIR.path("templates"))],
+        "DIRS": [APPS_DIR / "templates"],
         "OPTIONS": {
             # https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
             # https://docs.djangoproject.com/en/dev/ref/templates/api/#loader-types
@@ -213,7 +213,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 # FIXTURES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#fixture-dirs
-FIXTURE_DIRS = (str(APPS_DIR.path("fixtures")),)
+FIXTURE_DIRS = (APPS_DIR / "fixtures",)
 
 # SECURITY
 # ------------------------------------------------------------------------------
@@ -382,11 +382,11 @@ CACHEOPS_DEGRADE_ON_FAILURE = True
 # opentpod
 # ------------------------------------------------------------------------------
 BASE_DIR = ROOT_DIR
-DATA_ROOT = os.path.join(MEDIA_ROOT, 'data')
+DATA_ROOT = MEDIA_ROOT / 'data'
 os.makedirs(DATA_ROOT, exist_ok=True)
-SHARE_ROOT = os.path.join(MEDIA_ROOT, 'share')
+SHARE_ROOT = MEDIA_ROOT / 'share'
 os.makedirs(SHARE_ROOT, exist_ok=True)
-MODELS_ROOT = os.path.join(MEDIA_ROOT, 'models')
+MODELS_ROOT = MEDIA_ROOT / 'models'
 os.makedirs(MODELS_ROOT, exist_ok=True)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB
