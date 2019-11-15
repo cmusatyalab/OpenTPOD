@@ -1,19 +1,21 @@
+from cvat.apps.authentication import auth
 from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import permissions, viewsets
 
-from cvat.apps.authentication import auth
-from opentpod.object_detector import models, serializers
+from opentpod.object_detector import models, serializers, tasks
+
 
 class TrainSetViewSet(viewsets.ModelViewSet):
     queryset = models.TrainSet.objects.all()
     serializer_class = serializers.TrainSetSerializer
     search_fields = ("name", "owner__username")
 
+
 class DetectorViewSet(viewsets.ModelViewSet):
     queryset = models.Detector.objects.all()
     serializer_class = serializers.DetectorSerializer
-    search_fields = ("name", "owner__username", "mode", "status")
+    search_fields = ("name", "owner__username", "status")
     ordering_fields = ("id", "name", "owner", "status")
 
     def get_queryset(self):
@@ -25,10 +27,20 @@ class DetectorViewSet(viewsets.ModelViewSet):
         else:
             return queryset.filter(Q(owner=user)).distinct()
 
-    def get_permissions(self):
-        http_method = self.request.method
-        permission_classes = [permissions.IsAuthenticated]
-        return [perm() for perm in permission_classes]
+    def perform_create(self, serializer):
+        # launch training
+        # get labeled data
+        trainset_pk = self.request.data.get('trainset')
+        trainset = models.TrainSet.objects.get(pk=trainset_pk)
+        tasks.prepare_data(
+            trainset, self.request.user,
+            self.request.scheme, self.request.get_host()
+        )
+        # launch training
+        if self.request.data.get('owner', None):
+            serializer.save()
+        else:
+            serializer.save(owner=self.request.user)
 
     # @staticmethod
     # @action(detail=True, methods=['GET'], serializer_class=JobSerializer)
