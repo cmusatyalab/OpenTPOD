@@ -3,7 +3,8 @@ from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import permissions, viewsets
 
-from opentpod.object_detector import models, serializers, tasks
+from opentpod.object_detector import models, serializers
+from opentpod.object_detector import tasks as bg_tasks
 
 
 class TrainSetViewSet(viewsets.ModelViewSet):
@@ -28,19 +29,21 @@ class DetectorViewSet(viewsets.ModelViewSet):
             return queryset.filter(Q(owner=user)).distinct()
 
     def perform_create(self, serializer):
-        # launch training
-        # get labeled data
         trainset_pk = self.request.data.get('trainset')
         trainset = models.TrainSet.objects.get(pk=trainset_pk)
-        tasks.prepare_data(
+        if self.request.data.get('owner', None):
+            db_detector = serializer.save()
+        else:
+            db_detector = serializer.save(owner=self.request.user)
+
+        db_detector.get_dir().mkdir(parents=True)
+        # get labeled data
+        bg_tasks.prepare_data(
+            db_detector.get_dir(),
             trainset, self.request.user,
             self.request.scheme, self.request.get_host()
         )
         # launch training
-        if self.request.data.get('owner', None):
-            serializer.save()
-        else:
-            serializer.save(owner=self.request.user)
 
     # @staticmethod
     # @action(detail=True, methods=['GET'], serializer_class=JobSerializer)

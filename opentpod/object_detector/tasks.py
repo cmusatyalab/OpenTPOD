@@ -22,7 +22,18 @@ from cvat.apps.engine import annotation as cvat_annotation
 from cvat.apps.annotation import models as cvat_models
 
 
-def prepare_data(trainset, user,
+def dump_task_data(
+        detector_dir,
+        task_id, user, output_file_path, db_dumper, scheme, host):
+    """Dump data for a task. Put the end result to detector's directory
+    """
+    cvat_annotation.dump_task_data(
+        task_id, user, output_file_path, db_dumper, scheme, host)
+    shutil.move(output_file_path, detector_dir)
+
+
+def prepare_data(detector_dir,
+                 trainset, user,
                  scheme, host):
     """Dump data from CVAT DB to on-disk format
     """
@@ -44,8 +55,8 @@ def prepare_data(trainset, user,
                                                             task.id,
                                                             output_file_path)
         rq_job = queue.enqueue_call(
-            func=cvat_annotation.dump_task_data,
-            args=(task.id, user, output_file_path, db_dumper,
+            func=dump_task_data,
+            args=(detector_dir, task.id, user, output_file_path, db_dumper,
                   scheme, host),
             job_id=rq_id,
         )
