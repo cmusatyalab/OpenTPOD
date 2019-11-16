@@ -62,5 +62,8 @@ class Detector(models.Model):
     def get_dir(self):
         return pathlib.Path(settings.DATA_ROOT) / 'detector' / str(self.id)
 
+    def get_training_data_dir(self):
+        return self.get_dir() / 'trainval'
+
     def get_container_name(self):
         return self._CONTAINER_NAME_FORMAT.format(self.id)
