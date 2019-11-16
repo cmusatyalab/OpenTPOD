@@ -108,6 +108,9 @@ def prepare_data(db_detector,
         display_name=dump_format)
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
+    # TODO(junjuew): need to merge all tasks into a single dataset
+    # checkout coco assistant: https://github.com/ashnair1/COCO-Assistant
+
     for video in db_trainset.videos.all():
         task = video.task
         output_file_path = os.path.join(task.get_task_dirname(),
