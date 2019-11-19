@@ -19,7 +19,15 @@ class TrainSetSerializer(serializers.ModelSerializer):
         read_only_fields = ('created_date', )
 
 
+class TrainConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TrainConfig
+        fields = '__all__'
+
+
 class DetectorSerializer(serializers.ModelSerializer):
+    trainconfig = TrainConfigSerializer()
+
     class Meta:
         model = models.Detector
         fields = '__all__'

@@ -70,3 +70,12 @@ class Detector(models.Model):
 
     def get_container_name(self):
         return self._CONTAINER_NAME_FORMAT.format(self.id)
+
+
+class TrainConfig(models.Model):
+    num_classes = models.PositiveIntegerField()
+    batch_size = models.PositiveIntegerField()
+    num_steps = models.PositiveIntegerField(default=10000)
+    fine_tune_checkpoint = models.CharField(
+        max_length=2000)
+    detector = models.OneToOneField(Detector, on_delete=models.CASCADE)
