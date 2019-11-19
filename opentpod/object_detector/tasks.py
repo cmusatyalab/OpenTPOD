@@ -15,42 +15,52 @@ from urllib import request as urlrequest
 
 import django_rq
 import rq
-from cvat.apps.annotation import models as cvat_models
 from django.conf import settings
 from django.db import transaction
 from PIL import Image
 
 from . import models, datasets
+from .provider import tfod
 
 
-def prepare_data(db_detector,
-                 db_trainset,
-                 db_user,
-                 scheme,
-                 host):
+def _train(db_detector,
+           db_user,
+           scheme,
+           host):
+
+    # dump annotations
+    datasets.dump_detector_annotations(db_detector, db_user, scheme, host)
+    # launch training
+    detector = tfod.TFODDetector(
+        train_dir=db_detector.get_training_data_dir(),
+        model_dir=db_detector.get_model_dir(),
+        config={
+            'num_classes': 3,
+            'fine_tune_checkpoint': 'faster_rcnn_resnet101',
+            'batch_size': 2,
+            'num_steps': 100
+        }
+    )
+    detector.prepare()
+    detector.train()
+
+
+def train(db_detector,
+          db_user,
+          scheme,
+          host):
     """Dump data from CVAT DB to on-disk format
     """
     queue = django_rq.get_queue('default')
-    # another type is: TFRecord ZIP 1.0, see cvat.apps.annotation
-    # dump_format = 'COCO JSON 1.0'
-    dump_format = 'TFRecord ZIP 1.0'
-    db_dumper = cvat_models.AnnotationDumper.objects.get(
-        display_name=dump_format)
-
     # TODO(junjuew): need to merge all tasks into a single dataset
     rq_job = queue.enqueue_call(
-        func=datasets.dump_detector_annotations,
+        func=_train,
         args=(
             db_detector,
             db_user,
-            db_dumper,
             scheme,
             host),
     )
     # rq_job.meta['file_path'] = output_file_path
     # rq_job.save_meta()
     # for db_video in db_trainset.videos.all():
-
-
-def train():
-    pass

@@ -36,11 +36,11 @@ class DetectorViewSet(viewsets.ModelViewSet):
         else:
             db_detector = serializer.save(owner=self.request.user)
 
-        db_detector.get_dir().mkdir(parents=True)
+        db_detector.get_training_data_dir().mkdir(parents=True)
+        db_detector.get_model_dir().mkdir(parents=True)
         # get labeled data
-        bg_tasks.prepare_data(
+        bg_tasks.train(
             db_detector,
-            db_trainset,
             self.request.user,
             self.request.scheme,
             self.request.get_host()

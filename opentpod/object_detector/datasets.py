@@ -11,6 +11,7 @@ import tensorflow as tf
 import numpy as np
 
 from cvat.apps.engine import annotation as cvat_annotation
+from cvat.apps.annotation import models as cvat_models
 import collections
 import json
 
@@ -56,8 +57,12 @@ def _add_image_data_to_cvat_tfexample(tfexample, cvat_image_dir):
         tfexample.features.feature['image/encoded'].bytes_list.value.append(frame_data)
 
 
-def add_image_to_cvat_tfrecord(cvat_image_dir, cvat_tf_record_zip, output_file_path):
-    """Add image data to cvat tfrecord."""
+def fix_cvat_tfrecord(cvat_image_dir, cvat_tf_record_zip, output_file_path):
+    """Fix cvat tfrecord to comply with TF's object detection api.
+    - Add image data to cvat tfrecord.
+    - change source_id to string
+    - change label id to invalid -1: so that TF is forced to use image/object/class/text
+    """
     with tempfile.TemporaryDirectory() as temp_dir:
         with ZipFile(cvat_tf_record_zip) as cur_zip:
             cur_zip.extractall(temp_dir)
@@ -68,7 +73,17 @@ def add_image_to_cvat_tfrecord(cvat_image_dir, cvat_tf_record_zip, output_file_p
             for item in iter(dataset):
                 example = tf.train.Example()
                 example.ParseFromString(item.numpy())
+
+                # add image data
                 _add_image_data_to_cvat_tfexample(example, cvat_image_dir)
+                # fix source id type
+                source_id = example.features.feature['image/source_id'].int64_list.value.pop()
+                example.features.feature['image/source_id'].bytes_list.value.append(
+                    str(source_id).encode('utf-8'))
+                # change class label to -1. force TF to use class/text
+                for i in range(len(example.features.feature['image/object/class/label'].int64_list.value)):
+                    example.features.feature['image/object/class/label'].int64_list.value[i] = -1
+
                 writer.write(example.SerializeToString())
 
 
@@ -110,7 +125,6 @@ def _dump_labelmap_file(labels, output_file_path):
 def dump_detector_annotations(
         db_detector,
         db_user,
-        db_dumper,
         scheme,
         host):
     """Dump annotation data for detector training.
@@ -118,8 +132,13 @@ def dump_detector_annotations(
     Output is placed into the detector's ondisk dir.
     """
     output_dir = db_detector.get_training_data_dir()
-    output_dir.mkdir(parents=True)
     output_labelmap_file_path = output_dir / 'label_map.pbtxt'
+
+    # another type is: TFRecord ZIP 1.0, see cvat.apps.annotation
+    # dump_format = 'COCO JSON 1.0'
+    dump_format = 'TFRecord ZIP 1.0'
+    db_dumper = cvat_models.AnnotationDumper.objects.get(
+        display_name=dump_format)
 
     db_trainset = db_detector.trainset
     labels = []
@@ -129,12 +148,12 @@ def dump_detector_annotations(
         task_annotations_file_path = dump_cvat_task_annotations(db_task, db_user, db_dumper, scheme, host)
         # cvat's tfrecord does not contain image data. here we add the image
         # data into the tfrecord file as a feature 'image/data'
-        add_image_to_cvat_tfrecord(db_task.get_data_dirname(),
-                                   task_annotations_file_path,
-                                   output_dir / (
-                                       os.path.splitext(
-                                           os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
-                                   )
+        fix_cvat_tfrecord(db_task.get_data_dirname(),
+                          task_annotations_file_path,
+                          output_dir / (
+            os.path.splitext(
+                os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
+        )
         task_labels = get_label_map_from_cvat_tfrecord_zip(
             task_annotations_file_path
         )

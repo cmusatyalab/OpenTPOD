@@ -65,5 +65,8 @@ class Detector(models.Model):
     def get_training_data_dir(self):
         return self.get_dir() / 'train-data'
 
+    def get_model_dir(self):
+        return self.get_dir() / 'models'
+
     def get_container_name(self):
         return self._CONTAINER_NAME_FORMAT.format(self.id)
