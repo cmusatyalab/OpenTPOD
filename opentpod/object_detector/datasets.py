@@ -1,18 +1,18 @@
-"""Dataset Helper functions.
+"""Dataset functions.
 """
-import glob
 import os
 import pathlib
 import re
-import shutil
 import tempfile
 from datetime import datetime
 from zipfile import ZipFile
 
 import tensorflow as tf
+import numpy as np
 
 from cvat.apps.engine import annotation as cvat_annotation
 import collections
+import json
 
 
 def _cvat_get_frame_path(base_dir, frame):
@@ -34,6 +34,7 @@ def dump_cvat_task_annotations(
         db_dumper,
         scheme,
         host):
+    """Use CVAT's utilities to dump annotations for a task."""
     task_id = db_task.id
     task_image_dir = db_task.get_data_dirname()
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
@@ -52,7 +53,7 @@ def _add_image_data_to_cvat_tfexample(tfexample, cvat_image_dir):
     cvat_frame_id = int(re.findall(r'\d+', image_file_name)[0])
     with open(_cvat_get_frame_path(cvat_image_dir, cvat_frame_id), 'rb') as f:
         frame_data = f.read()
-        tfexample.features.feature['image/data'].bytes_list.value.append(frame_data)
+        tfexample.features.feature['image/encoded'].bytes_list.value.append(frame_data)
 
 
 def add_image_to_cvat_tfrecord(cvat_image_dir, cvat_tf_record_zip, output_file_path):
@@ -85,8 +86,18 @@ def get_label_map_from_cvat_tfrecord_zip(cvat_tf_record_zip):
                 return labels
 
 
+def dump_metadata(metadata, output_file_path):
+    with open(output_file_path, 'w') as f:
+        json.dump(metadata, f)
+
+
 def _dump_labelmap_file(labels, output_file_path):
-    label_ids = collections.OrderedDict((label, idx)
+    """Write out labels as tensorflow object detection API's lable_map.txt.
+    https://github.com/tensorflow/models/blob/master/research/object_detection/data/kitti_label_map.pbtxt
+
+    Label id 0 is reserved for 'background', therefore this file starts with id 1.
+    """
+    label_ids = collections.OrderedDict((label, idx + 1)
                                         for idx, label in enumerate(labels))
     with open(output_file_path, 'w', encoding='utf-8') as f:
         for label, idx in label_ids.items():
@@ -102,7 +113,7 @@ def dump_detector_annotations(
         db_dumper,
         scheme,
         host):
-    """Dump annotation data from a CVAT task.
+    """Dump annotation data for detector training.
 
     Output is placed into the detector's ondisk dir.
     """
@@ -132,7 +143,42 @@ def dump_detector_annotations(
 
     _dump_labelmap_file(labels,
                         output_labelmap_file_path)
+    split_train_eval_tfrecord(output_dir)
 
+
+def split_train_eval_tfrecord(data_dir):
+    """Split tfrecord in the data_dir into train and eval sets."""
+    tfrecord_files = data_dir.glob('*.tfrecord')
+    tfrecord_files = [str(tfrecord_file) for tfrecord_file in tfrecord_files]
+    dataset = tf.data.TFRecordDataset(tfrecord_files)
+    output_train_tfrecord_file_path = str(data_dir / 'train.tfrecord')
+    output_eval_tfrecord_file_path = str(data_dir / 'eval.tfrecord')
+
+    # get train/eval item ids
+    total_num = 0
+    eval_percentage = 0.1
+    meta_data = {
+        'train_num': 0,
+        'eval_num': 0
+    }
+    for item in iter(dataset):
+        total_num += 1
+    eval_ids = np.random.choice(total_num,
+                                int(eval_percentage * total_num), replace=False)
+
+    with tf.io.TFRecordWriter(output_train_tfrecord_file_path) as train_writer:
+        with tf.io.TFRecordWriter(output_eval_tfrecord_file_path) as eval_writer:
+            for idx, item in enumerate(iter(dataset)):
+                if idx in eval_ids:
+                    eval_writer.write(item.numpy())
+                    meta_data['eval_num'] += 1
+                else:
+                    train_writer.write(item.numpy())
+                    meta_data['train_num'] += 1
+    dump_metadata(
+        meta_data,
+        data_dir / 'meta'
+    )
 
 # def prepare_coco_dataset(annotation_file_path, cvat_image_dir, output_dir):
 #     """Create a on-disk coco dataset with both images and annotations.
