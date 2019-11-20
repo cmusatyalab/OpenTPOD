@@ -14,6 +14,8 @@ class TFODDetector():
     """Tensorflow Object Detection API
     See: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_locally.md
     """
+    REQUIRED_PARAMETERS = []
+    OPTIONAL_PARAMETERS = {}
 
     def __init__(self, config):
         """Expected directory layout
@@ -41,11 +43,11 @@ class TFODDetector():
 
     @property
     def required_parameters(self):
-        return []
+        return self.REQUIRED_PARAMETERS
 
     @property
     def optional_parameters(self):
-        return {}
+        return self.OPTIONAL_PARAMETERS
 
     @property
     def pretrained_model_cache_entry(self):

@@ -1,12 +1,17 @@
 import shutil
+import json
 
 from cvat.apps.authentication import auth
 from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import permissions, viewsets
+from rest_framework.decorators import action
 
 from opentpod.object_detector import models, serializers
 from opentpod.object_detector import tasks as bg_tasks
+from opentpod.object_detector import provider
+from rest_framework.response import Response
+from django.http import Http404
 
 
 class TrainSetViewSet(viewsets.ModelViewSet):
@@ -49,6 +54,40 @@ class DetectorViewSet(viewsets.ModelViewSet):
         shutil.rmtree(db_detector.get_dir())
         db_detector.delete()
 
+    @staticmethod
+    @action(detail=False, methods=['GET'], url_path='types')
+    def dnn_types(request):
+        """Return supported dnn types.
+        A list of tuples:
+        [
+        (detector type 1, human readable label 1),
+        (detector type 2, human readable label 2),
+        ]
+        """
+        dnn_types = provider.DNN_TYPE_DB_CHOICES
+        return Response(data=json.dumps(dnn_types))
+
+    @staticmethod
+    @action(detail=False, methods=['GET'], url_path='training_configs/(?P<type>.+)')
+    def training_configs(request, type):
+        """Return required and optional training parameters for a type.
+        A Dict:
+        {
+            'required': required parameter list,
+            'optional': a dict of optional parameters and their default value.
+        }
+        """
+        dnn_class = provider.get(type)
+        if dnn_class is None:
+            raise Http404
+        dnn_obj = dnn_class(config={'input_dir': '', 'output_dir': ''})
+        required_parameters = dnn_obj.required_parameters
+        optional_parameters = dnn_obj.optional_parameters
+        data = json.dumps({
+            'required': required_parameters,
+            'optional': optional_parameters
+        })
+        return Response(data=data)
     # @staticmethod
     # @action(detail=True, methods=['GET'], serializer_class=JobSerializer)
     # def jobs(request, pk):

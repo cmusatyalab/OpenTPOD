@@ -144,17 +144,12 @@ num_readers: 1
 
 
 class TFODFasterRCNNResNetGeneric(TFODDetector):
+    REQUIRED_PARAMETERS = ['batch_size', 'num_steps']
+    OPTIONAL_PARAMETERS = {}
+
     def __init__(self, config):
         super().__init__(config)
         self._config['feature_extractor_type'] = self.feature_extractor_type
-
-    @property
-    def required_parameters(self):
-        return ['batch_size', 'num_steps']
-
-    @property
-    def optional_parameters(self):
-        return {}
 
     @property
     def feature_extractor_type(self):
