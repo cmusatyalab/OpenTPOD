@@ -1,25 +1,7 @@
 from .base import TFODDetector
+from mako import template
 
-
-class TFODFasterRCNNResNet101(TFODDetector):
-    def __init__(self, config):
-        super().__init__(config)
-
-    @property
-    def required_parameters(self):
-        return ['batch_size', 'num_steps']
-
-    @property
-    def optional_parameters(self):
-        return {}
-
-    @property
-    def pretrained_model_url(self):
-        return 'http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_coco_2018_01_28.tar.gz'
-
-    @property
-    def pipeline_config_template(self):
-        return """
+GENERIC_FASTER_RCNN_RESNET_TEMPLATE = """
 # Faster R-CNN with Resnet-101 (v1) configured for the Oxford-IIIT Pet Dataset.
 # Users should configure the fine_tune_checkpoint field in the train config as
 # well as the label_map_path and input_path fields in the train_input_reader and
@@ -36,7 +18,7 @@ faster_rcnn {
     }
     }
     feature_extractor {
-    type: 'faster_rcnn_resnet101'
+    type: '${feature_extractor_type}'
     first_stage_features_stride: 16
     }
     first_stage_anchor_generator {
@@ -148,7 +130,6 @@ label_map_path: "${label_map_path}"
 
 eval_config: {
 metrics_set: "coco_detection_metrics"
-num_examples: 1101
 }
 
 eval_input_reader: {
@@ -156,7 +137,56 @@ tf_record_input_reader {
     input_path: "${eval_input_path}"
 }
 label_map_path: "${label_map_path}"
-shuffle: true
+shuffle: false
 num_readers: 1
 }
 """
+
+
+class TFODFasterRCNNResNetGeneric(TFODDetector):
+    def __init__(self, config):
+        super().__init__(config)
+
+    @property
+    def required_parameters(self):
+        return ['batch_size', 'num_steps']
+
+    @property
+    def optional_parameters(self):
+        return {}
+
+    @property
+    def feature_extractor_type(self):
+        raise NotImplementedError()
+
+    @property
+    def pipeline_config_template(self):
+        return template.Template(
+            GENERIC_FASTER_RCNN_RESNET_TEMPLATE).render(
+                feature_extractor_type=self.feature_extractor_type)
+
+
+class TFODFasterRCNNResNet101(TFODFasterRCNNResNetGeneric):
+    def __init__(self, config):
+        super().__init__(config)
+
+    @property
+    def pretrained_model_url(self):
+        return 'http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_coco_2018_01_28.tar.gz'
+
+    @property
+    def feature_extractor_type(self):
+        return 'faster_rcnn_resnet101'
+
+
+class TFODFasterRCNNResNet50(TFODFasterRCNNResNetGeneric):
+    def __init__(self, config):
+        super().__init__(config)
+
+    @property
+    def pretrained_model_url(self):
+        return 'http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet50_coco_2018_01_28.tar.gz'
+
+    @property
+    def feature_extractor_type(self):
+        return 'faster_rcnn_resnet50'

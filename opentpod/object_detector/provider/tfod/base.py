@@ -1,4 +1,4 @@
-"""Tensorflow Object Detection API provider
+"""Tensorflow Object Detection API provider.
 """
 import subprocess
 import re
@@ -17,7 +17,7 @@ class TFODDetector():
 
     def __init__(self, config):
         """Expected directory layout
-            +data
+            +train-data
                 -label_map file
                 -train TFRecord file
                 -eval TFRecord file
@@ -28,8 +28,9 @@ class TFODDetector():
                     +eval
         Arguments:
             config: contains input_dir, output_dir, and training parameters
-            db_detector: object_detection.models.Detector
-            db_detector: object_detection.models.TrainConfig
+        Output:
+            ``${output_dir}/status`` file: training status
+            ``${output_dir}/train.log`` file: training log file
         """
         super().__init__()
         self._config = config
@@ -96,7 +97,7 @@ class TFODDetector():
         # make sure all required parameter is given
         for parameter in self.required_parameters:
             if parameter not in self._config:
-                raise ValueError('Parameter ({}) is required, but not given'.format(paramter))
+                raise ValueError('Parameter ({}) is required, but not given'.format(parameter))
 
         # use default values for optional parameters if not given
         for parameter, value in self.optional_parameters.items():

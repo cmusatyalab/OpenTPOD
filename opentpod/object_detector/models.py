@@ -80,6 +80,7 @@ class Detector(models.Model):
     def get_train_config(self):
         return json.loads(self.train_config)
 
+    # TODO(junjuew): get status? read from ``status`` file
 
 # class TrainConfig(models.Model):
 #     num_classes = models.PositiveIntegerField()
