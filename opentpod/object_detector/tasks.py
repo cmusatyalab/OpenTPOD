@@ -29,14 +29,19 @@ def _train(db_detector,
 
     # dump annotations
     datasets.dump_detector_annotations(db_detector, db_user, scheme, host)
-    detector_class = provider.get(db_detector.dnn_type)
-    # launch training
-    config = db_detector.get_train_config()
-    config['input_dir'] = db_detector.get_training_data_dir().resolve()
-    config['output_dir'] = db_detector.get_model_dir().resolve()
-    detector = detector_class(config)
+    detector = db_detector.get_detector_object()
+    # detector_class = provider.get(db_detector.dnn_type)
+    # config = db_detector.get_train_config()
+    # config['input_dir'] = db_detector.get_training_data_dir().resolve()
+    # config['output_dir'] = db_detector.get_model_dir().resolve()
+    # detector = detector_class(config)
     detector.prepare()
     detector.train()
+
+
+def export(db_detector):
+    detector = db_detector.get_detector_object()
+    detector.export(db_detector.get_export_file_path())
 
 
 def train(db_detector,

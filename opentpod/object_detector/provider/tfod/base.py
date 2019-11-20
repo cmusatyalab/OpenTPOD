@@ -2,7 +2,9 @@
 """
 import subprocess
 import re
-import multiprocessing
+import tempfile
+import shutil
+import pathlib
 
 from logzero import logger
 from mako import template
@@ -38,8 +40,15 @@ class TFODDetector():
         self._config = config
         self._input_dir = self._config['input_dir']
         self._output_dir = self._config['output_dir']
+
         # find appropriate model to finetune from
         self.cache_pretrained_model()
+
+        # fill in on-disk file structure to config
+        self._config['pipeline_config_path'] = str(self._input_dir.resolve() / 'pipeline.config')
+        self._config['train_input_path'] = str(self._input_dir.resolve() / 'train.tfrecord')
+        self._config['eval_input_path'] = str(self._input_dir.resolve() / 'eval.tfrecord')
+        self._config['label_map_path'] = str(self._input_dir.resolve() / 'label_map.pbtxt')
 
     @property
     def required_parameters(self):
@@ -78,12 +87,6 @@ class TFODDetector():
         return str(fine_tune_model_dir.resolve() / 'model.ckpt')
 
     def prepare_config(self):
-        # fill in on-disk file structure to config
-        self._config['pipeline_config_path'] = str(self._input_dir.resolve() / 'pipeline.config')
-        self._config['train_input_path'] = str(self._input_dir.resolve() / 'train.tfrecord')
-        self._config['eval_input_path'] = str(self._input_dir.resolve() / 'eval.tfrecord')
-        self._config['label_map_path'] = str(self._input_dir.resolve() / 'label_map.pbtxt')
-
         # num_classes are the number of classes to learn
         with open(self._config['label_map_path'], 'r') as f:
             content = f.read()
@@ -109,14 +112,6 @@ class TFODDetector():
     def prepare_config_pipeline_file(self):
         pipeline_config = template.Template(
             self.pipeline_config_template).render(**self._config)
-        #     num_classes=self._config['num_classes'],
-        #     fine_tune_checkpoint=self._config['fine_tune_checkpoint'],
-        #     batch_size=self._config['batch_size'],
-        #     num_steps=self._config['num_steps'],
-        #     train_input_path=self._config['train_input_path'],
-        #     eval_input_path=self._config['eval_input_path'],
-        #     label_map_path=self._config['label_map_path']
-        # )
         with open(self._config['pipeline_config_path'], 'w') as f:
             f.write(pipeline_config)
 
@@ -129,14 +124,51 @@ class TFODDetector():
         # need to run tf train with subprocess as tf has problem with python's
         # multiprocess module
         # see: https://github.com/tensorflow/tensorflow/issues/5448
-        train_cmd = 'python -m opentpod.object_detector.provider.tfod.tfod_train_wrapper --pipeline_config_path={0} --model_dir={1} --alsologtostderr'.format(
+        cmd = 'python -m opentpod.object_detector.provider.tfod.wrappers.train --pipeline_config_path={0} --model_dir={1} --alsologtostderr'.format(
             self._config['pipeline_config_path'],
             self._output_dir
         )
-        logger.info('launching training process with following command: \n\n{}'.format(train_cmd))
+        logger.info('launching training process with following command: \n\n{}'.format(cmd))
         process = subprocess.Popen(
-            train_cmd.split())
+            cmd.split())
         return process.pid
 
     def run(self):
         pass
+
+    def _get_latest_model_ckpt_path(self):
+        candidates = [str(candidate.resolve()) for
+                      candidate in self._output_dir.glob('**/model.ckpt*')]
+        max_step_model_path = candidates[0]
+        max_steps = re.findall(r'model.ckpt-(\d+)', max_step_model_path)[0]
+        for candidate_path in candidates:
+            trained_steps = re.findall(r'model.ckpt-(\d+)', candidate_path)[0]
+            if trained_steps > max_steps:
+                max_step_model_path = candidate_path
+        return max_step_model_path
+
+    def export(self, output_file_path):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cmd = ('python -m opentpod.object_detector.provider.tfod.wrappers.export ' +
+                   '--input_type=image_tensor --pipeline_config_path={} ' +
+                   '--trained_checkpoint_prefix={} ' +
+                   '--output_directory={} ' +
+                   '--alsologtostderr').format(
+                self._config['pipeline_config_path'],
+                self._get_latest_model_ckpt_path(),
+                temp_dir
+            )
+            logger.info('launching training process with following command: \n\n{}'.format(cmd))
+            process = subprocess.Popen(
+                cmd.split())
+            process.wait()
+            file_stem = str(pathlib.Path(output_file_path).parent
+                            / pathlib.Path(output_file_path).stem)
+            logger.debug(file_stem)
+            shutil.make_archive(
+                file_stem,
+                'zip',
+                temp_dir)
+            # str(pathlib.Path(temp_dir).parent.resolve()),
+            # pathlib.Path(temp_dir).name)
+        return process.pid

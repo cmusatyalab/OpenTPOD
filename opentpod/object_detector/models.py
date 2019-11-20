@@ -60,10 +60,10 @@ class Detector(models.Model):
     _CONTAINER_NAME_FORMAT = 'opentpod-detector-{}'
 
     class Meta:
-        ordering = ['name']
+        ordering = ['id']
 
     def __str__(self):
-        return self.name
+        return '{}-{}'.format(self.pk, self.name)
 
     def get_dir(self):
         return pathlib.Path(settings.DATA_ROOT) / 'detector' / str(self.id)
@@ -74,11 +74,21 @@ class Detector(models.Model):
     def get_model_dir(self):
         return self.get_dir() / 'models'
 
+    def get_export_file_path(self):
+        return self.get_dir() / 'frozen-graph.zip'
+
     def get_container_name(self):
         return self._CONTAINER_NAME_FORMAT.format(self.id)
 
     def get_train_config(self):
         return json.loads(self.train_config)
+
+    def get_detector_object(self):
+        config = self.get_train_config()
+        config['input_dir'] = self.get_training_data_dir().resolve()
+        config['output_dir'] = self.get_model_dir().resolve()
+        detector_class = provider.get(self.dnn_type)
+        return detector_class(config)
 
     # TODO(junjuew): get status? read from ``status`` file
 

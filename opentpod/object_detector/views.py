@@ -4,8 +4,10 @@ import json
 from cvat.apps.authentication import auth
 from django.db.models import Q
 from django.shortcuts import render
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
+import django_rq
+import sendfile
 
 from opentpod.object_detector import models, serializers
 from opentpod.object_detector import tasks as bg_tasks
@@ -88,47 +90,40 @@ class DetectorViewSet(viewsets.ModelViewSet):
             'optional': optional_parameters
         })
         return Response(data=data)
-    # @staticmethod
-    # @action(detail=True, methods=['GET'], serializer_class=JobSerializer)
-    # def jobs(request, pk):
-    #     queryset = Job.objects.filter(segment__task_id=pk)
-    #     serializer = JobSerializer(queryset, many=True,
-    #         context={"request": request})
 
-    #     return Response(serializer.data)
+    @action(detail=True, methods=['GET'])
+    def data(self, request, pk):
+        """Download Trained Model Data."""
+        db_detector = self.get_object()
+        if db_detector.status != models.Status.TRAINED.value:
+            raise Http404('Model is not in TRAINED status. Current status: {}'.format(
+                db_detector.status))
 
-    # @action(detail=True, methods=['POST'], serializer_class=TaskDataSerializer)
-    # def data(self, request, pk):
-    #     db_task = self.get_object()
-    #     serializer = TaskDataSerializer(db_task, data=request.data)
-    #     if serializer.is_valid(raise_exception=True):
-    #         serializer.save()
-    #         task.create(db_task.id, serializer.data)
-    #         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        queue = django_rq.get_queue("default")
+        rq_id = "{}@/api/opentpod/v1/detectors/{}/data".format(
+            self.request.user, pk)
+        rq_job = queue.fetch_job(rq_id)
 
-    # @action(detail=True, methods=['GET'], serializer_class=RqStatusSerializer)
-    # def status(self, request, pk):
-    #     response = self._get_rq_response(queue="default",
-    #         job_id="/api/{}/tasks/{}".format(request.version, pk))
-    #     serializer = RqStatusSerializer(data=response)
+        if rq_job and not rq_job.meta["downloaded"]:
+            if rq_job.is_finished:
+                rq_job.meta["downloaded"] = True
+                rq_job.save_meta()
+                return sendfile.sendfile(request, rq_job.meta["file_path"], attachment=True,
+                                         attachment_filename=str(
+                                             db_detector.get_export_file_path().name))
+            elif rq_job.is_failed:
+                exc_info = str(rq_job.exc_info)
+                rq_job.delete()
+                return Response(data=exc_info, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                return Response(status=status.HTTP_202_ACCEPTED)
+        rq_job = queue.enqueue_call(
+            func=bg_tasks.export,
+            args=(db_detector,),
+            job_id=rq_id,
+        )
+        rq_job.meta["downloaded"] = False
+        rq_job.meta["file_path"] = db_detector.get_export_file_path()
+        rq_job.save_meta()
 
-    #     if serializer.is_valid(raise_exception=True):
-    #         return Response(serializer.data)
-
-    # @staticmethod
-    # def _get_rq_response(queue, job_id):
-    #     queue = django_rq.get_queue(queue)
-    #     job = queue.fetch_job(job_id)
-    #     response = {}
-    #     if job is None or job.is_finished:
-    #         response = { "state": "Finished" }
-    #     elif job.is_queued:
-    #         response = { "state": "Queued" }
-    #     elif job.is_failed:
-    #         response = { "state": "Failed", "message": job.exc_info }
-    #     else:
-    #         response = { "state": "Started" }
-    #         if 'status' in job.meta:
-    #             response['message'] = job.meta['status']
-
-    #     return response
+        return Response(status=status.HTTP_202_ACCEPTED)
