@@ -15,6 +15,8 @@ from cvat.apps.annotation import models as cvat_models
 import collections
 import json
 
+tf.enable_eager_execution()
+
 
 def _cvat_get_frame_path(base_dir, frame):
     """CVAT's image directory layout.
@@ -140,7 +142,7 @@ def dump_detector_annotations(
     db_dumper = cvat_models.AnnotationDumper.objects.get(
         display_name=dump_format)
 
-    db_trainset = db_detector.trainset
+    db_trainset = db_detector.train_set
     labels = []
     # call cvat dump tool on each video in the trainset
     for db_video in db_trainset.videos.all():

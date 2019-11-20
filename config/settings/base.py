@@ -388,6 +388,8 @@ SHARE_ROOT = MEDIA_ROOT / 'share'
 os.makedirs(SHARE_ROOT, exist_ok=True)
 MODELS_ROOT = MEDIA_ROOT / 'models'
 os.makedirs(MODELS_ROOT, exist_ok=True)
+CACHE_DIR = DATA_ROOT / '.cache'
+os.makedirs(CACHE_DIR, exist_ok=True)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None   # this django check disabled

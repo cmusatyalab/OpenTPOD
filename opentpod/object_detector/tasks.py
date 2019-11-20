@@ -19,8 +19,7 @@ from django.conf import settings
 from django.db import transaction
 from PIL import Image
 
-from . import models, datasets
-from .provider import tfod
+from . import models, datasets, provider
 
 
 def _train(db_detector,
@@ -30,17 +29,12 @@ def _train(db_detector,
 
     # dump annotations
     datasets.dump_detector_annotations(db_detector, db_user, scheme, host)
+    detector_class = provider.get(db_detector.dnn_type)
     # launch training
-    detector = tfod.TFODDetector(
-        train_dir=db_detector.get_training_data_dir(),
-        model_dir=db_detector.get_model_dir(),
-        config={
-            'num_classes': 3,
-            'fine_tune_checkpoint': 'faster_rcnn_resnet101',
-            'batch_size': 2,
-            'num_steps': 100
-        }
-    )
+    config = db_detector.get_train_config()
+    config['input_dir'] = db_detector.get_training_data_dir().resolve()
+    config['output_dir'] = db_detector.get_model_dir().resolve()
+    detector = detector_class(config)
     detector.prepare()
     detector.train()
 
@@ -51,8 +45,7 @@ def train(db_detector,
           host):
     """Dump data from CVAT DB to on-disk format
     """
-    queue = django_rq.get_queue('default')
-    # TODO(junjuew): need to merge all tasks into a single dataset
+    queue = django_rq.get_queue('low')
     rq_job = queue.enqueue_call(
         func=_train,
         args=(
@@ -63,4 +56,3 @@ def train(db_detector,
     )
     # rq_job.meta['file_path'] = output_file_path
     # rq_job.save_meta()
-    # for db_video in db_trainset.videos.all():

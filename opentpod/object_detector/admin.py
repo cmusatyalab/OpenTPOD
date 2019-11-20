@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+# TODO(junjuew): register admin view for object detector

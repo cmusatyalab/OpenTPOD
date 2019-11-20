@@ -1,3 +1,5 @@
+import shutil
+
 from cvat.apps.authentication import auth
 from django.db.models import Q
 from django.shortcuts import render
@@ -29,8 +31,6 @@ class DetectorViewSet(viewsets.ModelViewSet):
             return queryset.filter(Q(owner=user)).distinct()
 
     def perform_create(self, serializer):
-        trainset_pk = self.request.data.get('trainset')
-        db_trainset = models.TrainSet.objects.get(pk=trainset_pk)
         if self.request.data.get('owner', None):
             db_detector = serializer.save()
         else:
@@ -38,14 +38,16 @@ class DetectorViewSet(viewsets.ModelViewSet):
 
         db_detector.get_training_data_dir().mkdir(parents=True)
         db_detector.get_model_dir().mkdir(parents=True)
-        # get labeled data
         bg_tasks.train(
             db_detector,
             self.request.user,
             self.request.scheme,
             self.request.get_host()
         )
-        # launch training
+
+    def perform_destroy(self, db_detector):
+        shutil.rmtree(db_detector.get_dir())
+        db_detector.delete()
 
     # @staticmethod
     # @action(detail=True, methods=['GET'], serializer_class=JobSerializer)
