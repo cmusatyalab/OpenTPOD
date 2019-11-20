@@ -18,7 +18,7 @@ faster_rcnn {
     }
     }
     feature_extractor {
-    type: '${feature_extractor_type}'
+    type: "${feature_extractor_type}"
     first_stage_features_stride: 16
     }
     first_stage_anchor_generator {
@@ -146,6 +146,7 @@ num_readers: 1
 class TFODFasterRCNNResNetGeneric(TFODDetector):
     def __init__(self, config):
         super().__init__(config)
+        self._config['feature_extractor_type'] = self.feature_extractor_type
 
     @property
     def required_parameters(self):
@@ -161,9 +162,7 @@ class TFODFasterRCNNResNetGeneric(TFODDetector):
 
     @property
     def pipeline_config_template(self):
-        return template.Template(
-            GENERIC_FASTER_RCNN_RESNET_TEMPLATE).render(
-                feature_extractor_type=self.feature_extractor_type)
+        return GENERIC_FASTER_RCNN_RESNET_TEMPLATE
 
 
 class TFODFasterRCNNResNet101(TFODFasterRCNNResNetGeneric):

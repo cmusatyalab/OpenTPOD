@@ -7,6 +7,7 @@ import shutil
 
 from rest_framework import serializers
 from opentpod.object_detector import models
+from cvat.apps.engine.serializers import WriteOnceMixin
 
 
 class TrainSetSerializer(serializers.ModelSerializer):
@@ -19,11 +20,12 @@ class TrainSetSerializer(serializers.ModelSerializer):
         read_only_fields = ('created_date', )
 
 
-class DetectorSerializer(serializers.ModelSerializer):
+class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Detector
         fields = '__all__'
-        read_only_fields = ('created_date', 'updated_date', 'status')
+        read_only_fields = ('created_date', 'updated_date')
+        write_once_fields = ('dnn_type', 'parent', 'train_set', 'train_config')
 
     # def create(self, validated_data):
     #     """Override create to create the nested trainconfig db entry.
