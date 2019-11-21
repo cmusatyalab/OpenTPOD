@@ -7,7 +7,7 @@ import { ForgotPasswordPage as TablerForgotPasswordPage } from "tabler-react";
 type Props = {||};
 
 function ForgotPasswordPage(props: Props): React.Node {
-  return <TablerForgotPasswordPage />;
+    return <TablerForgotPasswordPage />;
 }
 
 export default ForgotPasswordPage;

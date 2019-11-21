@@ -12,16 +12,16 @@ import Email from "./Email.react";
 import ProfilePage from "./ProfilePage.react";
 
 export {
-  ForgotPasswordPage,
-  LoginPage,
-  RegisterPage,
-  Error400,
-  Error401,
-  Error403,
-  Error404,
-  Error500,
-  Error503,
-  Empty,
-  Email,
-  ProfilePage,
+    ForgotPasswordPage,
+    LoginPage,
+    RegisterPage,
+    Error400,
+    Error401,
+    Error403,
+    Error404,
+    Error500,
+    Error503,
+    Empty,
+    Email,
+    ProfilePage,
 };

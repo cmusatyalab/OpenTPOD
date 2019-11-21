@@ -2,57 +2,57 @@
 
 /* the text color of the drop label*/
 .filepond--drop-label {
-    color: #9aa0ac;
+  color: #9aa0ac;
 }
 
 /* underline color for "Browse" button */
 .filepond--label-action {
-    text-decoration-color: #aaa;
+  text-decoration-color: #aaa;
 }
 
 /* the background color of the filepond drop area */
 .filepond--panel-root {
-    background-color: #9aa0ac;
+  background-color: #9aa0ac;
 }
 
 /* the border radius of the drop area */
 .filepond--panel-root {
-    border-radius: 0em;
+  border-radius: 0em;
 }
 
 /* the background color of the file and file panel (used when dropping an image) */
 .filepond--item-panel {
-    background-color: rgb(70, 127, 207);
+  background-color: rgb(70, 127, 207);
 }
 
 /* the background color of the black action buttons */
 .filepond--file-action-button {
-    background-color: #9aa0ac;
+  background-color: #9aa0ac;
 }
 
 /* the color of the focus ring */
 .filepond--file-action-button:hover,
 .filepond--file-action-button:focus {
-    box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.9);
 }
 
 /* the text color of the file status and info labels */
 .filepond--file {
-    color: white;
+  color: white;
 }
 
 /* error state color */
-[data-filepond-item-state*='error'] .filepond--item-panel,
-[data-filepond-item-state*='invalid'] .filepond--item-panel {
-    background-color: #cd201f;
+[data-filepond-item-state*="error"] .filepond--item-panel,
+[data-filepond-item-state*="invalid"] .filepond--item-panel {
+  background-color: #cd201f;
 }
 
-[data-filepond-item-state='processing-complete'] .filepond--item-panel {
-    background-color: #5eba00;
+[data-filepond-item-state="processing-complete"] .filepond--item-panel {
+  background-color: #5eba00;
 }
 
 /* bordered drop area */
 .filepond--panel-root {
-    background-color: transparent;
-    border: 2px dashed #9aa0ac;
+  background-color: transparent;
+  border: 2px dashed #9aa0ac;
 }

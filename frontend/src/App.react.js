@@ -37,11 +37,7 @@ function App(props) {
                     component={AnnotatePage}
                 />
                 <Route exact path="/train" component={TrainPage} />
-                <Route
-                    exact
-                    path="/forgot-password"
-                    component={ForgotPasswordPage}
-                />
+                <Route exact path="/forgot-password" component={ForgotPasswordPage} />
                 <Route exact path="/login" component={LoginPage} />
                 <Route exact path="/register" component={RegisterPage} />
                 <Route exact path="/400" component={Error400} />
