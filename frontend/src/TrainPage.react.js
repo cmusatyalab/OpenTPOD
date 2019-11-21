@@ -1,5 +1,3 @@
-// @flow
-
 // Import the Image EXIF Orientation and Image Preview plugins
 // Note: These need to be installed separately
 // import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
@@ -9,10 +7,10 @@ import "filepond/dist/filepond.min.css";
 import React from 'react';
 // Import React FilePond
 import { FilePond, registerPlugin } from "react-filepond";
+import ReactPlayer from "react-player";
 import { Button, Card, Dimmer, Grid, Page } from "tabler-react";
-import ReactPlayer from "react-player"
 import SiteWrapper from "./SiteWrapper.react";
-import { fetchJSON } from "./util"
+import { fetchJSON } from "./util";
 import "./VideoPage.css";
 
 registerPlugin(FilePondPluginFileValidateType);

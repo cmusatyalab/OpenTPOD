@@ -21,6 +21,7 @@ import VideoPage from "./VideoPage.react";
 import { LabelManagementPage } from "./Label.react";
 import AnnotatePage from "./AnnotatePage.react";
 import TrainPage from "./TrainPage.react";
+import DetectorPage from "./DetectorPage.react";
 
 import "tabler-react/dist/Tabler.css";
 
@@ -36,7 +37,8 @@ function App(props) {
                     path="/annotate/tasks/:tid/jobs/:jid"
                     component={AnnotatePage}
                 />
-                <Route exact path="/train" component={TrainPage} />
+                <Route exact path="/detector" component={DetectorPage} />
+                {/* <Route exact path="/train" component={TrainPage} /> */}
                 <Route exact path="/forgot-password" component={ForgotPasswordPage} />
                 <Route exact path="/login" component={LoginPage} />
                 <Route exact path="/register" component={RegisterPage} />

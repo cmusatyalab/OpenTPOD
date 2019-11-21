@@ -26,8 +26,8 @@ const navBarItems = [
         LinkComponent: withRouter(NavLink)
     },
     {
-        value: "Train",
-        to: endpoints.train,
+        value: "Detector",
+        to: endpoints.detector,
         icon: "code",
         LinkComponent: withRouter(NavLink)
     }

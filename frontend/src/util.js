@@ -53,4 +53,9 @@ function withFormikStatus(component, status) {
     </>
 }
 
-export { checkAuth, fetchJSON, withFormikStatus }
+function lineWrap(input, breakAt = 10) {
+    let regex = `/(.{${breakAt}})/g`
+    input.replace(regex, "$1\n")
+}
+
+export { checkAuth, fetchJSON, withFormikStatus, lineWrap }
