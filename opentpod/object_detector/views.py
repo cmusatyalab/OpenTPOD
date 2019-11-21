@@ -56,6 +56,13 @@ class DetectorViewSet(viewsets.ModelViewSet):
         shutil.rmtree(db_detector.get_dir())
         db_detector.delete()
 
+    @action(detail=True, methods=['GET'])
+    def status(self, request, pk):
+        """Check Detector Status."""
+        db_detector = self.get_object()
+        cur_status = db_detector.get_status()
+        return Response(data=json.dumps(cur_status))
+
     @staticmethod
     @action(detail=False, methods=['GET'], url_path='types')
     def dnn_types(request):
@@ -92,7 +99,7 @@ class DetectorViewSet(viewsets.ModelViewSet):
         return Response(data=data)
 
     @action(detail=True, methods=['GET'])
-    def data(self, request, pk):
+    def model(self, request, pk):
         """Download Trained Model Data."""
         db_detector = self.get_object()
         if db_detector.status != models.Status.TRAINED.value:

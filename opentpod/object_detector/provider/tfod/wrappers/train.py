@@ -4,6 +4,7 @@ import pathlib
 
 from absl import flags
 from object_detection import model_main
+from opentpod.object_detector import models
 
 import tensorflow as tf
 
@@ -16,14 +17,14 @@ def main(unused):
     # redirect logging to file
     sys.stderr = open(os.path.join(output_dir, 'train.log'), "w")
     with open(status_file_path, "w") as f:
-        f.write('training')
+        f.write(models.Status.TRAINING.value)
     try:
         model_main.main(unused)
         with open(status_file_path, "w") as f:
-            f.write('trained')
+            f.write(models.Status.TRAINED.value)
     except:
         with open(status_file_path, "w") as f:
-            f.write('error')
+            f.write(models.Status.ERROR.value)
     finally:
         sys.stderr.flush()
         sys.stderr.close()

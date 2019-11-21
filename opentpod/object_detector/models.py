@@ -75,7 +75,7 @@ class Detector(models.Model):
         return self.get_dir() / 'models'
 
     def get_export_file_path(self):
-        return self.get_dir() / 'frozen-graph.zip'
+        return self.get_dir() / '{}-frozen-graph.zip'.format(self.name)
 
     def get_container_name(self):
         return self._CONTAINER_NAME_FORMAT.format(self.id)
@@ -89,6 +89,21 @@ class Detector(models.Model):
         config['output_dir'] = self.get_model_dir().resolve()
         detector_class = provider.get(self.dnn_type)
         return detector_class(config)
+
+    def _update_status(self):
+        status_file_path = self.get_model_dir() / 'status'
+        if status_file_path.exists():
+            with open(status_file_path, 'r') as f:
+                cur_status = f.read().rstrip()
+                for status_enum_item in list(Status):
+                    if cur_status == status_enum_item.value:
+                        self.status = cur_status
+                        self.save()
+                        break
+
+    def get_status(self):
+        self._update_status()
+        return self.status
 
     # TODO(junjuew): get status? read from ``status`` file
 
