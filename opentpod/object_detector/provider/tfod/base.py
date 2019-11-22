@@ -169,6 +169,4 @@ class TFODDetector():
                 file_stem,
                 'zip',
                 temp_dir)
-            # str(pathlib.Path(temp_dir).parent.resolve()),
-            # pathlib.Path(temp_dir).name)
         return process.pid

@@ -115,8 +115,8 @@ class DetectorViewSet(viewsets.ModelViewSet):
             if rq_job:
                 if rq_job.is_finished:
                     return sendfile.sendfile(request, rq_job.meta["file_path"], attachment=True,
-                                            attachment_filename=str(
-                                                db_detector.get_export_file_path().name))
+                                             attachment_filename=str(
+                        db_detector.get_export_file_path().name))
                 elif rq_job.is_failed:
                     exc_info = str(rq_job.exc_info)
                     rq_job.delete()
@@ -135,7 +135,7 @@ class DetectorViewSet(viewsets.ModelViewSet):
             rq_job.save_meta()
             return Response(status=status.HTTP_202_ACCEPTED, data={json.dumps('created')})
 
-    @action(detail=True, methods=['GET'])
+    @action(detail=True, methods=['POST'])
     def visualization(self, request, pk):
         """Visualize Training Procedures.
         Currently only support tensorboard

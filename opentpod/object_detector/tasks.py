@@ -18,8 +18,6 @@ from urllib import request as urlrequest
 
 import django_rq
 import rq
-from celery.decorators import task
-from celery.task import control
 from django.conf import settings
 from django.db import transaction
 from PIL import Image
@@ -35,11 +33,6 @@ def _train(db_detector,
     # dump annotations
     datasets.dump_detector_annotations(db_detector, db_user, scheme, host)
     detector = db_detector.get_detector_object()
-    # detector_class = provider.get(db_detector.dnn_type)
-    # config = db_detector.get_train_config()
-    # config['input_dir'] = db_detector.get_training_data_dir().resolve()
-    # config['output_dir'] = db_detector.get_model_dir().resolve()
-    # detector = detector_class(config)
     detector.prepare()
     detector.train()
 
@@ -65,10 +58,10 @@ def train(db_detector,
             host),
     )
 
-@task
-def visualize_tensorboard(model_dir):
+
+def _visualize_tensorboard(model_dir, pid_file_path):
     from tensorboard import program
-    with open(settings.CACHE_DIR / 'tensorboard.pid', 'w') as f:
+    with open(pid_file_path, 'w') as f:
         f.write(json.dumps(os.getpid()))
     tb = program.TensorBoard()
     tb.configure(argv=[
@@ -78,23 +71,37 @@ def visualize_tensorboard(model_dir):
     while True:
         time.sleep(1000)
 
+
 def visualize(db_detector):
+    """Visualize detector training procedures.
+
+    Currently only supports tensorboard. However, due to tensorboard spawns a
+    separate process to run. We're writing it's worker horse process pid to a
+    file. When another visualization request comes, we'll first check if a
+    tensorboard worker horse process is running. If so, that process is killed.
+
+    Once tensorboard is up, we use django-revproxy to proxy requests to that
+    local tensorboard server.
+
+    However, this only supports 1 tensorboard running across all users...
+    Need to find a better way...
+    """
     # TODO(junjuew): check celery to see if there are more elegant methods
-    # this method only allows 1 tensorboard session to be open
-    # among all users ...
-    with open(settings.CACHE_DIR / 'tensorboard.pid', 'r') as f:
-        pid = json.loads(f.read())
-        try:
-            os.kill(pid, signal.SIGKILL)
-        except ProcessLookupError as e:
-            pass
-    visualize_tensorboard.apply_async(
-        args = (str(db_detector.get_model_dir()),),
-        task_id='tb')
-    # queue = django_rq.get_queue('tensorboard')
-    # rq_job = queue.enqueue_call(
-    #     func=_visualize_tensorboard,
-    #     args=(
-    #         str(db_detector.get_model_dir()),
-    #         )
-    # )
+    # of killing a launched task. Somehow, celery is not showing the long-running
+    # _visualize_tensorboard job as active, only as registerd..
+    # kill running tb process if there is one
+    pid_file_path = (settings.CACHE_DIR / 'tensorboard.pid').resolve()
+    if pid_file_path.exists():
+        with open(pid_file_path, 'r') as f:
+            pid = json.loads(f.read())
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError as e:
+                pass
+
+    queue = django_rq.get_queue('tensorboard')
+    rq_job = queue.enqueue_call(
+        func=_visualize_tensorboard,
+        args=(
+            str(db_detector.get_model_dir()), str(pid_file_path),),
+    )

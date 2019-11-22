@@ -32,6 +32,9 @@ class SimpleTaskSerializer(serializers.ModelSerializer):
 
 
 class TrainSetSerializer(serializers.ModelSerializer):
+    # same as DetectorSerializer trick
+    # here a trainset object can be created with a list of task ids via POST
+    # while GET returns the whole Task object
     tasks = SimpleTaskSerializer(many=True, read_only=True)
     tasks_id = serializers.PrimaryKeyRelatedField(
         source='tasks',

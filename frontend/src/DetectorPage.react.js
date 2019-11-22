@@ -8,6 +8,12 @@ import { endpoints } from "./url";
 import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
 import "./App.css";
 
+const fetchDetector = id => {
+    /* Get detector json from backend*/
+    let url = URI.joinPaths(endpoints.detectors, id);
+    return fetchJSON(url, "GET");
+};
+
 // detector card to display detector information
 const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
     // null - no download
@@ -130,13 +136,13 @@ const DetectorDetailCard = ({ detector }) => {
                         icon="tag"
                         onClick={e => {
                             e.preventDefault();
-                            fetchJSON(visualizationUrl, "GET").then(resp => {
+                            fetchJSON(visualizationUrl, "POST").then(resp => {
                                 setTimeout(() => {
                                     window.open(
                                         endpoints.tensorboard,
                                         "_blank"
                                     );
-                                }, 5000);
+                                }, 2000);
                             });
                         }}
                     >
@@ -146,10 +152,14 @@ const DetectorDetailCard = ({ detector }) => {
             </Card.Header>
             <Card.Body>
                 <b>Status:</b> {detector.status} <br />
+                <b>DNN Type:</b> {detector.dnn_type} <br />
                 <b>Created Date:</b> {detector.created_date} <br />
                 <b>Updated Date:</b> {detector.updated_date} <br />
-                <b>Training Videos:</b>
-                <pre id="json"> {detector.tasksJson} </pre>
+                <b>Training Set:</b>
+                <pre id="json">
+                    {" "}
+                    {JSON.stringify(detector.train_set, undefined, 2)}{" "}
+                </pre>
                 <br />
                 <b>Training Config:</b>
                 <pre id="json"> {detector.train_config} </pre>
@@ -255,33 +265,8 @@ const DetectorDetailPage = ({ props }) => {
 
     const loadResource = () => {
         setDetector(null);
-        let url = URI.joinPaths(endpoints.detectors, id);
-        // load detector details
-        fetchJSON(url, "GET").then(detector => {
+        fetchDetector(id).then(detector => {
             setDetector(detector);
-            // load trainset details
-            fetchJSON(
-                URI.joinPaths(
-                    endpoints.trainsets,
-                    detector.train_set.toString()
-                ),
-                "GET"
-            ).then(trainset => {
-                // load task details
-                Promise.all(
-                    trainset.tasks.map(taskId => {
-                        return fetchJSON(
-                            URI.joinPaths(endpoints.tasks, taskId.toString()),
-                            "GET"
-                        );
-                    })
-                ).then(tasks => {
-                    let tasksJson = JSON.stringify(
-                        tasks.map(task => task.name)
-                    );
-                    setDetector({ ...detector, tasksJson: tasksJson });
-                });
-            });
         });
     };
 

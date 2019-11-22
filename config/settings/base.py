@@ -357,6 +357,12 @@ RQ_QUEUES = {
         'DB': 0,
         'DEFAULT_TIMEOUT': '24h'
     },
+    'tensorboard': {
+        'HOST': 'localhost',
+        'PORT': RQ_REDIS_PORT,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': '24h'
+    },
 }
 RQ_SHOW_ADMIN_LINK = True
 RQ_EXCEPTION_HANDLERS = ['cvat.apps.engine.views.rq_handler']
