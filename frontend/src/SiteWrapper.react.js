@@ -14,20 +14,20 @@ import {
 const navBarItems = [
     {
         value: "Video",
-        to: endpoints.video,
+        to: endpoints.uiVideo,
         icon: "home",
         LinkComponent: withRouter(NavLink),
         useExact: true
     },
     {
         value: "Label",
-        to: endpoints.label,
+        to: endpoints.uiLabel,
         icon: "edit",
         LinkComponent: withRouter(NavLink)
     },
     {
         value: "Detector",
-        to: endpoints.detector,
+        to: endpoints.uiDetector,
         icon: "code",
         LinkComponent: withRouter(NavLink)
     }

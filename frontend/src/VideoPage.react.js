@@ -53,7 +53,9 @@ class VideoPage extends React.Component {
                     <Grid.Col md={4} key={index}>
                         <Card>
                             <Card.Header>
-                                <Card.Title>{item.name.replace(/(.{10})/g, "$1\n")}</Card.Title>
+                                <Card.Title>
+                                    {item.name.replace(/(.{10})/g, "$1\n")}
+                                </Card.Title>
                                 <Card.Options>
                                     <Button
                                         outline
@@ -65,7 +67,7 @@ class VideoPage extends React.Component {
                                             e.preventDefault();
                                             this.props.history.push(
                                                 URI.joinPaths(
-                                                    endpoints.annotate,
+                                                    endpoints.uiAnnotate,
                                                     "tasks",
                                                     item.id.toString(),
                                                     "jobs",
@@ -75,7 +77,7 @@ class VideoPage extends React.Component {
                                         }}
                                     >
                                         Label
-                  </Button>
+                                    </Button>
                                     <Button
                                         outline
                                         RootComponent="button"
@@ -85,7 +87,10 @@ class VideoPage extends React.Component {
                                         method="delete"
                                         onClick={e => {
                                             fetchJSON(
-                                                URI.joinPaths(endpoints.tasks, item.id.toString()),
+                                                URI.joinPaths(
+                                                    endpoints.tasks,
+                                                    item.id.toString()
+                                                ),
                                                 "DELETE"
                                             ).then(
                                                 this.setState({
@@ -97,35 +102,35 @@ class VideoPage extends React.Component {
                                         }}
                                     >
                                         Delete
-                  </Button>
+                                    </Button>
                                 </Card.Options>
                             </Card.Header>
                             <Card.Body>
                                 {item.loading ? (
                                     <div>
                                         The video is being processed...
-                    <Dimmer active loader />
+                                        <Dimmer active loader />
                                     </div>
                                 ) : (
-                                        <div>
-                                            <ReactPlayer
-                                                url={URI.joinPaths(
-                                                    endpoints.mediaData,
-                                                    item.id.toString(),
-                                                    ".upload",
-                                                    item.name
-                                                )}
-                                                width="100%"
-                                                height="100%"
-                                                controls={true}
-                                                light={URI.joinPaths(
-                                                    endpoints.tasks,
-                                                    item.id.toString(),
-                                                    "/frames/0"
-                                                ).toString()} // expects string type
-                                            />
-                                        </div>
-                                    )}
+                                    <div>
+                                        <ReactPlayer
+                                            url={URI.joinPaths(
+                                                endpoints.mediaData,
+                                                item.id.toString(),
+                                                ".upload",
+                                                item.name
+                                            )}
+                                            width="100%"
+                                            height="100%"
+                                            controls={true}
+                                            light={URI.joinPaths(
+                                                endpoints.tasks,
+                                                item.id.toString(),
+                                                "/frames/0"
+                                            ).toString()} // expects string type
+                                        />
+                                    </div>
+                                )}
                             </Card.Body>
                         </Card>
                     </Grid.Col>
@@ -164,7 +169,10 @@ class VideoPage extends React.Component {
                                                 // fieldName is the name of the input field
                                                 // file is the actual file object to send
                                                 const batchOfFiles = new FormData();
-                                                batchOfFiles.append("client_files[0]", file);
+                                                batchOfFiles.append(
+                                                    "client_files[0]",
+                                                    file
+                                                );
                                                 const request = new XMLHttpRequest();
                                                 request.open(
                                                     "POST",
@@ -177,18 +185,29 @@ class VideoPage extends React.Component {
                                                 // Should call the progress method to update the progress to 100% before calling load
                                                 // Setting computable to false switches the loading indicator to infinite mode
                                                 request.upload.onprogress = e => {
-                                                    progress(e.lengthComputable, e.loaded, e.total);
+                                                    progress(
+                                                        e.lengthComputable,
+                                                        e.loaded,
+                                                        e.total
+                                                    );
                                                 };
                                                 // Should call the load method when done and pass the returned server file id
                                                 // this server file id is then used later on when reverting or restoring a file
                                                 // so your server knows which file to return without exposing that info to the client
-                                                request.onload = function () {
-                                                    if (request.status >= 200 && request.status < 300) {
+                                                request.onload = function() {
+                                                    if (
+                                                        request.status >= 200 &&
+                                                        request.status < 300
+                                                    ) {
                                                         // the load method accepts either a string (id) or an object
-                                                        load(request.responseText);
+                                                        load(
+                                                            request.responseText
+                                                        );
                                                     } else {
                                                         // Can call the error method if something is wrong, should exit after
-                                                        error("File Upload Failed");
+                                                        error(
+                                                            "File Upload Failed"
+                                                        );
                                                         abort();
                                                     }
                                                 };
@@ -220,7 +239,9 @@ class VideoPage extends React.Component {
                                 onupdatefiles={fileItems => {
                                     // Set currently active file objects to this.state
                                     this.setState({
-                                        files: fileItems.map(fileItem => fileItem.file)
+                                        files: fileItems.map(
+                                            fileItem => fileItem.file
+                                        )
                                     });
                                 }}
                                 onprocessfiles={() => {
@@ -230,7 +251,11 @@ class VideoPage extends React.Component {
                             />
                         </section>
                     </Grid.Row>
-                    {this.state.loading ? <Dimmer active loader /> : videoInfoCards}
+                    {this.state.loading ? (
+                        <Dimmer active loader />
+                    ) : (
+                        videoInfoCards
+                    )}
                 </Page.Content>
             </SiteWrapper>
         );

@@ -5,12 +5,13 @@ const endpoints = {
     registration: "/auth/registration/",
     tasks: "/api/v1/tasks",
     detectors: "/api/opentpod/v1/detectors",
+    trainsets: "/api/opentpod/v1/trainsets",
     media: "/media/",
     mediaData: "/media/data/",
     // front end handled routes
-    video: "/video",
-    label: "/label", // TODO (junjuew): still need this?
-    annotate: "/annotate",
-    detector: "/detector"
+    uiVideo: "/video",
+    uiLabel: "/label", // TODO (junjuew): still need this?
+    uiAnnotate: "/annotate",
+    uiDetector: "/detector"
 };
 export { endpoints };

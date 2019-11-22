@@ -45,7 +45,7 @@ class LoginPage extends React.Component {
                         fetchJSON(endpoints.login, "POST", data)
                             .then(resp => {
                                 actions.setStatus("Login success: ");
-                                this.props.history.push(endpoints.video);
+                                this.props.history.push(endpoints.uiVideo);
                             })
                             .catch(e => {
                                 console.error(e);

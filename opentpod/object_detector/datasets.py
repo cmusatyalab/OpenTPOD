@@ -145,8 +145,7 @@ def dump_detector_annotations(
     db_trainset = db_detector.train_set
     labels = []
     # call cvat dump tool on each video in the trainset
-    for db_video in db_trainset.videos.all():
-        db_task = db_video.task
+    for db_task in db_trainset.tasks.all():
         task_annotations_file_path = dump_cvat_task_annotations(db_task, db_user, db_dumper, scheme, host)
         # cvat's tfrecord does not contain image data. here we add the image
         # data into the tfrecord file as a feature 'image/data'

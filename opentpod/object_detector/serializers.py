@@ -11,9 +11,7 @@ from cvat.apps.engine.serializers import WriteOnceMixin
 
 
 class TrainSetSerializer(serializers.ModelSerializer):
-    videos = serializers.PrimaryKeyRelatedField(many=True,
-                                                queryset=models.Video.objects.all())
-
+    # tasks = serializers.StringRelatedField(many=True)
     class Meta:
         model = models.TrainSet
         fields = '__all__'

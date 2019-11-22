@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
-    HashRouter as Router,
+    // HashRouter as Router,
+    BrowserRouter as Router,
     Redirect,
     Route,
     Switch
@@ -21,7 +22,7 @@ import VideoPage from "./VideoPage.react";
 import { LabelManagementPage } from "./Label.react";
 import AnnotatePage from "./AnnotatePage.react";
 import TrainPage from "./TrainPage.react";
-import DetectorPage from "./DetectorPage.react";
+import { DetectorPage, DetectorDetailPage } from "./DetectorPage.react";
 
 import "tabler-react/dist/Tabler.css";
 
@@ -38,8 +39,17 @@ function App(props) {
                     component={AnnotatePage}
                 />
                 <Route exact path="/detector" component={DetectorPage} />
+                <Route
+                    exact
+                    path="/detector/:id"
+                    component={DetectorDetailPage}
+                />
                 {/* <Route exact path="/train" component={TrainPage} /> */}
-                <Route exact path="/forgot-password" component={ForgotPasswordPage} />
+                <Route
+                    exact
+                    path="/forgot-password"
+                    component={ForgotPasswordPage}
+                />
                 <Route exact path="/login" component={LoginPage} />
                 <Route exact path="/register" component={RegisterPage} />
                 <Route exact path="/400" component={Error400} />

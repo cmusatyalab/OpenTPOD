@@ -2,7 +2,7 @@ import pathlib
 from enum import Enum
 import json
 
-from cvat.apps.engine.models import Video
+from cvat.apps.engine.models import Task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -30,7 +30,7 @@ class TrainSet(models.Model):
     name = models.CharField(max_length=256)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
-    videos = models.ManyToManyField(Video)
+    tasks = models.ManyToManyField(Task)
 
     class Meta:
         ordering = ['name']

@@ -18,9 +18,9 @@ known_first_party=opentpod
 multi_line_output=3
 default_section=THIRDPARTY
 
-[*.{html,css,scss,json,yml}]
+[*.{html,css,scss,json,yml,js}]
 indent_style = space
-indent_size = 2
+indent_size = 4
 
 [*.md]
 trim_trailing_whitespace = false
@@ -30,4 +30,4 @@ indent_style = tab
 
 [nginx.conf]
 indent_style = space
-indent_size = 2
+indent_size = 4
