@@ -5,12 +5,21 @@ import ReactPaginate from "react-paginate";
 import { Button, Card, Dimmer, Grid, Page, List, Form } from "tabler-react";
 import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
-import { fetchJSON, lineWrap } from "./util";
+import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
 import "./App.css";
 
 // detector card to display detector information
 const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
+    // null - no download
+    // false - created downloading job
+    // true - job avalable for download
+    const [downloadAvailable, setDownloadAvailable] = useState(null);
     let history = useHistory();
+    let downloadUrl = URI.joinPaths(
+        endpoints.detectors,
+        detector.id.toString(),
+        endpoints.detectorDownloadField
+    );
     return (
         <Card>
             <Card.Header>
@@ -34,6 +43,30 @@ const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
                     >
                         Details
                     </Button>
+                    {detector.status == "trained" && (
+                        <Button
+                            outline
+                            color="info"
+                            size="sm"
+                            icon="download"
+                            onClick={e => {
+                                e.preventDefault();
+                                setDownloadAvailable(false);
+                                fetchJSON(downloadUrl, "POST").then(() => {
+                                    // need to continuously fetch the server
+                                    checkDownload(
+                                        downloadUrl,
+                                        10000,
+                                        1200000,
+                                        resp => {
+                                            setDownloadAvailable(true);
+                                        },
+                                        () => {}
+                                    );
+                                });
+                            }}
+                        ></Button>
+                    )}
                     <Button
                         outline
                         RootComponent="button"
@@ -51,15 +84,27 @@ const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
                                 "DELETE"
                             ).then(onDelete());
                         }}
-                    >
-                        Delete
-                    </Button>
+                    ></Button>
                 </Card.Options>
             </Card.Header>
             <Card.Body>
-                <b>Status:</b> {detector.status} <br />
-                <b>Created Date:</b> {detector.created_date} <br />
-                <b>Updated Date:</b> {detector.updated_date} <br />
+                {downloadAvailable === null ? (
+                    <>
+                        <b>Status:</b> {detector.status} <br />
+                        <b>Created Date:</b> {detector.created_date} <br />
+                        <b>Updated Date:</b> {detector.updated_date} <br />
+                    </>
+                ) : downloadAvailable === false ? (
+                    <Dimmer active loader />
+                ) : (
+                    <Button
+                        color="primary"
+                        RootComponent="a"
+                        href={downloadUrl}
+                    >
+                        Click to Download
+                    </Button>
+                )}
             </Card.Body>
         </Card>
     );
@@ -90,8 +135,8 @@ const DetectorDetailCard = ({ detector }) => {
 const DetectorCards = ({ detectors, ...rest }) => {
     let cards = detectors.map((item, index) => {
         return (
-            <Grid.Col auto>
-                <DetectorPreviewCard detector={item} key={index} {...rest} />
+            <Grid.Col auto key={index} sm={6}>
+                <DetectorPreviewCard detector={item} {...rest} />
             </Grid.Col>
         );
     });
@@ -99,7 +144,6 @@ const DetectorCards = ({ detectors, ...rest }) => {
 };
 
 const DetectorPage = ({ ...props }) => {
-    // const [loadDetectors, reloadDetectors] = useState(true);
     const [detectors, setDetectors] = useState(null);
 
     const loadDetectors = () => {

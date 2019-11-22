@@ -98,7 +98,7 @@ class DetectorViewSet(viewsets.ModelViewSet):
         })
         return Response(data=data)
 
-    @action(detail=True, methods=['GET'])
+    @action(detail=True, methods=['GET', 'POST'])
     def model(self, request, pk):
         """Download Trained Model Data."""
         db_detector = self.get_object()
@@ -111,26 +111,26 @@ class DetectorViewSet(viewsets.ModelViewSet):
             self.request.user, pk)
         rq_job = queue.fetch_job(rq_id)
 
-        if rq_job and not rq_job.meta["downloaded"]:
-            if rq_job.is_finished:
-                rq_job.meta["downloaded"] = True
-                rq_job.save_meta()
-                return sendfile.sendfile(request, rq_job.meta["file_path"], attachment=True,
-                                         attachment_filename=str(
-                                             db_detector.get_export_file_path().name))
-            elif rq_job.is_failed:
-                exc_info = str(rq_job.exc_info)
-                rq_job.delete()
-                return Response(data=exc_info, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if request.method == 'GET':
+            if rq_job:
+                if rq_job.is_finished:
+                    return sendfile.sendfile(request, rq_job.meta["file_path"], attachment=True,
+                                            attachment_filename=str(
+                                                db_detector.get_export_file_path().name))
+                elif rq_job.is_failed:
+                    exc_info = str(rq_job.exc_info)
+                    rq_job.delete()
+                    return Response(data=exc_info, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    return Response(status=status.HTTP_202_ACCEPTED, data={json.dumps('created')})
             else:
-                return Response(status=status.HTTP_202_ACCEPTED)
-        rq_job = queue.enqueue_call(
-            func=bg_tasks.export,
-            args=(db_detector,),
-            job_id=rq_id,
-        )
-        rq_job.meta["downloaded"] = False
-        rq_job.meta["file_path"] = db_detector.get_export_file_path()
-        rq_job.save_meta()
-
-        return Response(status=status.HTTP_202_ACCEPTED)
+                raise Http404
+        if request.method == 'POST':
+            rq_job = queue.enqueue_call(
+                func=bg_tasks.export,
+                args=(db_detector,),
+                job_id=rq_id,
+            )
+            rq_job.meta["file_path"] = db_detector.get_export_file_path()
+            rq_job.save_meta()
+            return Response(status=status.HTTP_202_ACCEPTED, data={json.dumps('created')})

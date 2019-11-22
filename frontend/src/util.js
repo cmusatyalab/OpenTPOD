@@ -34,6 +34,34 @@ function fetchJSON(url, method, data = {}) {
         });
 }
 
+function checkDownload(url, interval, timeout, onSuccess, onFailure) {
+    /* download url by polling
+     * interval: the minimum interval (ms) between subsequent pollling request
+     * timeout: the total time of polling. the polling will stop after timeout
+     */
+    let startTime = new Date();
+    let curTime = null;
+    let options = {
+        method: "GET",
+        credentials: "include" // make sure cookies are sent
+    };
+    const pollUrl = () => {
+        fetch(url, options).then(response => {
+            if (response.status == 200) {
+                onSuccess(response);
+            } else {
+                curTime = new Date();
+                if (curTime - startTime < timeout) {
+                    setTimeout(pollUrl, interval);
+                } else {
+                    onFailure();
+                }
+            }
+        });
+    };
+    pollUrl();
+}
+
 function checkAuth() {
     fetchJSON(endpoints.user, "GET")
         .then(resp => true)
@@ -55,4 +83,10 @@ function lineWrap(input, breakAt = 10) {
     return input;
 }
 
-export { checkAuth, fetchJSON, withFormikStatus, lineWrap };
+export {
+    checkAuth,
+    fetchJSON,
+    checkDownload as downloadByPoll,
+    withFormikStatus,
+    lineWrap
+};

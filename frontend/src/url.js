@@ -5,6 +5,7 @@ const endpoints = {
     registration: "/auth/registration/",
     tasks: "/api/v1/tasks",
     detectors: "/api/opentpod/v1/detectors",
+    detectorDownloadField: "model",
     trainsets: "/api/opentpod/v1/trainsets",
     media: "/media/",
     mediaData: "/media/data/",
