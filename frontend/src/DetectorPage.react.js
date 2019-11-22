@@ -112,7 +112,6 @@ const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
 
 // detailed detector view with all of its field
 const DetectorDetailCard = ({ detector }) => {
-    // let trainsetJson = JSON.stringify(trainset.tasks);
     return (
         <Card>
             <Card.Header>
@@ -122,7 +121,9 @@ const DetectorDetailCard = ({ detector }) => {
                 <b>Status:</b> {detector.status} <br />
                 <b>Created Date:</b> {detector.created_date} <br />
                 <b>Updated Date:</b> {detector.updated_date} <br />
-                <b>Training Videos:</b> {detector.tasksJson} <br />
+                <b>Training Videos:</b>
+                <pre id="json"> {detector.tasksJson} </pre>
+                <br />
                 <b>Training Config:</b>
                 <pre id="json"> {detector.train_config} </pre>
                 <br />
@@ -149,7 +150,6 @@ const DetectorPage = ({ ...props }) => {
     const loadDetectors = () => {
         setDetectors(null);
         fetchJSON(endpoints.detectors, "GET").then(resp => {
-            console.log("detectors: " + resp);
             setDetectors(resp);
         });
     };
@@ -170,7 +170,7 @@ const DetectorPage = ({ ...props }) => {
                 ) : (
                     <Grid>
                         <Grid.Row>
-                            <Grid.Col offset={8}>
+                            <Grid.Col offset={10}>
                                 <ReactPaginate
                                     previousLabel={"<"}
                                     nextLabel={">"}
