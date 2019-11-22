@@ -17,8 +17,6 @@ import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
 import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
 import defaultStrings from "./DetectorPage.strings";
-import { TrainSetNewForm } from "./TrainSetPage.react";
-import "./App.css";
 
 const fetchTasks = async page => {
     let url = new URI(endpoints.tasks);
