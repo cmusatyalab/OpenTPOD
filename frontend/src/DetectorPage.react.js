@@ -1,11 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
+import { Formik } from "formik";
 import URI from "urijs";
 import ReactPaginate from "react-paginate";
-import { Button, Card, Dimmer, Grid, Page, List, Form } from "tabler-react";
+import AsyncPaginate from "react-select-async-paginate";
+import {
+    Button,
+    Card,
+    Dimmer,
+    Grid,
+    Page,
+    List,
+    Form,
+    FormTextInput,
+    FormCard
+} from "tabler-react";
 import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
 import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
+import defaultStrings from "./DetectorPage.strings";
+import { loadAndSearchTasks } from "./DetectorForm.react";
 import "./App.css";
 
 const fetchDetector = id => {
@@ -182,6 +196,7 @@ const DetectorCards = ({ detectors, ...rest }) => {
 };
 
 const DetectorPage = ({ ...props }) => {
+    let history = useHistory();
     const [detectors, setDetectors] = useState(null);
 
     const loadDetectors = () => {
@@ -206,8 +221,22 @@ const DetectorPage = ({ ...props }) => {
                     <Dimmer active loader />
                 ) : (
                     <Grid>
-                        <Grid.Row>
-                            <Grid.Col offset={10}>
+                        <Grid.Row alignItems="top">
+                            <Grid.Col>
+                                <Button
+                                    RootComponent="button"
+                                    color="primary"
+                                    size="lg"
+                                    icon="plus"
+                                    onClick={e => {
+                                        e.preventDefault();
+                                        history.push(endpoints.uiDetectorNew);
+                                    }}
+                                >
+                                    Create
+                                </Button>
+                            </Grid.Col>
+                            <Grid.Col offset={8}>
                                 <ReactPaginate
                                     previousLabel={"<"}
                                     nextLabel={">"}
@@ -308,4 +337,144 @@ const DetectorDetailPage = ({ props }) => {
     );
 };
 
-export { DetectorPage, DetectorDetailPage };
+const DetectorNewForm = props => {
+    const [selectValue, onSelectValueChange] = useState(null);
+    const [numberOfRequests, setNumberOfRequests] = useState(0);
+
+    const {
+        action,
+        method,
+        onSubmit,
+        onChange,
+        onBlur,
+        values,
+        strings = {},
+        errors
+    } = props;
+
+    return (
+        <FormCard
+            buttonText={strings.buttonText || defaultStrings.buttonText}
+            title={strings.title || defaultStrings.title}
+            onSubmit={onSubmit}
+            action={action}
+            method={method}
+        >
+            <FormTextInput
+                name="name"
+                label={strings.nameLabel || defaultStrings.nameLabel}
+                placeholder={
+                    strings.namePlaceholder || defaultStrings.namePlaceholder
+                }
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values && values.name}
+                error={errors && errors.name}
+            />
+            <FormTextInput
+                name="Training Configurations"
+                label={strings.emailLabel || defaultStrings.emailLabel}
+                placeholder={
+                    strings.emailPlaceholder || defaultStrings.emailPlaceholder
+                }
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values && values.email}
+                error={errors && errors.email}
+            />
+            <AsyncPaginate
+                debounceTimeout={300}
+                value={selectValue}
+                initialOptions={[]}
+                loadOptions={loadAndSearchTasks}
+                onChange={onSelectValueChange}
+                isMulti
+                closeMenuOnSelect={false}
+                additional={{
+                    page: 1
+                }}
+            />
+            <FormTextInput
+                name="password"
+                type="password"
+                label={strings.passwordLabel || defaultStrings.passwordLabel}
+                placeholder={
+                    strings.passwordPlaceholder ||
+                    defaultStrings.passwordPlaceholder
+                }
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values && values.password}
+                error={errors && errors.password}
+            />
+            {/* <FormCheckboxInput
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values && values.terms}
+                name="terms"
+                label={strings.termsLabel || defaultStrings.termsLabel}
+            /> */}
+        </FormCard>
+    );
+};
+
+const DetectorNewPage = ({ ...props }) => {
+    return (
+        <SiteWrapper>
+            <Page.Content>
+                <Page.Header title="New Detector"></Page.Header>
+                <Grid>
+                    <Formik
+                        initialValues={{
+                            email: "",
+                            password: ""
+                        }}
+                        validate={values => {
+                            // same as above, but feel free to move this into a class method now.
+                            let errors = {};
+                            if (!values.email) {
+                                errors.email = "Required";
+                            } else if (
+                                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(
+                                    values.email
+                                )
+                            ) {
+                                errors.email = "Invalid email address";
+                            }
+                            return errors;
+                        }}
+                        onSubmit={(
+                            values,
+                            {
+                                setSubmitting,
+                                setErrors /* setValues and other goodies */
+                            }
+                        ) => {
+                            alert("Done!");
+                        }}
+                        render={({
+                            values,
+                            errors,
+                            touched,
+                            handleChange,
+                            handleBlur,
+                            handleSubmit,
+                            isSubmitting
+                        }) => (
+                            <DetectorNewForm
+                                onSubmit={handleSubmit}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                values={values}
+                                errors={errors}
+                                touched={touched}
+                            />
+                        )}
+                    />
+                </Grid>
+            </Page.Content>
+        </SiteWrapper>
+    );
+};
+
+export { DetectorPage, DetectorDetailPage, DetectorNewPage };

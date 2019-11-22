@@ -15,6 +15,7 @@ const endpoints = {
     uiVideo: "/video",
     uiLabel: "/label", // TODO (junjuew): still need this?
     uiAnnotate: "/annotate",
-    uiDetector: "/detector"
+    uiDetector: "/detector",
+    uiDetectorNew: "/detector-new"
 };
 export { endpoints };
