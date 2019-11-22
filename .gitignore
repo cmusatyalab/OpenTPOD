@@ -276,6 +276,7 @@ opentpod/media/
 .ipython/
 .env
 .envs/*
+.envrc
 
 keys/secret_keys.py
 unused
