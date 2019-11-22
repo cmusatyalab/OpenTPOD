@@ -1,10 +1,13 @@
 """Background tasks for object_detector
 """
+import json
 import os
-import re
 import pathlib
+import re
 import shutil
+import signal
 import sys
+import time
 from ast import literal_eval
 from datetime import datetime
 from distutils.dir_util import copy_tree
@@ -15,11 +18,13 @@ from urllib import request as urlrequest
 
 import django_rq
 import rq
+from celery.decorators import task
+from celery.task import control
 from django.conf import settings
 from django.db import transaction
 from PIL import Image
 
-from . import models, datasets, provider
+from . import datasets, models, provider
 
 
 def _train(db_detector,
@@ -59,5 +64,37 @@ def train(db_detector,
             scheme,
             host),
     )
-    # rq_job.meta['file_path'] = output_file_path
-    # rq_job.save_meta()
+
+@task
+def visualize_tensorboard(model_dir):
+    from tensorboard import program
+    with open(settings.CACHE_DIR / 'tensorboard.pid', 'w') as f:
+        f.write(json.dumps(os.getpid()))
+    tb = program.TensorBoard()
+    tb.configure(argv=[
+        None, '--logdir', model_dir,
+        '--host', settings.TENSORBOARD_HOST, '--port', settings.TENSORBOARD_PORT])
+    url = tb.launch()
+    while True:
+        time.sleep(1000)
+
+def visualize(db_detector):
+    # TODO(junjuew): check celery to see if there are more elegant methods
+    # this method only allows 1 tensorboard session to be open
+    # among all users ...
+    with open(settings.CACHE_DIR / 'tensorboard.pid', 'r') as f:
+        pid = json.loads(f.read())
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError as e:
+            pass
+    visualize_tensorboard.apply_async(
+        args = (str(db_detector.get_model_dir()),),
+        task_id='tb')
+    # queue = django_rq.get_queue('tensorboard')
+    # rq_job = queue.enqueue_call(
+    #     func=_visualize_tensorboard,
+    #     args=(
+    #         str(db_detector.get_model_dir()),
+    #         )
+    # )

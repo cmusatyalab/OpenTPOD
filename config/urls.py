@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.views.generic import TemplateView
@@ -14,8 +14,8 @@ urlpatterns = [
     # use rest_auth for authentication and registration
     path("auth/", include("rest_auth.urls")),
     path("auth/registration/", include('rest_auth.registration.urls')),
-    path('django-rq/', include('django_rq.urls')),
-    path("", include("opentpod.object_detector.urls"))
+    path("django-rq/", include('django_rq.urls')),
+    path("", include("opentpod.object_detector.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

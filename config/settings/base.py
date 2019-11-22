@@ -356,7 +356,7 @@ RQ_QUEUES = {
         'PORT': RQ_REDIS_PORT,
         'DB': 0,
         'DEFAULT_TIMEOUT': '24h'
-    }
+    },
 }
 RQ_SHOW_ADMIN_LINK = True
 RQ_EXCEPTION_HANDLERS = ['cvat.apps.engine.views.rq_handler']
@@ -395,3 +395,8 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None   # this django check disabled
 LOCAL_LOAD_MAX_FILES_COUNT = 500
 LOCAL_LOAD_MAX_FILES_SIZE = 512 * 1024 * 1024  # 512 MB
+
+# Tensorboard
+# ------------------------------------------------------------------------------
+TENSORBOARD_HOST = 'localhost'
+TENSORBOARD_PORT = '11000'

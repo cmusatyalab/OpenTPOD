@@ -38,7 +38,7 @@ const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
                                     endpoints.uiDetector,
                                     detector.id.toString()
                                 ).toString()
-                            ); // only consider 1st job
+                            );
                         }}
                     >
                         Details
@@ -112,10 +112,37 @@ const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
 
 // detailed detector view with all of its field
 const DetectorDetailCard = ({ detector }) => {
+    let visualizationUrl = URI.joinPaths(
+        endpoints.detectors,
+        detector.id.toString(),
+        endpoints.detectorVisualizationField
+    );
     return (
         <Card>
             <Card.Header>
                 <Card.Title>{lineWrap(detector.name)}</Card.Title>
+                <Card.Options>
+                    <Button
+                        outline
+                        RootComponent="button"
+                        color="success"
+                        size="sm"
+                        icon="tag"
+                        onClick={e => {
+                            e.preventDefault();
+                            fetchJSON(visualizationUrl, "GET").then(resp => {
+                                setTimeout(() => {
+                                    window.open(
+                                        endpoints.tensorboard,
+                                        "_blank"
+                                    );
+                                }, 5000);
+                            });
+                        }}
+                    >
+                        Visualize
+                    </Button>
+                </Card.Options>
             </Card.Header>
             <Card.Body>
                 <b>Status:</b> {detector.status} <br />
