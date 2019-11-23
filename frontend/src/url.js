@@ -5,6 +5,8 @@ const endpoints = {
     registration: "/auth/registration/",
     tasks: "/api/v1/tasks",
     detectors: "/api/opentpod/v1/detectors",
+    detectorDnnTypes: "/api/opentpod/v1/detectors/types",
+    dnnTrainingConfigs: "/api/opentpod/v1/detectors/training_configs",
     tensorboard: "/api/opentpod/tensorboard/index.html",
     detectorDownloadField: "model",
     detectorVisualizationField: "visualization",

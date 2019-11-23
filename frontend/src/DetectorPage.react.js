@@ -19,7 +19,7 @@ import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
 import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
 import defaultStrings from "./DetectorPage.strings";
-import { loadAndSearchTasks } from "./DetectorForm.react";
+import { DetectorNewForm } from "./DetectorForm.react";
 import "./App.css";
 
 const fetchDetector = id => {
@@ -334,87 +334,6 @@ const DetectorDetailPage = ({ props }) => {
                 )}
             </Page.Content>
         </SiteWrapper>
-    );
-};
-
-const DetectorNewForm = props => {
-    const [selectValue, onSelectValueChange] = useState(null);
-    const [numberOfRequests, setNumberOfRequests] = useState(0);
-
-    const {
-        action,
-        method,
-        onSubmit,
-        onChange,
-        onBlur,
-        values,
-        strings = {},
-        errors
-    } = props;
-
-    return (
-        <FormCard
-            buttonText={strings.buttonText || defaultStrings.buttonText}
-            title={strings.title || defaultStrings.title}
-            onSubmit={onSubmit}
-            action={action}
-            method={method}
-        >
-            <FormTextInput
-                name="name"
-                label={strings.nameLabel || defaultStrings.nameLabel}
-                placeholder={
-                    strings.namePlaceholder || defaultStrings.namePlaceholder
-                }
-                onChange={onChange}
-                onBlur={onBlur}
-                value={values && values.name}
-                error={errors && errors.name}
-            />
-            <FormTextInput
-                name="Training Configurations"
-                label={strings.emailLabel || defaultStrings.emailLabel}
-                placeholder={
-                    strings.emailPlaceholder || defaultStrings.emailPlaceholder
-                }
-                onChange={onChange}
-                onBlur={onBlur}
-                value={values && values.email}
-                error={errors && errors.email}
-            />
-            <AsyncPaginate
-                debounceTimeout={300}
-                value={selectValue}
-                initialOptions={[]}
-                loadOptions={loadAndSearchTasks}
-                onChange={onSelectValueChange}
-                isMulti
-                closeMenuOnSelect={false}
-                additional={{
-                    page: 1
-                }}
-            />
-            <FormTextInput
-                name="password"
-                type="password"
-                label={strings.passwordLabel || defaultStrings.passwordLabel}
-                placeholder={
-                    strings.passwordPlaceholder ||
-                    defaultStrings.passwordPlaceholder
-                }
-                onChange={onChange}
-                onBlur={onBlur}
-                value={values && values.password}
-                error={errors && errors.password}
-            />
-            {/* <FormCheckboxInput
-                onChange={onChange}
-                onBlur={onBlur}
-                value={values && values.terms}
-                name="terms"
-                label={strings.termsLabel || defaultStrings.termsLabel}
-            /> */}
-        </FormCard>
     );
 };
 

@@ -38,8 +38,8 @@ class TFODDetector():
         """
         super().__init__()
         self._config = config
-        self._input_dir = self._config['input_dir']
-        self._output_dir = self._config['output_dir']
+        self._input_dir = pathlib.Path(self._config['input_dir'])
+        self._output_dir = pathlib.Path(self._config['output_dir'])
 
         # find appropriate model to finetune from
         self.cache_pretrained_model()
