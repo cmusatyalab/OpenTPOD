@@ -1,3 +1,10 @@
+"""Wrapper Script to call tf object detection API's continuous train and eval.
+
+Eval is run after every checkpoint. The frequency of checkpoint is determined by
+RunConfig arguments save_checkpoints_steps or save_checkpoints_secs (default:
+600s). However, current tf object detection API doens't provide an easy method
+to override RunConfig. See: https://github.com/tensorflow/models/issues/5246
+"""
 import os
 import sys
 import pathlib
@@ -35,21 +42,19 @@ def main(unused):
     _check_training_data_dir()
     with open(status_file_path, "w") as f:
         f.write(provider.Status.TRAINING.value)
-    # try:
-    model_main.main(unused)
-    with open(status_file_path, "w") as f:
-        f.write(provider.Status.TRAINED.value)
-    # except:
-    #     import pdb
-    #     pdb.set_trace()
-    #     with open(status_file_path, "w") as f:
-    #         f.write(provider.Status.ERROR.value)
-    # finally:
-    #     sys.stderr.flush()
-    #     sys.stderr.close()
+    try:
+        model_main.main(unused)
+        with open(status_file_path, "w") as f:
+            f.write(provider.Status.TRAINED.value)
+    except:
+        import pdb
+        pdb.set_trace()
+        with open(status_file_path, "w") as f:
+            f.write(provider.Status.ERROR.value)
+    finally:
+        sys.stderr.flush()
+        sys.stderr.close()
 
 
 if __name__ == '__main__':
     tf.app.run()
-
-    # python -m opentpod.object_detector.provider.tfod.wrappers.train --pipeline_config_path=/home/junjuew/work/opentpod/opentpod/media/data/detector/66/train-data/pipeline.config --model_dir=/home/junjuew/work/opentpod/opentpod/media/data/detector/66/models --alsologtostderr
