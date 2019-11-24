@@ -26,12 +26,16 @@ from . import datasets, models, provider
 
 
 def _train(db_detector,
+           db_tasks,
            db_user,
            scheme,
            host):
-
     # dump annotations
-    datasets.dump_detector_annotations(db_detector, db_user, scheme, host)
+    datasets.dump_detector_annotations(db_detector,
+                                       db_tasks,
+                                       db_user,
+                                       scheme,
+                                       host)
     detector = db_detector.get_detector_object()
     detector.prepare()
     detector.train()
@@ -48,11 +52,12 @@ def train(db_detector,
           host):
     """Dump data from CVAT DB to on-disk format
     """
-    queue = django_rq.get_queue('low')
+    queue = django_rq.get_queue('default')
     rq_job = queue.enqueue_call(
         func=_train,
         args=(
             db_detector,
+            db_detector.train_set.tasks.all(),
             db_user,
             scheme,
             host),

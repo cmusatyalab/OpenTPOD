@@ -1,5 +1,22 @@
 from .tfod import TFODFasterRCNNResNet101, TFODFasterRCNNResNet50, TFODSSDMobileNetV2
 
+from enum import Enum
+
+
+class Status(Enum):
+    CREATED = 'created'
+    TRAINING = 'training'
+    TRAINED = 'trained'
+    ERROR = 'error'
+
+    @classmethod
+    def choices(self):
+        return tuple((x.value, x.name) for x in self)
+
+    def __str__(self):
+        return self.value
+
+
 _SUPPORTED_DNN_TYPE = [
     # class name, db type name, human readable name
     (TFODFasterRCNNResNet101, 'tensorflow_faster_rcnn_resnet101', 'Tensorflow Faster-RCNN ResNet 101'),

@@ -1,5 +1,4 @@
 import pathlib
-from enum import Enum
 import json
 
 from cvat.apps.engine.models import Task
@@ -8,20 +7,21 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from opentpod.object_detector import provider
+Status = provider.Status
 
 
-class Status(Enum):
-    CREATED = 'created'
-    TRAINING = 'training'
-    TRAINED = 'trained'
-    ERROR = 'error'
+# class Status(Enum):
+#     CREATED = 'created'
+#     TRAINING = 'training'
+#     TRAINED = 'trained'
+#     ERROR = 'error'
 
-    @classmethod
-    def choices(self):
-        return tuple((x.value, x.name) for x in self)
+#     @classmethod
+#     def choices(self):
+#         return tuple((x.value, x.name) for x in self)
 
-    def __str__(self):
-        return self.value
+#     def __str__(self):
+#         return self.value
 
 
 class TrainSet(models.Model):

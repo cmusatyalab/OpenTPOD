@@ -57,17 +57,21 @@ class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
     # TODO(junjuew): add validator for required fields in train_config
     # now, if the required fields are not given, the bg_task will fail
     train_set = TrainSetSerializer()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Detector
-        read_only_fields = ('created_date', 'updated_date')
+        fields = '__all__'
+        read_only_fields = ('created_date', 'updated_date', 'status')
         write_once_fields = ('dnn_type', 'parent', 'train_set', 'train_config')
-        exclude = ['status']
 
     def _fix_owner(self, data):
         owner = self.context['request'].user
         if data.get('owner', None) is None:
             data['owner'] = owner
+
+    def get_status(self, obj):
+        return obj.get_status()
 
     def create(self, validated_data):
         # ignore the owner fields, as we'll only create it for the user
@@ -80,6 +84,7 @@ class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
         db_train_set = models.TrainSet.objects.create(
             **train_set_data)
         db_train_set.tasks.set(tasks)
+        db_train_set.save()
 
         # status can only be created
         validated_data['status'] = models.Status.CREATED

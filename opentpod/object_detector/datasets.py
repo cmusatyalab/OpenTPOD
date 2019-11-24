@@ -126,6 +126,7 @@ def _dump_labelmap_file(labels, output_file_path):
 
 def dump_detector_annotations(
         db_detector,
+        db_tasks,
         db_user,
         scheme,
         host):
@@ -142,11 +143,14 @@ def dump_detector_annotations(
     db_dumper = cvat_models.AnnotationDumper.objects.get(
         display_name=dump_format)
 
-    db_trainset = db_detector.train_set
     labels = []
     # call cvat dump tool on each video in the trainset
-    for db_task in db_trainset.tasks.all():
-        task_annotations_file_path = dump_cvat_task_annotations(db_task, db_user, db_dumper, scheme, host)
+    for db_task in db_tasks:
+        task_annotations_file_path = dump_cvat_task_annotations(db_task,
+                                                                db_user,
+                                                                db_dumper,
+                                                                scheme,
+                                                                host)
         # cvat's tfrecord does not contain image data. here we add the image
         # data into the tfrecord file as a feature 'image/data'
         fix_cvat_tfrecord(db_task.get_data_dirname(),
