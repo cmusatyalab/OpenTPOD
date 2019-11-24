@@ -32,10 +32,15 @@ class SimpleTaskSerializer(serializers.ModelSerializer):
 
 
 class TrainSetSerializer(serializers.ModelSerializer):
-    # same as DetectorSerializer trick
+    # a workaround to return full object when read
+    # but only needs object id for write.
+    # Otherwise, such behavior needs to be manually implemented in create()
+    # By default, drf doens't automatically implement nested writable fields.
+    # see: https://github.com/encode/django-rest-framework/issues/5206
     # here a trainset object can be created with a list of task ids via POST
     # while GET returns the whole Task object
     tasks = SimpleTaskSerializer(many=True, read_only=True)
+    # the 'id' field of 'tasks'
     tasks_id = serializers.PrimaryKeyRelatedField(
         source='tasks',
         many=True,
@@ -49,21 +54,36 @@ class TrainSetSerializer(serializers.ModelSerializer):
 
 
 class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
-    # a workaround to return full object when read
-    # but only needs object id for write.
-    # Otherwise, such behavior needs to be manually implemented in create()
-    # By default, drf doens't automatically implement nested writable fields.
-    # see: https://github.com/encode/django-rest-framework/issues/5206
-    train_set = TrainSetSerializer(read_only=True)
-    # the 'id' field of 'train_set'
-    train_set_id = serializers.PrimaryKeyRelatedField(
-        source='train_set',
-        queryset=models.TrainSet.objects.all(),
-        write_only=True
-    )
+    # TODO(junjuew): add validator for required fields in train_config
+    # now, if the required fields are not given, the bg_task will fail
+    # and the detector db object not created.
+    train_set = TrainSetSerializer()
 
     class Meta:
         model = models.Detector
-        fields = '__all__'
         read_only_fields = ('created_date', 'updated_date')
         write_once_fields = ('dnn_type', 'parent', 'train_set', 'train_config')
+        exclude = ['status']
+
+    def _fix_owner(self, data):
+        owner = self.context['request'].user
+        if data.get('owner', None):
+            data['owner'] = owner
+
+    def create(self, validated_data):
+        # ignore the owner fields, as we'll only create it for the user
+        self._fix_owner(validated_data)
+
+        # create train_set db object
+        train_set_data = validated_data.pop('train_set')
+        self._fix_owner(train_set_data)
+        tasks = train_set_data.pop('tasks')
+        db_train_set = models.TrainSet.objects.create(
+            **train_set_data)
+        db_train_set.tasks.set(tasks)
+
+        # status can only be created
+        validated_data['status'] = models.Status.CREATED
+        db_detector = models.Detector.objects.create(**validated_data,
+                                                     train_set=db_train_set)
+        return db_detector

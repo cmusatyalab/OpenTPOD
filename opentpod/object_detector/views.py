@@ -38,12 +38,7 @@ class DetectorViewSet(viewsets.ModelViewSet):
             return queryset.filter(Q(owner=user)).distinct()
 
     def perform_create(self, serializer):
-        if self.request.data.get('owner', None):
-            db_detector = serializer.save(status=models.Status.CREATED)
-        else:
-            db_detector = serializer.save(owner=self.request.user,
-                                          status=models.Status.Created)
-
+        db_detector = serializer.save()
         db_detector.get_training_data_dir().mkdir(parents=True)
         db_detector.get_model_dir().mkdir(parents=True)
         bg_tasks.train(

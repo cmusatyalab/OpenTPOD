@@ -28,7 +28,7 @@ class TrainSet(models.Model):
     """A set of training videos.
     """
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     tasks = models.ManyToManyField(Task)
 
