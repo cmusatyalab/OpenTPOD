@@ -225,9 +225,24 @@ const NewDetectorForm = props => {
                 values,
                 { setSubmitting, setErrors /* setValues and other goodies */ }
             ) => {
-                console.log(values);
-                console.log(activeDnnType);
-                console.log(tasks);
+                setSubmitting(true);
+                let train_config_values = {
+                    ...values.trainingConfig.required,
+                    ...values.trainingConfig.optional
+                };
+                let tasks_id = tasks.map(item => item.value);
+                let data = {
+                    name: values.name,
+                    dnn_type: activeDnnType.value,
+                    train_config: JSON.stringify(train_config_values),
+                    train_set: {
+                        name: values.name + "-trainset",
+                        tasks_id: tasks_id
+                    }
+                };
+                fetchJSON(endpoints.detectors, "POST", data).then(resp => {
+                    history.push(endpoints.uiDetector);
+                });
             }}
             render={({
                 values,
@@ -236,109 +251,91 @@ const NewDetectorForm = props => {
                 handleSubmit,
                 validateForm,
                 isSubmitting
-            }) => (
-                <FormCard
-                    buttonText={strings.buttonText || defaultStrings.buttonText}
-                    title={strings.title || defaultStrings.title}
-                    onSubmit={handleSubmit}
-                >
-                    <FormTextInput
-                        name="name"
-                        label={strings.nameLabel || defaultStrings.nameLabel}
-                        placeholder={
-                            strings.namePlaceholder ||
-                            defaultStrings.namePlaceholder
+            }) =>
+                isSubmitting ? (
+                    <Dimmer active loader />
+                ) : (
+                    <FormCard
+                        buttonText={
+                            strings.buttonText || defaultStrings.buttonText
                         }
-                        value={values && values.name}
-                        error={errors && errors.name}
+                        title={strings.title || defaultStrings.title}
                         onSubmit={handleSubmit}
-                        onChange={handleChange}
-                    />
-                    <Form.Group label={"Training Videos"}>
-                        <AsyncPaginate
-                            styles={reactSelectTablerStyles}
-                            debounceTimeout={300}
-                            value={tasks}
-                            initialOptions={[]}
-                            loadOptions={loadAndSearchTasks}
-                            isMulti
-                            closeMenuOnSelect={false}
-                            additional={{
-                                page: 1
-                            }}
-                            onChange={(...all) => {
-                                onTaskSelectOptionsChange(...all);
-                                validateForm();
-                            }}
+                    >
+                        <FormTextInput
+                            name="name"
+                            label={
+                                strings.nameLabel || defaultStrings.nameLabel
+                            }
+                            placeholder={
+                                strings.namePlaceholder ||
+                                defaultStrings.namePlaceholder
+                            }
+                            value={values && values.name}
+                            error={errors && errors.name}
                             onSubmit={handleSubmit}
+                            onChange={handleChange}
                         />
-                        {errors && errors.tasks && (
-                            <span className="tabler-invalid-feedback">
-                                {errors.tasks}
-                            </span>
-                        )}
-                    </Form.Group>
-                    <Form.Group label={"Detector Types"}>
-                        <Select
-                            name="Dnn Types"
-                            styles={reactSelectTablerStyles}
-                            options={dnnTypes}
-                            value={activeDnnType}
-                            isLoading={trainingConfigLoading}
-                            isClearable={true}
-                            isSearchable={true}
-                            onChange={selectedOption => {
-                                setActiveDnnType(selectedOption);
-                                setTrainingConfig(null);
-                                fetchTrainingConfig(selectedOption);
-                                validateForm();
-                            }}
-                            onSubmit={handleSubmit}
-                        />
-                        {errors && errors.activeDnnType && (
-                            <span className="tabler-invalid-feedback">
-                                {errors.activeDnnType}
-                            </span>
-                        )}
-                    </Form.Group>
-                    {trainingConfig && (
-                        <Form.FieldSet>
-                            {// required items
-                            trainingConfig.required.map((item, index) => (
-                                <Form.Group label={item} key={index}>
-                                    <Form.Input
-                                        isRequired
-                                        name={`trainingConfig.required.${item}`}
-                                        type="text"
-                                        value={
-                                            values &&
-                                            values.trainingConfig &&
-                                            (values.trainingConfig.required[
-                                                item
-                                            ] ||
-                                                "")
-                                        }
-                                        error={
-                                            errors &&
-                                            errors.trainingConfig &&
-                                            errors.trainingConfig.required[item]
-                                        }
-                                        onChange={handleChange}
-                                        onSubmit={handleSubmit}
-                                    />
-                                </Form.Group>
-                            ))}
-                            {Object.entries(trainingConfig.optional).map(
-                                (item, index) => (
-                                    <Form.Group label={item[0]} key={index}>
+                        <Form.Group label={"Training Videos"}>
+                            <AsyncPaginate
+                                styles={reactSelectTablerStyles}
+                                debounceTimeout={300}
+                                value={tasks}
+                                initialOptions={[]}
+                                loadOptions={loadAndSearchTasks}
+                                isMulti
+                                closeMenuOnSelect={false}
+                                additional={{
+                                    page: 1
+                                }}
+                                onChange={(...all) => {
+                                    onTaskSelectOptionsChange(...all);
+                                    validateForm();
+                                }}
+                                onSubmit={handleSubmit}
+                            />
+                            {errors && errors.tasks && (
+                                <span className="tabler-invalid-feedback">
+                                    {errors.tasks}
+                                </span>
+                            )}
+                        </Form.Group>
+                        <Form.Group label={"Detector Types"}>
+                            <Select
+                                name="Dnn Types"
+                                styles={reactSelectTablerStyles}
+                                options={dnnTypes}
+                                value={activeDnnType}
+                                isLoading={trainingConfigLoading}
+                                isClearable={true}
+                                isSearchable={true}
+                                onChange={selectedOption => {
+                                    setActiveDnnType(selectedOption);
+                                    setTrainingConfig(null);
+                                    fetchTrainingConfig(selectedOption);
+                                    validateForm();
+                                }}
+                                onSubmit={handleSubmit}
+                            />
+                            {errors && errors.activeDnnType && (
+                                <span className="tabler-invalid-feedback">
+                                    {errors.activeDnnType}
+                                </span>
+                            )}
+                        </Form.Group>
+                        {trainingConfig && (
+                            <Form.FieldSet>
+                                {// required items
+                                trainingConfig.required.map((item, index) => (
+                                    <Form.Group label={item} key={index}>
                                         <Form.Input
-                                            name={`trainingConfig.optional.${item}`}
+                                            isRequired
+                                            name={`trainingConfig.required.${item}`}
                                             type="text"
-                                            placeholder={item[1]}
                                             value={
                                                 values &&
                                                 values.trainingConfig &&
-                                                (values.trainingConfig.optional[
+                                                (values.trainingConfig.required[
                                                     item
                                                 ] ||
                                                     "")
@@ -346,7 +343,7 @@ const NewDetectorForm = props => {
                                             error={
                                                 errors &&
                                                 errors.trainingConfig &&
-                                                errors.trainingConfig.optional[
+                                                errors.trainingConfig.required[
                                                     item
                                                 ]
                                             }
@@ -354,19 +351,38 @@ const NewDetectorForm = props => {
                                             onSubmit={handleSubmit}
                                         />
                                     </Form.Group>
-                                )
-                            )}
-                        </Form.FieldSet>
-                    )}
-                </FormCard>
-                // <TrainingConfig
-                //     trainingConfig={trainingConfig}
-                //     values={values && values.trainingConfigs}
-                //     errors={errors && errors.trainingConfigs}
-                //     onChange={handleChange}
-                //     onSubmit={handleSubmit}
-                // />
-            )}
+                                ))}
+                                {Object.entries(trainingConfig.optional).map(
+                                    (item, index) => (
+                                        <Form.Group label={item[0]} key={index}>
+                                            <Form.Input
+                                                name={`trainingConfig.optional.${item}`}
+                                                type="text"
+                                                placeholder={item[1]}
+                                                value={
+                                                    values &&
+                                                    values.trainingConfig &&
+                                                    (values.trainingConfig
+                                                        .optional[item] ||
+                                                        "")
+                                                }
+                                                error={
+                                                    errors &&
+                                                    errors.trainingConfig &&
+                                                    errors.trainingConfig
+                                                        .optional[item]
+                                                }
+                                                onChange={handleChange}
+                                                onSubmit={handleSubmit}
+                                            />
+                                        </Form.Group>
+                                    )
+                                )}
+                            </Form.FieldSet>
+                        )}
+                    </FormCard>
+                )
+            }
         />
     );
 };

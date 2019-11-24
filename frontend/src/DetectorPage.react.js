@@ -28,6 +28,8 @@ const fetchDetector = id => {
 };
 
 // detector card to display detector information
+// TODO(junjuew): a deleted item sometimes still show up in the detector panel
+// after being redirected to the detector preview
 const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
     // null - no download
     // false - created downloading job
@@ -175,7 +177,14 @@ const DetectorDetailCard = ({ detector }) => {
                 </pre>
                 <br />
                 <b>Training Config:</b>
-                <pre id="json"> {detector.train_config} </pre>
+                <pre id="json">
+                    {" "}
+                    {JSON.stringify(
+                        JSON.parse(detector.train_config),
+                        undefined,
+                        2
+                    )}{" "}
+                </pre>
                 <br />
             </Card.Body>
         </Card>

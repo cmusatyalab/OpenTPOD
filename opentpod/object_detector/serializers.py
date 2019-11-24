@@ -56,7 +56,6 @@ class TrainSetSerializer(serializers.ModelSerializer):
 class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
     # TODO(junjuew): add validator for required fields in train_config
     # now, if the required fields are not given, the bg_task will fail
-    # and the detector db object not created.
     train_set = TrainSetSerializer()
 
     class Meta:
@@ -67,7 +66,7 @@ class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
 
     def _fix_owner(self, data):
         owner = self.context['request'].user
-        if data.get('owner', None):
+        if data.get('owner', None) is None:
             data['owner'] = owner
 
     def create(self, validated_data):
