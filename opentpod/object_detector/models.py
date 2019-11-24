@@ -47,7 +47,7 @@ class Detector(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=32, choices=Status.choices(),
-                              default=Status.CREATED)
+                              default=Status.CREATED, null=True, blank=True)
     dnn_type = models.CharField(max_length=32,
                                 choices=provider.DNN_TYPE_DB_CHOICES)
     # where this model is finetuned from

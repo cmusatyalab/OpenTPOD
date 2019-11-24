@@ -39,9 +39,10 @@ class DetectorViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.data.get('owner', None):
-            db_detector = serializer.save()
+            db_detector = serializer.save(status=models.Status.CREATED)
         else:
-            db_detector = serializer.save(owner=self.request.user)
+            db_detector = serializer.save(owner=self.request.user,
+                                          status=models.Status.Created)
 
         db_detector.get_training_data_dir().mkdir(parents=True)
         db_detector.get_model_dir().mkdir(parents=True)

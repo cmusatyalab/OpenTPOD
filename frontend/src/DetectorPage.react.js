@@ -3,7 +3,6 @@ import { useHistory, useParams } from "react-router-dom";
 import { Formik } from "formik";
 import URI from "urijs";
 import ReactPaginate from "react-paginate";
-import AsyncPaginate from "react-select-async-paginate";
 import {
     Button,
     Card,
@@ -19,7 +18,7 @@ import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
 import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
 import defaultStrings from "./DetectorPage.strings";
-import { DetectorNewForm } from "./DetectorForm.react";
+import { NewDetectorForm } from "./DetectorForm.react";
 import "./App.css";
 
 const fetchDetector = id => {
@@ -343,53 +342,7 @@ const DetectorNewPage = ({ ...props }) => {
             <Page.Content>
                 <Page.Header title="New Detector"></Page.Header>
                 <Grid>
-                    <Formik
-                        initialValues={{
-                            email: "",
-                            password: ""
-                        }}
-                        validate={values => {
-                            // same as above, but feel free to move this into a class method now.
-                            let errors = {};
-                            if (!values.email) {
-                                errors.email = "Required";
-                            } else if (
-                                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(
-                                    values.email
-                                )
-                            ) {
-                                errors.email = "Invalid email address";
-                            }
-                            return errors;
-                        }}
-                        onSubmit={(
-                            values,
-                            {
-                                setSubmitting,
-                                setErrors /* setValues and other goodies */
-                            }
-                        ) => {
-                            alert("Done!");
-                        }}
-                        render={({
-                            values,
-                            errors,
-                            touched,
-                            handleChange,
-                            handleBlur,
-                            handleSubmit,
-                            isSubmitting
-                        }) => (
-                            <DetectorNewForm
-                                onSubmit={handleSubmit}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                values={values}
-                                errors={errors}
-                                touched={touched}
-                            />
-                        )}
-                    />
+                    <NewDetectorForm></NewDetectorForm>
                 </Grid>
             </Page.Content>
         </SiteWrapper>
