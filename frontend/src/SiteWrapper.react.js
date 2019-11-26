@@ -19,12 +19,12 @@ const navBarItems = [
         LinkComponent: withRouter(NavLink),
         useExact: true
     },
-    {
-        value: "Label",
-        to: endpoints.uiLabel,
-        icon: "edit",
-        LinkComponent: withRouter(NavLink)
-    },
+    // {
+    //     value: "Label",
+    //     to: endpoints.uiLabel,
+    //     icon: "edit",
+    //     LinkComponent: withRouter(NavLink)
+    // },
     {
         value: "Detector",
         to: endpoints.uiDetector,
