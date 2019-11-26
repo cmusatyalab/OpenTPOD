@@ -19,6 +19,8 @@ import "./VideoPage.css";
 registerPlugin(FilePondPluginFileValidateType);
 
 class VideoPage extends React.Component {
+    // in this class, a video is used as the equivalent of a CVAT tasks
+    // as CVAT only allows a single video in a task
     constructor(props) {
         super(props);
 
@@ -27,19 +29,89 @@ class VideoPage extends React.Component {
             videoInfos: [],
             loading: true
         };
-
-        this.fetchVideoInfo = this.fetchVideoInfo.bind(this);
     }
 
-    fetchVideoInfo() {
+    // fetch task/video information
+    fetchVideoInfo = () => {
+        this.setState({ loading: true });
         fetchJSON(endpoints.tasks, "GET").then(resp => {
-            console.debug("video info: " + resp);
             this.setState({
                 videoInfos: resp.results,
                 loading: false
             });
         });
-    }
+    };
+
+    // called when a new task/video has finished creation
+    onTaskCreated = () => {
+        this.setState({ loading: true });
+        // TODO(junjuew): hacky. delaying video
+        // information fetching for a few second to
+        // give server some time to extract frames
+        // this way, when going to the labeling
+        // page, at least some frames are available.
+        // the correct way is to get a method that
+        // is able to retrieve the information about whether the extraction
+        // process has finished or not.
+        setTimeout(this.fetchVideoInfo, 10000);
+    };
+
+    createTask = ({
+        data,
+        onTaskCreated,
+        file,
+        progress,
+        load,
+        error,
+        abort
+    }) => {
+        fetchJSON(endpoints.tasks, "POST", data)
+            .then(resp => {
+                // fieldName is the name of the input field
+                // file is the actual file object to send
+                const batchOfFiles = new FormData();
+                batchOfFiles.append("client_files[0]", file);
+                const request = new XMLHttpRequest();
+                request.open(
+                    "POST",
+                    URI.joinPaths(endpoints.tasks, resp.id.toString(), "data")
+                );
+                // Should call the progress method to update the progress to 100% before calling load
+                // Setting computable to false switches the loading indicator to infinite mode
+                request.upload.onprogress = e => {
+                    progress(e.lengthComputable, e.loaded, e.total);
+                };
+                // Should call the load method when done and pass the returned server file id
+                // this server file id is then used later on when reverting or restoring a file
+                // so your server knows which file to return without exposing that info to the client
+                request.onload = function() {
+                    if (request.status >= 200 && request.status < 300) {
+                        // the load method accepts either a string (id) or an object
+                        load(request.responseText);
+                        onTaskCreated();
+                    } else {
+                        // Can call the error method if something is wrong, should exit after
+                        error("File Upload Failed");
+                        abort();
+                    }
+                };
+                request.send(batchOfFiles);
+                // Should expose an abort method so the request can be cancelled
+                return {
+                    abort: () => {
+                        // This function is entered if the user has tapped the cancel button
+                        request.abort();
+                        // Let FilePond know the request has been cancelled
+                        abort();
+                    }
+                };
+            })
+            .catch(e => {
+                console.error(e);
+                error(e);
+                abort();
+            });
+    };
 
     componentDidMount() {
         this.fetchVideoInfo();
@@ -164,69 +236,16 @@ class VideoPage extends React.Component {
                                             labels: [],
                                             image_quality: 100
                                         };
-                                        fetchJSON(endpoints.tasks, "POST", data)
-                                            .then(resp => {
-                                                // fieldName is the name of the input field
-                                                // file is the actual file object to send
-                                                const batchOfFiles = new FormData();
-                                                batchOfFiles.append(
-                                                    "client_files[0]",
-                                                    file
-                                                );
-                                                const request = new XMLHttpRequest();
-                                                request.open(
-                                                    "POST",
-                                                    URI.joinPaths(
-                                                        endpoints.tasks,
-                                                        resp.id.toString(),
-                                                        "data"
-                                                    )
-                                                );
-                                                // Should call the progress method to update the progress to 100% before calling load
-                                                // Setting computable to false switches the loading indicator to infinite mode
-                                                request.upload.onprogress = e => {
-                                                    progress(
-                                                        e.lengthComputable,
-                                                        e.loaded,
-                                                        e.total
-                                                    );
-                                                };
-                                                // Should call the load method when done and pass the returned server file id
-                                                // this server file id is then used later on when reverting or restoring a file
-                                                // so your server knows which file to return without exposing that info to the client
-                                                request.onload = function() {
-                                                    if (
-                                                        request.status >= 200 &&
-                                                        request.status < 300
-                                                    ) {
-                                                        // the load method accepts either a string (id) or an object
-                                                        load(
-                                                            request.responseText
-                                                        );
-                                                    } else {
-                                                        // Can call the error method if something is wrong, should exit after
-                                                        error(
-                                                            "File Upload Failed"
-                                                        );
-                                                        abort();
-                                                    }
-                                                };
-                                                request.send(batchOfFiles);
-                                                // Should expose an abort method so the request can be cancelled
-                                                return {
-                                                    abort: () => {
-                                                        // This function is entered if the user has tapped the cancel button
-                                                        request.abort();
-                                                        // Let FilePond know the request has been cancelled
-                                                        abort();
-                                                    }
-                                                };
-                                            })
-                                            .catch(e => {
-                                                console.error(e);
-                                                error(e);
-                                                abort();
-                                            });
+                                        let onTaskCreated = this.onTaskCreated;
+                                        this.createTask({
+                                            data,
+                                            onTaskCreated,
+                                            file,
+                                            progress,
+                                            load,
+                                            error,
+                                            abort
+                                        });
                                     },
 
                                     fetch: null,
@@ -246,7 +265,6 @@ class VideoPage extends React.Component {
                                 }}
                                 onprocessfiles={() => {
                                     this.setState({ files: [] });
-                                    this.fetchVideoInfo();
                                 }}
                             />
                         </section>
