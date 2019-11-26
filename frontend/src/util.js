@@ -47,7 +47,7 @@ function checkDownload(url, interval, timeout, onSuccess, onFailure) {
     };
     const pollUrl = () => {
         fetch(url, options).then(response => {
-            if (response.status == 200) {
+            if (response.status === 200) {
                 onSuccess(response);
             } else {
                 curTime = new Date();

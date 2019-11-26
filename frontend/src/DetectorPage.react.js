@@ -282,7 +282,13 @@ const DetectorPage = ({ ...props }) => {
                         <Grid.Row>
                             <DetectorCards
                                 detectors={detectors.results}
-                                onDelete={loadDetectors}
+                                onDelete={() => {
+                                    setDetectors(null);
+                                    // TODO(junjuew): somehow without delays
+                                    // detector information fetched would still
+                                    // contain the deleted detector
+                                    setTimeout(loadDetectors, 1000);
+                                }}
                                 {...props}
                             />
                         </Grid.Row>

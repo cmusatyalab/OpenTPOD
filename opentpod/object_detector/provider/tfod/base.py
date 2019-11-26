@@ -5,6 +5,7 @@ import re
 import tempfile
 import shutil
 import pathlib
+import os
 
 from logzero import logger
 from mako import template
@@ -145,7 +146,11 @@ class TFODDetector():
             trained_steps = re.findall(r'model.ckpt-(\d+)', candidate_path)[0]
             if trained_steps > max_steps:
                 max_step_model_path = candidate_path
-        return max_step_model_path
+        # the max_step_model_path now is a full of e.g.
+        # .../model-ckpt-2000.data-00000-of-00001
+        # however, for TF's export code, we need to give  .../model-ckpt-2000
+        # as there are multiple files ending in .meta, .index, .data-...
+        return os.path.splitext(max_step_model_path)[0]
 
     def export(self, output_file_path):
         with tempfile.TemporaryDirectory() as temp_dir:

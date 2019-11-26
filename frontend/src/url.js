@@ -11,7 +11,6 @@ const endpoints = {
     detectorDownloadField: "model",
     detectorVisualizationField: "visualization",
     trainsets: "/api/opentpod/v1/trainsets",
-    media: "/media/",
     mediaData: "/media/data/",
     // front end handled routes
     uiVideo: "/video",
