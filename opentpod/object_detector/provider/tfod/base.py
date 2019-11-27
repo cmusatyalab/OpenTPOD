@@ -166,6 +166,20 @@ class TFODDetector():
         return os.path.splitext(max_step_model_path)[0]
 
     def export(self, output_file_path):
+        """Export TF model.
+        Both the frozen graph and training artifacts are exported to allow
+        inference and future training.
+
+        Note: Since TF's object detection API is not using TF v2.0. We had to
+        run the export script in a separate process with TF eager mode disabled.
+        CVAT and object_detector.datasets enable TF eager mode for easy
+        read/write TFrecord files, causing the following model export script to
+        throw errors due to calls to tf.placeholder(). See more at:
+        https://github.com/tensorflow/tensorflow/issues/18165
+
+        When TF object detection has migrated to TF v2.0, something like train()
+        can be done to directly call the export script as a python function.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             cmd = ('python -m opentpod.object_detector.provider.tfod.wrappers.export ' +
                    '--input_type=image_tensor --pipeline_config_path={} ' +
@@ -176,7 +190,9 @@ class TFODDetector():
                 self._get_latest_model_ckpt_path(),
                 temp_dir
             )
-            logger.info('launching training process with following command: \n\n{}'.format(cmd))
+            logger.info('\n===========================================\n')
+            logger.info('\n\nExporting trained model with following command: \n\n{}'.format(cmd))
+            logger.info('\n===========================================\n')
             process = subprocess.Popen(
                 cmd.split())
             process.wait()
@@ -187,4 +203,3 @@ class TFODDetector():
                 file_stem,
                 'zip',
                 temp_dir)
-        return process.pid
