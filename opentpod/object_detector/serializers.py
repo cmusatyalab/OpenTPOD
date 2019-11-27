@@ -87,7 +87,7 @@ class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
         db_train_set.save()
 
         # status can only be created
-        validated_data['status'] = models.Status.CREATED
+        validated_data['status'] = models.Status.CREATED.value
         db_detector = models.Detector.objects.create(**validated_data,
                                                      train_set=db_train_set)
         return db_detector

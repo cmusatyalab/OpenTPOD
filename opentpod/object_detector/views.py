@@ -85,13 +85,7 @@ class DetectorViewSet(viewsets.ModelViewSet):
         dnn_class = provider.get(type)
         if dnn_class is None:
             raise Http404
-        dnn_obj = dnn_class(config={'input_dir': '', 'output_dir': ''})
-        required_parameters = dnn_obj.required_parameters
-        optional_parameters = dnn_obj.optional_parameters
-        data = json.dumps({
-            'required': required_parameters,
-            'optional': optional_parameters
-        })
+        data = json.dumps(dnn_class.TRAINING_PARAMETERS)
         return Response(data=data)
 
     @action(detail=True, methods=['GET', 'POST'])

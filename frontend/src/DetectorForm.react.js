@@ -141,36 +141,46 @@ const NewDetectorForm = props => {
         errors
     } = props;
     let history = useHistory();
-    const [dnnTypes, setDnnTypes] = useState(null);
-    const [tasks, onTaskSelectOptionsChange] = useState([]);
-    const [activeDnnType, setActiveDnnType] = useState(null);
-    const [trainingConfig, setTrainingConfig] = useState(null);
+    const [availableDnnTypes, setAvailableDnnTypes] = useState(null);
     const [trainingConfigLoading, setTrainingConfigLoading] = useState(false);
+    // form values. Set as a state variable as we're updating it
+    // both from default values of the backend and user input
+    const [formInitialValues, setFormInitialValues] = useState({
+        name: "",
+        dnnType: null,
+        tasks: [],
+        trainingConfig: {}
+    });
 
     // get supported dnn types
-    const fetchSupportedDnnTypes = () => {
+    const fetchAvailableDnnTypes = () => {
         fetchJSON(endpoints.detectorDnnTypes, "GET").then(resp => {
             let types = JSON.parse(resp);
             let typeOptions = types.map(item => ({
                 value: item[0],
                 label: item[1]
             }));
-            setDnnTypes(typeOptions);
+            setAvailableDnnTypes(typeOptions);
         });
     };
 
     // fetch training configuration of currently selected dnn type
-    const fetchTrainingConfig = selectedOption => {
+    const updateTrainingConfig = (selectedOption, curFormValues) => {
         if (selectedOption != null) {
-            let dnnType = selectedOption.value;
+            let dnnTypeString = selectedOption.value;
             setTrainingConfigLoading(true);
             fetchJSON(
-                URI.joinPaths(endpoints.dnnTrainingConfigs, dnnType),
+                URI.joinPaths(endpoints.dnnTrainingConfigs, dnnTypeString),
                 "GET"
             )
                 .then(resp => {
                     let trainingConfigs = JSON.parse(resp);
-                    setTrainingConfig(trainingConfigs);
+                    // populate form value to include training configs
+                    setFormInitialValues({
+                        ...curFormValues,
+                        dnnType: selectedOption,
+                        trainingConfig: trainingConfigs
+                    });
                 })
                 .finally(() => {
                     setTrainingConfigLoading(false);
@@ -179,67 +189,45 @@ const NewDetectorForm = props => {
     };
 
     useEffect(() => {
-        fetchSupportedDnnTypes();
+        fetchAvailableDnnTypes();
     }, []);
 
-    return dnnTypes == null ? (
+    return availableDnnTypes == null ? (
         <Dimmer active loader />
     ) : (
         <Formik
-            initialValues={{
-                name: "",
-                trainingConfig: {
-                    required: {},
-                    optional: {}
-                }
-            }}
+            enableReinitialize={true}
+            initialValues={formInitialValues}
             validate={values => {
                 let errors = {};
-                let errorTrainingConfig = {};
                 if (!values.name) {
                     errors.name = "Required";
                 }
-                if (tasks.length == 0) {
+                if (values.tasks.length == 0) {
                     errors.tasks = "Required";
                 }
-                if (!activeDnnType) {
+                if (!values.dnnType) {
                     errors.activeDnnType = "Required";
                 }
-                if (trainingConfig && trainingConfig.required) {
-                    trainingConfig.required.map(item => {
-                        if (
-                            !values.trainingConfig.required.hasOwnProperty(
-                                item
-                            ) ||
-                            !values.trainingConfig.required[item]
-                        )
-                            errorTrainingConfig[item] = "Required";
-                    });
-                }
-                if (Object.keys(errorTrainingConfig).length > 0) {
-                    errors.trainingConfig = { required: errorTrainingConfig };
-                }
+                console("validate values: " + JSON.stringify(values));
                 return errors;
             }}
             onSubmit={(
                 values,
-                { setSubmitting, setErrors /* setValues and other goodies */ }
+                { setSubmitting /* setErrors, setValues and other goodies */ }
             ) => {
                 setSubmitting(true);
-                let train_config_values = {
-                    ...values.trainingConfig.required,
-                    ...values.trainingConfig.optional
-                };
-                let tasks_id = tasks.map(item => item.value);
+                let tasks_id = values.tasks.map(item => item.value);
                 let data = {
                     name: values.name,
-                    dnn_type: activeDnnType.value,
-                    train_config: JSON.stringify(train_config_values),
+                    dnn_type: values.dnnType.value,
+                    train_config: JSON.stringify(values.trainingConfig),
                     train_set: {
                         name: values.name + "-trainset",
                         tasks_id: tasks_id
                     }
                 };
+                console.log(data);
                 fetchJSON(endpoints.detectors, "POST", data).then(resp => {
                     history.push(endpoints.uiDetector);
                 });
@@ -249,7 +237,6 @@ const NewDetectorForm = props => {
                 errors,
                 handleChange,
                 handleSubmit,
-                validateForm,
                 isSubmitting
             }) =>
                 isSubmitting ? (
@@ -280,7 +267,7 @@ const NewDetectorForm = props => {
                             <AsyncPaginate
                                 styles={reactSelectTablerStyles}
                                 debounceTimeout={300}
-                                value={tasks}
+                                value={values.tasks}
                                 initialOptions={[]}
                                 loadOptions={loadAndSearchTasks}
                                 isMulti
@@ -288,9 +275,15 @@ const NewDetectorForm = props => {
                                 additional={{
                                     page: 1
                                 }}
-                                onChange={(...all) => {
-                                    onTaskSelectOptionsChange(...all);
-                                    validateForm();
+                                onChange={selectedOption => {
+                                    handleChange(selectedOption);
+                                    // need to pass in values here as prevValues
+                                    // in the state does not have the most
+                                    // updated form data, which is kept in values
+                                    setFormInitialValues({
+                                        ...values,
+                                        tasks: selectedOption
+                                    });
                                 }}
                                 onSubmit={handleSubmit}
                             />
@@ -302,18 +295,21 @@ const NewDetectorForm = props => {
                         </Form.Group>
                         <Form.Group label={"Detector Types"}>
                             <Select
-                                name="Dnn Types"
+                                name="DNN Types"
                                 styles={reactSelectTablerStyles}
-                                options={dnnTypes}
-                                value={activeDnnType}
+                                options={availableDnnTypes}
+                                value={values.dnnType}
                                 isLoading={trainingConfigLoading}
-                                isClearable={true}
                                 isSearchable={true}
                                 onChange={selectedOption => {
-                                    setActiveDnnType(selectedOption);
-                                    setTrainingConfig(null);
-                                    fetchTrainingConfig(selectedOption);
-                                    validateForm();
+                                    handleChange(selectedOption);
+                                    // need to pass in values here as prevValues
+                                    // in the state does not have the most
+                                    // updated form data, which is kept in values
+                                    updateTrainingConfig(
+                                        selectedOption,
+                                        values
+                                    );
                                 }}
                                 onSubmit={handleSubmit}
                             />
@@ -323,54 +319,24 @@ const NewDetectorForm = props => {
                                 </span>
                             )}
                         </Form.Group>
-                        {trainingConfig && (
+                        {Object.keys(values.trainingConfig).length > 0 && (
                             <Form.FieldSet>
-                                {// required items
-                                trainingConfig.required.map((item, index) => (
-                                    <Form.Group label={item} key={index}>
-                                        <Form.Input
-                                            isRequired
-                                            name={`trainingConfig.required.${item}`}
-                                            type="text"
-                                            value={
-                                                values &&
-                                                values.trainingConfig &&
-                                                (values.trainingConfig.required[
-                                                    item
-                                                ] ||
-                                                    "")
-                                            }
-                                            error={
-                                                errors &&
-                                                errors.trainingConfig &&
-                                                errors.trainingConfig.required[
-                                                    item
-                                                ]
-                                            }
-                                            onChange={handleChange}
-                                            onSubmit={handleSubmit}
-                                        />
-                                    </Form.Group>
-                                ))}
-                                {Object.entries(trainingConfig.optional).map(
-                                    (item, index) => (
-                                        <Form.Group label={item[0]} key={index}>
+                                {Object.entries(values.trainingConfig).map(
+                                    ([k, v], index) => (
+                                        <Form.Group label={k} key={index}>
                                             <Form.Input
-                                                name={`trainingConfig.optional.${item}`}
+                                                isRequired
+                                                name={`trainingConfig.${k}`}
                                                 type="text"
-                                                placeholder={item[1]}
                                                 value={
                                                     values &&
                                                     values.trainingConfig &&
-                                                    (values.trainingConfig
-                                                        .optional[item] ||
-                                                        "")
+                                                    values.trainingConfig[k]
                                                 }
                                                 error={
                                                     errors &&
                                                     errors.trainingConfig &&
-                                                    errors.trainingConfig
-                                                        .optional[item]
+                                                    errors.trainingConfig[k]
                                                 }
                                                 onChange={handleChange}
                                                 onSubmit={handleSubmit}

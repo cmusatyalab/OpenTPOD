@@ -17,8 +17,7 @@ class TFODDetector():
     """Tensorflow Object Detection API
     See: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/running_locally.md
     """
-    REQUIRED_PARAMETERS = []
-    OPTIONAL_PARAMETERS = {}
+    TRAINING_PARAMETERS = {}
 
     def __init__(self, config):
         """Expected directory layout
@@ -52,12 +51,8 @@ class TFODDetector():
         self._config['label_map_path'] = str(self._input_dir.resolve() / 'label_map.pbtxt')
 
     @property
-    def required_parameters(self):
-        return self.REQUIRED_PARAMETERS
-
-    @property
-    def optional_parameters(self):
-        return self.OPTIONAL_PARAMETERS
+    def training_parameters(self):
+        return self.TRAINING_PARAMETERS
 
     @property
     def pretrained_model_cache_entry(self):
@@ -100,13 +95,8 @@ class TFODDetector():
                 self._config['fine_tune_checkpoint'] is None):
             self._config['fine_tune_checkpoint'] = self.get_pretrained_model_checkpoint()
 
-        # make sure all required parameter is given
-        for parameter in self.required_parameters:
-            if parameter not in self._config:
-                raise ValueError('Parameter ({}) is required, but not given'.format(parameter))
-
-        # use default values for optional parameters if not given
-        for parameter, value in self.optional_parameters.items():
+        # use default values for training parameters if not given
+        for parameter, value in self.training_parameters.items():
             if parameter not in self._config:
                 self._config[parameter] = value
 

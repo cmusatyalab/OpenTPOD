@@ -196,16 +196,10 @@ eval_input_reader: {
 
 
 class TFODSSDMobileNetV2(TFODDetector):
+    TRAINING_PARAMETERS = {'batch_size': 2, 'num_steps': 20000}
+
     def __init__(self, config):
         super().__init__(config)
-
-    @property
-    def required_parameters(self):
-        return ['batch_size', 'num_steps']
-
-    @property
-    def optional_parameters(self):
-        return {}
 
     @property
     def pretrained_model_url(self):

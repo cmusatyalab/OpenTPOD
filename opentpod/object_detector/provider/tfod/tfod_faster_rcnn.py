@@ -144,8 +144,7 @@ num_readers: 1
 
 
 class TFODFasterRCNNResNetGeneric(TFODDetector):
-    REQUIRED_PARAMETERS = ['batch_size', 'num_steps']
-    OPTIONAL_PARAMETERS = {}
+    TRAINING_PARAMETERS = {'batch_size': 2, 'num_steps': 20000}
 
     def __init__(self, config):
         super().__init__(config)
