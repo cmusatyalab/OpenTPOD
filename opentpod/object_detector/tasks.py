@@ -36,9 +36,19 @@ def _train(db_detector,
                                        db_user,
                                        scheme,
                                        host)
+    # refresh db_detector object to make sure it is fresh
+    db_detector = models.Detector.objects.get(id=db_detector.id)
     detector = db_detector.get_detector_object()
+    db_detector.status = str(models.Status.TRAINING)
+    db_detector.save()
+
     detector.prepare()
     detector.train()
+
+    # refresh db obj as a long time has passed after training
+    db_detector = models.Detector.objects.get(id=db_detector.id)
+    db_detector.status = str(models.Status.TRAINED)
+    db_detector.save()
 
 
 def export(db_detector):

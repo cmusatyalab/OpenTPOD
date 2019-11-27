@@ -6,6 +6,7 @@ import tempfile
 import shutil
 import pathlib
 import os
+import json
 
 from logzero import logger
 from mako import template
@@ -111,18 +112,40 @@ class TFODDetector():
         self.prepare_config()
         self.prepare_config_pipeline_file()
 
+    def _check_training_data_dir(self, FLAGS):
+        """Check training directory's data is valid
+
+        Fail if missing files, or # of training/eval examples used is not positive
+        """
+        training_data_dir = pathlib.Path(FLAGS.pipeline_config_path).parent
+        assert (training_data_dir / 'meta').resolve().exists()
+        assert (training_data_dir / 'label_map.pbtxt').resolve().exists()
+        assert (training_data_dir / 'label_map.pbtxt').resolve().stat().st_size > 0
+        assert (training_data_dir / 'train.tfrecord').resolve().exists()
+        with open(training_data_dir / 'meta', 'r') as f:
+            meta = json.load(f)
+            assert(meta["train_num"] > 0)
+            assert(meta["eval_num"] > 0)
+
     def train(self):
-        # need to run tf train with subprocess as tf has problem with python's
-        # multiprocess module
-        # see: https://github.com/tensorflow/tensorflow/issues/5448
-        cmd = 'python -m opentpod.object_detector.provider.tfod.wrappers.train --pipeline_config_path={0} --model_dir={1} --alsologtostderr'.format(
-            self._config['pipeline_config_path'],
-            self._output_dir
-        )
-        logger.info('launching training process with following command: \n\n{}'.format(cmd))
-        process = subprocess.Popen(
-            cmd.split())
-        return process.pid
+        """Launch training using tensorflow object detection API."""
+        from absl import flags
+        from object_detection import model_main as continuous_train_and_eval_model
+
+        # TF uses absl to get command line flags
+        FLAGS = flags.FLAGS
+        # argv[0] is treated as program name, therefore not parsed
+        argv = ['',
+                '--pipeline_config_path={}'.format(self._config['pipeline_config_path']),
+                '--model_dir={}'.format(self._output_dir),
+                '--alsologtostderr']
+        logger.info('\n===========================================\n')
+        logger.info('\n\nlaunching training with the following parameters: \n{}\n\n'.format(
+            '\n'.join(argv)))
+        logger.info('\n===========================================\n')
+        FLAGS(argv)
+        self._check_training_data_dir(FLAGS)
+        continuous_train_and_eval_model.main([])
 
     def run(self):
         pass

@@ -1,5 +1,6 @@
 import pathlib
 import json
+import enum
 
 from cvat.apps.engine.models import Task
 from django.conf import settings
@@ -7,21 +8,20 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from opentpod.object_detector import provider
-Status = provider.Status
 
 
-# class Status(Enum):
-#     CREATED = 'created'
-#     TRAINING = 'training'
-#     TRAINED = 'trained'
-#     ERROR = 'error'
+class Status(enum.Enum):
+    CREATED = 'created'
+    TRAINING = 'training'
+    TRAINED = 'trained'
+    ERROR = 'error'
 
-#     @classmethod
-#     def choices(self):
-#         return tuple((x.value, x.name) for x in self)
+    @classmethod
+    def choices(self):
+        return tuple((x.value, x.name) for x in self)
 
-#     def __str__(self):
-#         return self.value
+    def __str__(self):
+        return self.value
 
 
 class TrainSet(models.Model):
@@ -47,7 +47,7 @@ class Detector(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=32, choices=Status.choices(),
-                              default=Status.CREATED, null=True, blank=True)
+                              default=str(Status.CREATED), null=True, blank=True)
     dnn_type = models.CharField(max_length=32,
                                 choices=provider.DNN_TYPE_DB_CHOICES)
     # where this model is finetuned from
@@ -89,28 +89,3 @@ class Detector(models.Model):
         config['output_dir'] = self.get_model_dir().resolve()
         detector_class = provider.get(self.dnn_type)
         return detector_class(config)
-
-    def _update_status(self):
-        status_file_path = self.get_model_dir() / 'status'
-        if status_file_path.exists():
-            with open(status_file_path, 'r') as f:
-                cur_status = f.read().rstrip()
-                for status_enum_item in list(Status):
-                    if cur_status == status_enum_item.value:
-                        self.status = cur_status
-                        self.save()
-                        break
-
-    def get_status(self):
-        self._update_status()
-        return self.status
-
-    # TODO(junjuew): get status? read from ``status`` file
-
-# class TrainConfig(models.Model):
-#     num_classes = models.PositiveIntegerField()
-#     batch_size = models.PositiveIntegerField()
-#     num_steps = models.PositiveIntegerField(default=10000)
-#     fine_tune_checkpoint = models.CharField(
-#         max_length=2000)
-#     detector = models.OneToOneField(Detector, on_delete=models.CASCADE)

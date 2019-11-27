@@ -54,10 +54,7 @@ class TrainSetSerializer(serializers.ModelSerializer):
 
 
 class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
-    # TODO(junjuew): add validator for required fields in train_config
-    # now, if the required fields are not given, the bg_task will fail
     train_set = TrainSetSerializer()
-    status = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Detector
@@ -69,9 +66,6 @@ class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
         owner = self.context['request'].user
         if data.get('owner', None) is None:
             data['owner'] = owner
-
-    def get_status(self, obj):
-        return obj.get_status()
 
     def create(self, validated_data):
         # ignore the owner fields, as we'll only create it for the user
@@ -87,7 +81,7 @@ class DetectorSerializer(WriteOnceMixin, serializers.ModelSerializer):
         db_train_set.save()
 
         # status can only be created
-        validated_data['status'] = models.Status.CREATED.value
+        validated_data['status'] = str(models.Status.CREATED)
         db_detector = models.Detector.objects.create(**validated_data,
                                                      train_set=db_train_set)
         return db_detector
