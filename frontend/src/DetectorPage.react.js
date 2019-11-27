@@ -357,7 +357,7 @@ const DetectorNewPage = ({ ...props }) => {
             <Page.Content>
                 <Page.Header title="New Detector"></Page.Header>
                 <Grid>
-                    <NewDetectorForm></NewDetectorForm>
+                    <NewDetectorForm {...props} />
                 </Grid>
             </Page.Content>
         </SiteWrapper>

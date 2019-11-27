@@ -4,20 +4,9 @@ import Select from "react-select";
 import AsyncPaginate from "react-select-async-paginate";
 import { Formik } from "formik";
 import URI from "urijs";
-import {
-    Button,
-    Card,
-    Dimmer,
-    Grid,
-    Page,
-    List,
-    Form,
-    FormTextInput,
-    FormCard
-} from "tabler-react";
-import SiteWrapper from "./SiteWrapper.react";
+import { Dimmer, Form, FormTextInput, FormCard } from "tabler-react";
 import { endpoints } from "./url";
-import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
+import { fetchJSON } from "./util";
 import defaultStrings from "./DetectorPage.strings";
 import "./App.css";
 
@@ -83,63 +72,7 @@ const reactSelectTablerStyles = {
     })
 };
 
-const TrainingConfig = ({ trainingConfig, values, errors, ...rest }) => {
-    let requireds = trainingConfig.required;
-    let optionals = trainingConfig.optional;
-
-    let requiredFields = requireds.map((item, index) => {
-        values.required[item] = "";
-        return (
-            <FormTextInput
-                isRequired
-                key={index}
-                name={item}
-                type="text"
-                label={item}
-                value={values && values.required[item]}
-                error={errors && errors.required[item]}
-                {...rest}
-            />
-        );
-    });
-
-    let optionalFields = Object.entries((item, index) => {
-        values.optional[item[0]] = "";
-        return (
-            <FormTextInput
-                key={index}
-                name={item[0]}
-                type="text"
-                label={item[0]}
-                placeholder={item[1]}
-                value={values && values.optional[item[0]]}
-                error={errors && errors.optional[item[0]]}
-                {...rest}
-            />
-        );
-    });
-
-    if (requireds.length + Object.keys(optionals).length > 0) {
-        return (
-            <Form.FieldSet>
-                {requiredFields}
-                {optionalFields}
-            </Form.FieldSet>
-        );
-    }
-};
-
-const NewDetectorForm = props => {
-    const {
-        action,
-        method,
-        onSubmit,
-        onChange,
-        onBlur,
-        values,
-        strings = {},
-        errors
-    } = props;
+const NewDetectorForm = ({ strings = {} }) => {
     let history = useHistory();
     const [availableDnnTypes, setAvailableDnnTypes] = useState(null);
     const [trainingConfigLoading, setTrainingConfigLoading] = useState(false);
