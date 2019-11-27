@@ -258,8 +258,8 @@ const NewDetectorForm = ({ strings = {} }) => {
                         </Form.Group>
                         {Object.keys(values.trainingConfig).length > 0 && (
                             <Form.FieldSet>
-                                {Object.entries(values.trainingConfig).map(
-                                    ([k, v], index) => (
+                                {Object.keys(values.trainingConfig).map(
+                                    (k, index) => (
                                         <Form.Group label={k} key={index}>
                                             <Form.Input
                                                 isRequired
