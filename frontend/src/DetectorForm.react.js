@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Select from "react-select";
 import AsyncPaginate from "react-select-async-paginate";
 import { Formik } from "formik";
@@ -10,18 +10,21 @@ import { fetchJSON } from "./util";
 import defaultStrings from "./DetectorPage.strings";
 import "./App.css";
 
+// get tasks information to populate available tasks select field
 const fetchTasks = async page => {
     let url = new URI(endpoints.tasks);
     url.addSearch("page", page);
     return await fetchJSON(url.toString(), "GET");
 };
 
+// for task AsyncPaginate select
 const filterTasksByName = async searchString => {
     let url = new URI(endpoints.tasks);
     url.addSearch("name", searchString);
     return await fetchJSON(url.toString(), "GET");
 };
 
+// for task AsyncPaginate select
 const loadAndSearchTasks = async (search, options, { page }) => {
     let filteredOptions;
     let hasMore;
@@ -60,6 +63,7 @@ const loadAndSearchTasks = async (search, options, { page }) => {
     };
 };
 
+// Style Select to fit into site's theme
 const reactSelectTablerStyles = {
     control: (provided, state) => ({
         ...provided,
