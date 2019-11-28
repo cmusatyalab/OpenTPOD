@@ -181,7 +181,7 @@ class TFODDetector():
         can be done to directly call the export script as a python function.
         """
         with tempfile.TemporaryDirectory() as temp_dir:
-            cmd = ('python -m opentpod.object_detector.provider.tfod.wrappers.export ' +
+            cmd = ('python -m opentpod.object_detector.provider.tfod.wrappers.export_inference_graph ' +
                    '--input_type=image_tensor --pipeline_config_path={} ' +
                    '--trained_checkpoint_prefix={} ' +
                    '--output_directory={} ' +
