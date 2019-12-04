@@ -62,7 +62,7 @@ def train(db_detector,
           host):
     """Dump data from CVAT DB to on-disk format
     """
-    queue = django_rq.get_queue('default')
+    queue = django_rq.get_queue('low')
     rq_job = queue.enqueue_call(
         func=_train,
         args=(

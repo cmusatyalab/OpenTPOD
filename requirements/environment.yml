@@ -1,7 +1,8 @@
 name: opentpod-env
 dependencies:
-  - pip=19.1.1
-  - python>3.4
-  - setuptools
-  - pip:
-    - -r production.txt
+    - pip=19.1.1
+    - python>3.4
+    - setuptools
+    - supervisor
+    - pip:
+          - -r production.txt
