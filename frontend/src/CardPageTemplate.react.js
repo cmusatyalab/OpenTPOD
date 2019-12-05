@@ -9,29 +9,56 @@ const InfoCard = ({ title, options, body }) => {
         <Card>
             <Card.Header>
                 <Card.Title>{title}</Card.Title>
-                <Card.Options>
-                    {options}
-                </Card.Options>
+                <Card.Options>{options}</Card.Options>
             </Card.Header>
-            <Card.Body>
-                {body}
-            </Card.Body>
+            <Card.Body>{body}</Card.Body>
         </Card>
     );
 };
 
 // a list of info card wrapped with Grid Col
-const InfoCardList = ({ iterableResourceObjs, makeTitle, makeOptions, makeBody, cardColumnWidth = 3, ...rest }) => {
-    // makeTitle, makeOptions, makeBody are three functions that
-    // takes a resourceObj and produce UI elements
+const InfoCardList = ({
+    iterableResourceObjs,
+    Title,
+    Options,
+    Body,
+    makeTitle,
+    makeOptions,
+    makeBody,
+    cardColumnWidth = 3,
+    ...rest
+}) => {
+    // Title, Options, Body are React component types
+    // makeTitle, makeOptions, makeBody are three functions that takes a
+    // resourceObj and produce UI elements
+    // Title, Options, Body have precedence over make... functions
     let cards = iterableResourceObjs.map((item, index) => {
         return (
             <Grid.Col auto key={index} sm={cardColumnWidth}>
                 <InfoCard
-                    title={makeTitle(item)}
-                    options={makeOptions(item)}
-                    body={makeBody(item)}
-                    {...rest} />
+                    title={
+                        Title ? (
+                            <Title resourceObj={item} {...rest} />
+                        ) : (
+                            makeTitle(item)
+                        )
+                    }
+                    options={
+                        Options ? (
+                            <Options resourceObj={item} {...rest} />
+                        ) : (
+                            makeOptions(item)
+                        )
+                    }
+                    body={
+                        Body ? (
+                            <Body resourceObj={item} {...rest} />
+                        ) : (
+                            makeBody(item)
+                        )
+                    }
+                    {...rest}
+                />
             </Grid.Col>
         );
     });
@@ -43,13 +70,17 @@ const PaginatedInfoCardList = ({
     iterableResourceObjs,
     onPageChange,
     pageCount,
+    Title,
+    Options,
+    Body,
     makeTitle,
     makeOptions,
     makeBody,
     cardColumnWidth = 6,
     pageNavOffset = 10,
     ...rest
-}) => <>
+}) => (
+    <>
         <Grid.Row alignItems="top">
             <Grid.Col offset={pageNavOffset}>
                 <ReactPaginate
@@ -60,21 +91,13 @@ const PaginatedInfoCardList = ({
                     marginPagesDisplayed={1}
                     pageRangeDisplayed={2}
                     onPageChange={onPageChange}
-                    containerClassName={
-                        "pagination react-paginate"
-                    }
-                    subContainerClassName={
-                        "pages pagination react-paginate"
-                    }
-                    pageLinkClassName={
-                        "list-group-item list-group-item-action"
-                    }
+                    containerClassName={"pagination react-paginate"}
+                    subContainerClassName={"pages pagination react-paginate"}
+                    pageLinkClassName={"list-group-item list-group-item-action"}
                     previousLinkClassName={
                         "list-group-item list-group-item-action"
                     }
-                    nextLinkClassName={
-                        "list-group-item list-group-item-action"
-                    }
+                    nextLinkClassName={"list-group-item list-group-item-action"}
                     breakLinkClassName={
                         "list-group-item list-group-item-action"
                     }
@@ -85,6 +108,9 @@ const PaginatedInfoCardList = ({
         <Grid.Row>
             <InfoCardList
                 iterableResourceObjs={iterableResourceObjs}
+                Title={Title}
+                Options={Options}
+                Body={Body}
                 makeTitle={makeTitle}
                 makeOptions={makeOptions}
                 makeBody={makeBody}
@@ -93,6 +119,6 @@ const PaginatedInfoCardList = ({
             />
         </Grid.Row>
     </>
+);
 
 export { InfoCard, InfoCardList, PaginatedInfoCardList };
-

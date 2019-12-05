@@ -10,7 +10,7 @@ import ReactPlayer from "react-player";
 import { useHistory } from "react-router-dom";
 import { Button, Dimmer, Grid, Page } from "tabler-react";
 import URI from "urijs";
-import { PaginatedInfoCardList } from "./CardPage.react.js";
+import { PaginatedInfoCardList } from "./CardPageTemplate.react.js";
 import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
 import { fetchJSON, lineWrap } from "./util";
@@ -18,85 +18,85 @@ import "./VideoPage.css";
 
 registerPlugin(FilePondPluginFileValidateType);
 
-const makeVideoCardTitle = (resourceObj) => {
-    return lineWrap(resourceObj.name)
-}
+const makeVideoCardTitle = resourceObj => {
+    return lineWrap(resourceObj.name);
+};
 
 const makeVideoCardOptions = ({ resourceObj, onDelete }) => {
     let history = useHistory();
-    return <>
-        <Button
-            outline
-            RootComponent="button"
-            color="primary"
-            size="sm"
-            icon="tag"
-            onClick={e => {
-                e.preventDefault();
-                history.push(
-                    URI.joinPaths(
-                        endpoints.uiAnnotate,
-                        "tasks",
-                        resourceObj.id.toString(),
-                        "jobs",
-                        resourceObj.segments[0].jobs[0].id.toString()
-                    ).toString()
-                ); // only considered 1st job
-            }}
-        >
-            Label
-        </Button>
-        <Button
-            outline
-            RootComponent="button"
-            color="danger"
-            size="sm"
-            icon="trash"
-            method="delete"
-            onClick={e => {
-                fetchJSON(
-                    URI.joinPaths(
-                        endpoints.tasks,
-                        resourceObj.id.toString()
-                    ),
-                    "DELETE"
-                ).then(onDelete());
-            }}
-        >
-            Delete
-        </Button>
-    </>
-}
-
-const makeVideoCardBody = (resourceObj) => {
     return (
-        resourceObj.loading ? (
-            <div>
-                The video is being processed...
-                <Dimmer active loader />
-            </div>
-        ) : (
-                <div>
-                    <ReactPlayer
-                        url={URI.joinPaths(
-                            endpoints.mediaData,
+        <>
+            <Button
+                outline
+                RootComponent="button"
+                color="primary"
+                size="sm"
+                icon="tag"
+                onClick={e => {
+                    e.preventDefault();
+                    history.push(
+                        URI.joinPaths(
+                            endpoints.uiAnnotate,
+                            "tasks",
                             resourceObj.id.toString(),
-                            ".upload",
-                            resourceObj.name
-                        )}
-                        width="100%"
-                        height="100%"
-                        controls={true}
-                        light={URI.joinPaths(
+                            "jobs",
+                            resourceObj.segments[0].jobs[0].id.toString()
+                        ).toString()
+                    ); // only considered 1st job
+                }}
+            >
+                Label
+            </Button>
+            <Button
+                outline
+                RootComponent="button"
+                color="danger"
+                size="sm"
+                icon="trash"
+                method="delete"
+                onClick={e => {
+                    fetchJSON(
+                        URI.joinPaths(
                             endpoints.tasks,
-                            resourceObj.id.toString(),
-                            "/frames/0"
-                        ).toString()} // expects string type
-                    />
-                </div>
-            )
-    )
-}
+                            resourceObj.id.toString()
+                        ),
+                        "DELETE"
+                    ).then(onDelete());
+                }}
+            >
+                Delete
+            </Button>
+        </>
+    );
+};
+
+const makeVideoCardBody = resourceObj => {
+    return resourceObj.loading ? (
+        <div>
+            The video is being processed...
+            <Dimmer active loader />
+        </div>
+    ) : (
+        <div>
+            <ReactPlayer
+                url={URI.joinPaths(
+                    endpoints.mediaData,
+                    resourceObj.id.toString(),
+                    ".upload",
+                    resourceObj.name
+                )}
+                width="100%"
+                height="100%"
+                controls={true}
+                light={URI.joinPaths(
+                    endpoints.tasks,
+                    resourceObj.id.toString(),
+                    "/frames/0"
+                ).toString()} // expects string type
+            />
+        </div>
+    );
+};
 
 const VideoPage = ({ ...props }) => {
     let history = useHistory();
@@ -158,7 +158,7 @@ const VideoPage = ({ ...props }) => {
                 // Should call the load method when done and pass the returned server file id
                 // this server file id is then used later on when reverting or restoring a file
                 // so your server knows which file to return without exposing that info to the client
-                request.onload = function () {
+                request.onload = function() {
                     if (request.status >= 200 && request.status < 300) {
                         // the load method accepts either a string (id) or an object
                         load(request.responseText);
@@ -245,27 +245,28 @@ const VideoPage = ({ ...props }) => {
                 {videos == null ? (
                     <Dimmer active loader />
                 ) : (
-                        <PaginatedInfoCardList
-                            iterableResourceObjs={videos.results}
-                            onPageChange={() => { }}
-                            pageCount={Math.ceil(videos.count / videos.results.length)}
-                            makeTitle={makeVideoCardTitle}
-                            makeOptions={
-                                resourceObj => makeVideoCardOptions({
-                                    resourceObj: resourceObj,
-                                    onDelete: () => {
-                                        setVideos(null);
-                                        // TODO(junjuew): somehow without delays
-                                        // information fetched would still
-                                        // contain the deleted item
-                                        setTimeout(loadVideos, 1000);
-                                    }
-                                })
-                            }
-                            makeBody={makeVideoCardBody}
-                        />
-                    )
-                }
+                    <PaginatedInfoCardList
+                        iterableResourceObjs={videos.results}
+                        onPageChange={() => {}}
+                        pageCount={Math.ceil(
+                            videos.count / videos.results.length
+                        )}
+                        makeTitle={makeVideoCardTitle}
+                        makeOptions={resourceObj =>
+                            makeVideoCardOptions({
+                                resourceObj: resourceObj,
+                                onDelete: () => {
+                                    setVideos(null);
+                                    // TODO(junjuew): somehow without delays
+                                    // information fetched would still
+                                    // contain the deleted item
+                                    setTimeout(loadVideos, 1000);
+                                }
+                            })
+                        }
+                        makeBody={makeVideoCardBody}
+                    />
+                )}
             </Page.Content>
         </SiteWrapper>
     );

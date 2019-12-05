@@ -3,7 +3,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { Button, Card, Dimmer, Form, Grid, Page } from "tabler-react";
 import URI from "urijs";
 import "./App.css";
-import { PaginatedInfoCardList } from "./CardPage.react.js";
+import { PaginatedInfoCardList } from "./CardPageTemplate.react.js";
 import { NewDetectorForm } from "./DetectorForm.react";
 import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
@@ -15,82 +15,91 @@ const fetchDetector = id => {
     return fetchJSON(url, "GET");
 };
 
-const makeDetectorCardTitle = (resourceObj) => {
-    return lineWrap(resourceObj.name)
-}
+const makeDetectorCardTitle = resourceObj => {
+    return lineWrap(resourceObj.name);
+};
 
-const makeDetectorCardOptions = ({ resourceObj, onDownload, onDelete }) => {
+const DetectorCardOptions = ({ resourceObj, onDownload, onDelete }) => {
+    const [downloading, setDownloading] = useState(false);
+
     let history = useHistory();
     let downloadUrl = URI.joinPaths(
         endpoints.detectors,
         resourceObj.id.toString(),
         endpoints.detectorDownloadField
     );
-    return <>
-        <Button
-            outline
-            RootComponent="button"
-            color="primary"
-            size="sm"
-            icon="tag"
-            onClick={e => {
-                e.preventDefault();
-                history.push(
-                    URI.joinPaths(
-                        endpoints.uiDetector,
-                        resourceObj.id.toString()
-                    ).toString()
-                );
-            }}
-        >
-            Details
-                    </Button>
-        {resourceObj.status == "trained" && (
+    return (
+        <>
             <Button
                 outline
-                color="info"
+                RootComponent="button"
+                color="primary"
                 size="sm"
-                icon="download"
+                icon="tag"
                 onClick={e => {
                     e.preventDefault();
-                    onDownload(downloadUrl);
+                    history.push(
+                        URI.joinPaths(
+                            endpoints.uiDetector,
+                            resourceObj.id.toString()
+                        ).toString()
+                    );
+                }}
+            >
+                Details
+            </Button>
+            {resourceObj.status == "trained" && !downloading && (
+                <Button
+                    outline
+                    color="info"
+                    size="sm"
+                    icon="download"
+                    onClick={e => {
+                        e.preventDefault();
+                        setDownloading(true);
+                        onDownload({
+                            downloadUrl: downloadUrl,
+                            onDownloadSuccess: () => {
+                                setDownloading(false);
+                            }
+                        });
+                    }}
+                ></Button>
+            )}
+            {resourceObj.status == "trained" && downloading && (
+                <Button loading color="info" size="sm"></Button>
+            )}
+            <Button
+                outline
+                RootComponent="button"
+                color="danger"
+                size="sm"
+                icon="trash"
+                method="delete"
+                onClick={e => {
+                    e.preventDefault();
+                    fetchJSON(
+                        URI.joinPaths(
+                            endpoints.detectors,
+                            resourceObj.id.toString()
+                        ),
+                        "DELETE"
+                    ).then(onDelete());
                 }}
             ></Button>
-        )}
-        <Button
-            outline
-            RootComponent="button"
-            color="danger"
-            size="sm"
-            icon="trash"
-            method="delete"
-            onClick={e => {
-                e.preventDefault();
-                fetchJSON(
-                    URI.joinPaths(
-                        endpoints.detectors,
-                        resourceObj.id.toString()
-                    ),
-                    "DELETE"
-                ).then(onDelete());
-            }}
-        ></Button>
-    </>
-}
+        </>
+    );
+};
 
 const makeDetectorCardBody = ({ resourceObj }) => {
     return (
-        // resourceObj.loading ? (
-        //     <Dimmer active loader />
-        // ) : (
         <>
             <b>Status:</b> {resourceObj.status} <br />
             <b>Created Date:</b> {resourceObj.created_date} <br />
             <b>Updated Date:</b> {resourceObj.updated_date} <br />
         </>
-        // )
-    )
-}
+    );
+};
 
 // detector card to display detector information
 // TODO(junjuew): a deleted item sometimes still show up in the detector panel
@@ -105,11 +114,9 @@ const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
         <Card>
             <Card.Header>
                 <Card.Title>{lineWrap(detector.name)}</Card.Title>
-                <Card.Options>
-                </Card.Options>
+                <Card.Options></Card.Options>
             </Card.Header>
-            <Card.Body>
-            </Card.Body>
+            <Card.Body></Card.Body>
         </Card>
     );
 };
@@ -174,26 +181,12 @@ const DetectorDetailCard = ({ detector }) => {
     );
 };
 
-// a list of detectors cards
-// const DetectorCards = ({ detectors, ...rest }) => {
-//     let cards = detectors.map((item, index) => {
-//         return (
-//             <Grid.Col auto key={index} sm={6}>
-//                 <DetectorPreviewCard detector={item} {...rest} />
-//             </Grid.Col>
-//         );
-//     });
-//     return <>{cards}</>;
-// };
-
 const DetectorPage = ({ ...props }) => {
-    let history = useHistory();
     const [detectors, setDetectors] = useState(null);
 
     const loadDetectors = () => {
         setDetectors(null);
         fetchJSON(endpoints.detectors, "GET").then(resp => {
-            debugger;
             setDetectors(resp);
         });
     };
@@ -212,125 +205,52 @@ const DetectorPage = ({ ...props }) => {
                 {detectors == null ? (
                     <Dimmer active loader />
                 ) : (
-                        <PaginatedInfoCardList
-                            iterableResourceObjs={detectors.results}
-                            onPageChange={() => { }}
-                            pageCount={Math.ceil(detectors.count / detectors.results.length)}
-                            makeTitle={makeDetectorCardTitle}
-                            makeOptions={
-                                resourceObj => makeDetectorCardOptions({
-                                    resourceObj: resourceObj,
-                                    onDownload: (downloadUrl) => {
-                                        // TODO(junjuew): need to somehow convey
-                                        // setDownloadAvailable(false);
-                                        fetchJSON(downloadUrl, "POST").then(() => {
-                                            // need to continuously fetch the server
-                                            checkDownload(
-                                                downloadUrl,
-                                                10000,
-                                                1200000,
-                                                resp => {
-                                                    // setDownloadAvailable(true);
-                                                    fetch(
-                                                        downloadUrl,
-                                                        {
-                                                            method: 'GET',
-                                                            credentials: 'include',
-                                                            responseType: 'blob',
-                                                        }
-                                                    ).then((response) => {
-                                                        const url = window.URL.createObjectURL(new Blob([response.data]));
-                                                        const link = document.createElement('a');
-                                                        link.href = url;
-                                                        link.setAttribute('download', 'models.zip');
-                                                        link.click();
-                                                        window.URL.revokeObjectURL(url);
-                                                    });
-                                                },
-                                                () => { }
-                                            );
-                                            // (TODO) need to initiate URL download
-                                            // or have a way to download file
-                                        });
-                                    },
-                                    onDelete: () => {
-                                        setDetectors(null);
-                                        // TODO(junjuew): somehow without delays
-                                        // information fetched would still
-                                        // contain the deleted item
-                                        setTimeout(loadDetectors, 1000);
-                                    }
-                                })
-                            }
-                            makeBody={(resourceObj) => makeDetectorCardBody({
+                    <PaginatedInfoCardList
+                        iterableResourceObjs={detectors.results}
+                        onPageChange={() => {}}
+                        pageCount={Math.ceil(
+                            detectors.count / detectors.results.length
+                        )}
+                        makeTitle={makeDetectorCardTitle}
+                        Options={DetectorCardOptions}
+                        makeBody={resourceObj =>
+                            makeDetectorCardBody({
                                 resourceObj: resourceObj
-                            })}
-                        />
-                        // <Grid>
-                        //     <Grid.Row alignItems="top">
-                        //         <Grid.Col>
-                        //             <Button
-                        //                 RootComponent="button"
-                        //                 color="primary"
-                        //                 size="lg"
-                        //                 icon="plus"
-                        //                 onClick={e => {
-                        //                     e.preventDefault();
-                        //                     history.push(endpoints.uiDetectorNew);
-                        //                 }}
-                        //             >
-                        //                 Create
-                        //         </Button>
-                        //         </Grid.Col>
-                        //         <Grid.Col offset={8}>
-                        //             <ReactPaginate
-                        //                 previousLabel={"<"}
-                        //                 nextLabel={">"}
-                        //                 breakLabel={"..."}
-                        //                 pageCount={Math.ceil(
-                        //                     detectors.count /
-                        //                     detectors.results.length
-                        //                 )}
-                        //                 marginPagesDisplayed={1}
-                        //                 pageRangeDisplayed={2}
-                        //                 onPageChange={() => { }}
-                        //                 containerClassName={
-                        //                     "pagination react-paginate"
-                        //                 }
-                        //                 subContainerClassName={
-                        //                     "pages pagination react-paginate"
-                        //                 }
-                        //                 pageLinkClassName={
-                        //                     "list-group-item list-group-item-action"
-                        //                 }
-                        //                 previousLinkClassName={
-                        //                     "list-group-item list-group-item-action"
-                        //                 }
-                        //                 nextLinkClassName={
-                        //                     "list-group-item list-group-item-action"
-                        //                 }
-                        //                 breakLinkClassName={
-                        //                     "list-group-item list-group-item-action"
-                        //                 }
-                        //                 activeClassName={"active"}
-                        //             />
-                        //         </Grid.Col>
-                        //     </Grid.Row>
-                        //     <Grid.Row>
-                        //         <DetectorCards
-                        //             detectors={detectors.results}
-                        //             onDelete={() => {
-                        //                 setDetectors(null);
-                        //                 // TODO(junjuew): somehow without delays
-                        //                 // detector information fetched would still
-                        //                 // contain the deleted detector
-                        //                 setTimeout(loadDetectors, 1000);
-                        //             }}
-                        //             {...props}
-                        //         />
-                        //     </Grid.Row>
-                        // </Grid>
-                    )}
+                            })
+                        }
+                        onDownload={({
+                            downloadUrl,
+                            onDownloadSuccess = () => {},
+                            onDownloadFailure = () => {}
+                        }) => {
+                            fetchJSON(downloadUrl, "POST").then(() => {
+                                // need to continuously fetch the server
+                                checkDownload(
+                                    downloadUrl,
+                                    10000,
+                                    1200000,
+                                    resp => {
+                                        // a workaround to download a link automatically
+                                        const link = document.createElement(
+                                            "a"
+                                        );
+                                        link.href = downloadUrl;
+                                        link.click();
+                                        onDownloadSuccess();
+                                    },
+                                    onDownloadFailure
+                                );
+                            });
+                        }}
+                        onDelete={() => {
+                            setDetectors(null);
+                            // TODO(junjuew): somehow without delays
+                            // information fetched would still
+                            // contain the deleted item
+                            setTimeout(loadDetectors, 1000);
+                        }}
+                    />
+                )}
             </Page.Content>
         </SiteWrapper>
     );
@@ -377,12 +297,12 @@ const DetectorDetailPage = ({ props }) => {
                 {detector == null ? (
                     <Dimmer active loader />
                 ) : (
-                        <Grid>
-                            <Grid.Row>
-                                <DetectorDetailCard detector={detector} />
-                            </Grid.Row>
-                        </Grid>
-                    )}
+                    <Grid>
+                        <Grid.Row>
+                            <DetectorDetailCard detector={detector} />
+                        </Grid.Row>
+                    </Grid>
+                )}
             </Page.Content>
         </SiteWrapper>
     );
@@ -402,4 +322,3 @@ const DetectorNewPage = ({ ...props }) => {
 };
 
 export { DetectorPage, DetectorDetailPage, DetectorNewPage };
-
