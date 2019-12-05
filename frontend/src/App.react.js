@@ -38,7 +38,7 @@ function App(props) {
                 <Route exact path="/label" component={LabelManagementPage} />
                 <Route
                     exact
-                    path="/annotate/tasks/:tid/jobs/:jid"
+                    path="/annotate/tasks/:tid"
                     component={AnnotatePage}
                 />
                 <Route exact path="/detector" component={DetectorPage} />

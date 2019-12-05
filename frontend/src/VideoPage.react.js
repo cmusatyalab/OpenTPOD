@@ -38,9 +38,7 @@ const makeVideoCardOptions = ({ resourceObj, onDelete }) => {
                         URI.joinPaths(
                             endpoints.uiAnnotate,
                             "tasks",
-                            resourceObj.id.toString(),
-                            "jobs",
-                            resourceObj.segments[0].jobs[0].id.toString()
+                            resourceObj.id.toString()
                         ).toString()
                     ); // only considered 1st job
                 }}
@@ -140,23 +138,8 @@ const VideoPage = ({ ...props }) => {
     }, []);
 
     // called when a new task/video has finished creation
-    const onTaskCreated = task => {
+    const onTaskCreated = () => {
         setVideos(null);
-        let url = URI.joinPaths(endpoints.tasks, task.id.toString(), "status");
-
-        // wait until extraction is ready
-        fetchJSON(url, "GET").then(resp => {
-            console.log(resp);
-        });
-        // TODO(junjuew): hacky. delaying video
-        // information fetching for a few second to
-        // give server some time to extract frames
-        // this way, when going to the labeling
-        // page, at least some frames are available.
-        // the correct way is to get a method that
-        // is able to retrieve the information about whether the extraction
-        // process has finished or not.
-        // setTimeout(loadVideos, 10000);
         loadVideos(curPage);
     };
 
@@ -187,12 +170,14 @@ const VideoPage = ({ ...props }) => {
                 };
                 // Should call the load method when done and pass the returned server file id
                 // this server file id is then used later on when reverting or restoring a file
-                // so your server knows which file to return without exposing that info to the client
+                // so your server knows which file to return without exposing
+                // that info to the client
+                // this is called when the request transaction is finished
                 request.onload = function() {
                     if (request.status >= 200 && request.status < 300) {
                         // the load method accepts either a string (id) or an object
                         load(request.responseText);
-                        onTaskCreated(resp);
+                        onTaskCreated();
                     } else {
                         // Can call the error method if something is wrong, should exit after
                         error("File Upload Failed");

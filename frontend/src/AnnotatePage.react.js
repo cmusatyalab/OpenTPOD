@@ -75,6 +75,9 @@ class AnnotatePage extends React.Component {
 
     render() {
         let curHost = window.location.protocol + "//" + window.location.host;
+        // TODO(junjuew): need to change here
+        // jid is no longer passed in. need to create a select to choose
+        // different jobs
         let cvatURL =
             curHost + "/cvat-ui/?id=" + this.props.match.params.jid.toString();
         return (
@@ -88,15 +91,15 @@ class AnnotatePage extends React.Component {
                             {this.state.loading ? (
                                 <Dimmer active loader />
                             ) : (
-                                    <>
-                                        <LabelManagementPanel
-                                            taskID={this.props.match.params.tid}
-                                            labels={this.state.labels}
-                                            onAddLabel={this.addLabel}
-                                            onDeleteLabel={this.deleteLabel}
-                                        />
-                                    </>
-                                )}
+                                <>
+                                    <LabelManagementPanel
+                                        taskID={this.props.match.params.tid}
+                                        labels={this.state.labels}
+                                        onAddLabel={this.addLabel}
+                                        onDeleteLabel={this.deleteLabel}
+                                    />
+                                </>
+                            )}
                         </section>
                     </Grid.Row>
                 </Page.Content>
