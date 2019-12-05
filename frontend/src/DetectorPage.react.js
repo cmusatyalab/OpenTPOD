@@ -182,6 +182,7 @@ const DetectorDetailCard = ({ detector }) => {
 };
 
 const DetectorPage = ({ ...props }) => {
+    let history = useHistory();
     const [detectors, setDetectors] = useState(null);
 
     const loadDetectors = () => {
@@ -198,10 +199,26 @@ const DetectorPage = ({ ...props }) => {
     return (
         <SiteWrapper>
             <Page.Content>
-                <Page.Header
-                    title="Detectors"
-                    options={<Form.Input icon="search" placeholder="Search" />}
-                ></Page.Header>
+                <Page.Header title="Detectors">
+                    <Grid.Col width={1} offset={6}>
+                        <Button
+                            outline
+                            RootComponent="button"
+                            color="primary"
+                            size="md"
+                            icon="plus"
+                            onClick={e => {
+                                e.preventDefault();
+                                history.push(endpoints.uiDetectorNew);
+                            }}
+                        >
+                            Create
+                        </Button>
+                    </Grid.Col>
+                    <Grid.Col>
+                        <Form.Input icon="search" placeholder="Search" />
+                    </Grid.Col>
+                </Page.Header>
                 {detectors == null ? (
                     <Dimmer active loader />
                 ) : (
@@ -250,6 +267,70 @@ const DetectorPage = ({ ...props }) => {
                             setTimeout(loadDetectors, 1000);
                         }}
                     />
+                    // <Grid>
+                    //     <Grid.Row alignItems="top">
+                    //         <Grid.Col>
+                    //             <Button
+                    //                 RootComponent="button"
+                    //                 color="primary"
+                    //                 size="lg"
+                    //                 icon="plus"
+                    //                 onClick={e => {
+                    //                     e.preventDefault();
+                    //                     history.push(endpoints.uiDetectorNew);
+                    //                 }}
+                    //             >
+                    //                 Create
+                    //         </Button>
+                    //         </Grid.Col>
+                    //         <Grid.Col offset={8}>
+                    //             <ReactPaginate
+                    //                 previousLabel={"<"}
+                    //                 nextLabel={">"}
+                    //                 breakLabel={"..."}
+                    //                 pageCount={Math.ceil(
+                    //                     detectors.count /
+                    //                     detectors.results.length
+                    //                 )}
+                    //                 marginPagesDisplayed={1}
+                    //                 pageRangeDisplayed={2}
+                    //                 onPageChange={() => { }}
+                    //                 containerClassName={
+                    //                     "pagination react-paginate"
+                    //                 }
+                    //                 subContainerClassName={
+                    //                     "pages pagination react-paginate"
+                    //                 }
+                    //                 pageLinkClassName={
+                    //                     "list-group-item list-group-item-action"
+                    //                 }
+                    //                 previousLinkClassName={
+                    //                     "list-group-item list-group-item-action"
+                    //                 }
+                    //                 nextLinkClassName={
+                    //                     "list-group-item list-group-item-action"
+                    //                 }
+                    //                 breakLinkClassName={
+                    //                     "list-group-item list-group-item-action"
+                    //                 }
+                    //                 activeClassName={"active"}
+                    //             />
+                    //         </Grid.Col>
+                    //     </Grid.Row>
+                    //     <Grid.Row>
+                    //         <DetectorCards
+                    //             detectors={detectors.results}
+                    //             onDelete={() => {
+                    //                 setDetectors(null);
+                    //                 // TODO(junjuew): somehow without delays
+                    //                 // detector information fetched would still
+                    //                 // contain the deleted detector
+                    //                 setTimeout(loadDetectors, 1000);
+                    //             }}
+                    //             {...props}
+                    //         />
+                    //     </Grid.Row>
+                    // </Grid>
                 )}
             </Page.Content>
         </SiteWrapper>
