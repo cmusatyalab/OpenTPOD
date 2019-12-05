@@ -115,7 +115,7 @@ const AnnotatePage = ({ ...props }) => {
                     </>
                 )}
             </Page.Content>
-            {segment != null && (
+            {task != null && segment != null && (
                 <Iframe
                     url={URI.joinPaths(curHost, "/cvat-ui").setSearch(
                         "id",
