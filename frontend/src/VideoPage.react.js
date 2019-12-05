@@ -1,50 +1,125 @@
-// @flow
-
+import React, { useState, useEffect } from "react";
+import { useHistory, useParams } from "react-router-dom";
 // Import the Image EXIF Orientation and Image Preview plugins
 // Note: These need to be installed separately
 // import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
 import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
 // Import FilePond styles
 import "filepond/dist/filepond.min.css";
-import React from "react";
 import { FilePond, registerPlugin } from "react-filepond";
 import ReactPlayer from "react-player";
+import ReactPaginate from "react-paginate";
 import { Button, Card, Dimmer, Grid, Page } from "tabler-react";
 import URI from "urijs";
 import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
-import { fetchJSON } from "./util";
+import { fetchJSON, lineWrap } from "./util";
+import { PaginatedInfoCardList } from "./CardPage.react.js";
 import "./VideoPage.css";
 
 registerPlugin(FilePondPluginFileValidateType);
 
-class VideoPage extends React.Component {
+const makeVideoCardTitle = (resourceObj) => {
+    return lineWrap(resourceObj.name)
+}
+
+const makeVideoCardOptions = ({ resourceObj, onDelete }) => {
+    let history = useHistory();
+    return <>
+        <Button
+            outline
+            RootComponent="button"
+            color="primary"
+            size="sm"
+            icon="tag"
+            onClick={e => {
+                e.preventDefault();
+                history.push(
+                    URI.joinPaths(
+                        endpoints.uiAnnotate,
+                        "tasks",
+                        resourceObj.id.toString(),
+                        "jobs",
+                        resourceObj.segments[0].jobs[0].id.toString()
+                    ).toString()
+                ); // only considered 1st job
+            }}
+        >
+            Label
+        </Button>
+        <Button
+            outline
+            RootComponent="button"
+            color="danger"
+            size="sm"
+            icon="trash"
+            method="delete"
+            onClick={e => {
+                fetchJSON(
+                    URI.joinPaths(
+                        endpoints.tasks,
+                        resourceObj.id.toString()
+                    ),
+                    "DELETE"
+                ).then(onDelete());
+            }}
+        >
+            Delete
+        </Button>
+    </>
+}
+
+const makeVideoCardBody = (resourceObj) => {
+    return (
+        resourceObj.loading ? (
+            <div>
+                The video is being processed...
+                <Dimmer active loader />
+            </div>
+        ) : (
+                <div>
+                    <ReactPlayer
+                        url={URI.joinPaths(
+                            endpoints.mediaData,
+                            resourceObj.id.toString(),
+                            ".upload",
+                            resourceObj.name
+                        )}
+                        width="100%"
+                        height="100%"
+                        controls={true}
+                        light={URI.joinPaths(
+                            endpoints.tasks,
+                            resourceObj.id.toString(),
+                            "/frames/0"
+                        ).toString()} // expects string type
+                    />
+                </div>
+            )
+    )
+}
+
+const VideoPage = ({ ...props }) => {
+    let history = useHistory();
     // in this class, a video is used as the equivalent of a CVAT tasks
     // as CVAT only allows a single video in a task
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            files: [],
-            videoInfos: [],
-            loading: true
-        };
-    }
+    const [videos, setVideos] = useState(null);
+    const [files, setFiles] = useState([]);
 
     // fetch task/video information
-    fetchVideoInfo = () => {
-        this.setState({ loading: true });
+    const loadVideos = () => {
         fetchJSON(endpoints.tasks, "GET").then(resp => {
-            this.setState({
-                videoInfos: resp.results,
-                loading: false
-            });
+            setVideos(resp);
         });
     };
 
+    useEffect(() => {
+        loadVideos();
+    }, []);
+
     // called when a new task/video has finished creation
-    onTaskCreated = () => {
-        this.setState({ loading: true });
+    const onTaskCreated = () => {
+        setVideos(null);
         // TODO(junjuew): hacky. delaying video
         // information fetching for a few second to
         // give server some time to extract frames
@@ -53,10 +128,10 @@ class VideoPage extends React.Component {
         // the correct way is to get a method that
         // is able to retrieve the information about whether the extraction
         // process has finished or not.
-        setTimeout(this.fetchVideoInfo, 10000);
+        setTimeout(loadVideos, 10000);
     };
 
-    createTask = ({
+    const createTask = ({
         data,
         onTaskCreated,
         file,
@@ -84,7 +159,7 @@ class VideoPage extends React.Component {
                 // Should call the load method when done and pass the returned server file id
                 // this server file id is then used later on when reverting or restoring a file
                 // so your server knows which file to return without exposing that info to the client
-                request.onload = function() {
+                request.onload = function () {
                     if (request.status >= 200 && request.status < 300) {
                         // the load method accepts either a string (id) or an object
                         load(request.responseText);
@@ -113,170 +188,87 @@ class VideoPage extends React.Component {
             });
     };
 
-    componentDidMount() {
-        this.fetchVideoInfo();
-    }
-
-    render() {
-        let videoInfoCards = (
-            <Grid.Row>
-                {" "}
-                {this.state.videoInfos.map((item, index) => (
-                    <Grid.Col md={4} key={index}>
-                        <Card>
-                            <Card.Header>
-                                <Card.Title>
-                                    {item.name.replace(/(.{10})/g, "$1\n")}
-                                </Card.Title>
-                                <Card.Options>
-                                    <Button
-                                        outline
-                                        RootComponent="button"
-                                        color="primary"
-                                        size="sm"
-                                        icon="tag"
-                                        onClick={e => {
-                                            e.preventDefault();
-                                            this.props.history.push(
-                                                URI.joinPaths(
-                                                    endpoints.uiAnnotate,
-                                                    "tasks",
-                                                    item.id.toString(),
-                                                    "jobs",
-                                                    item.segments[0].jobs[0].id.toString()
-                                                ).toString()
-                                            ); // only consider 1st job
-                                        }}
-                                    >
-                                        Label
-                                    </Button>
-                                    <Button
-                                        outline
-                                        RootComponent="button"
-                                        color="danger"
-                                        size="sm"
-                                        icon="trash"
-                                        method="delete"
-                                        onClick={e => {
-                                            fetchJSON(
-                                                URI.joinPaths(
-                                                    endpoints.tasks,
-                                                    item.id.toString()
-                                                ),
-                                                "DELETE"
-                                            ).then(
-                                                this.setState({
-                                                    videoInfos: this.state.videoInfos.filter(
-                                                        (_, i) => i !== index
-                                                    )
-                                                })
-                                            );
-                                        }}
-                                    >
-                                        Delete
-                                    </Button>
-                                </Card.Options>
-                            </Card.Header>
-                            <Card.Body>
-                                {item.loading ? (
-                                    <div>
-                                        The video is being processed...
-                                        <Dimmer active loader />
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <ReactPlayer
-                                            url={URI.joinPaths(
-                                                endpoints.mediaData,
-                                                item.id.toString(),
-                                                ".upload",
-                                                item.name
-                                            )}
-                                            width="100%"
-                                            height="100%"
-                                            controls={true}
-                                            light={URI.joinPaths(
-                                                endpoints.tasks,
-                                                item.id.toString(),
-                                                "/frames/0"
-                                            ).toString()} // expects string type
-                                        />
-                                    </div>
-                                )}
-                            </Card.Body>
-                        </Card>
-                    </Grid.Col>
-                ))}
-            </Grid.Row>
-        );
-
-        return (
-            <SiteWrapper>
-                <Page.Content>
-                    <Grid.Row>
-                        <section className="container">
-                            <FilePond
-                                ref={ref => (this.pond = ref)}
-                                labelIdle="Drag & Drop videos or Click to Browse."
-                                files={this.state.files}
-                                allowMultiple={true}
-                                server={{
-                                    process: (
-                                        fieldName,
+    return (
+        <SiteWrapper>
+            <Page.Content>
+                <Grid.Row>
+                    <section className="container">
+                        <FilePond
+                            labelIdle="Drag & Drop videos or Click to Browse."
+                            files={files}
+                            allowMultiple={true}
+                            server={{
+                                process: (
+                                    fieldName,
+                                    file,
+                                    metadata,
+                                    load,
+                                    error,
+                                    progress,
+                                    abort
+                                ) => {
+                                    // create CVAT task first
+                                    let data = {
+                                        name: file.name,
+                                        labels: [],
+                                        image_quality: 100
+                                    };
+                                    createTask({
+                                        data,
+                                        onTaskCreated,
                                         file,
-                                        metadata,
+                                        progress,
                                         load,
                                         error,
-                                        progress,
                                         abort
-                                    ) => {
-                                        // create CVAT task first
-                                        let data = {
-                                            name: file.name,
-                                            labels: [],
-                                            image_quality: 100
-                                        };
-                                        let onTaskCreated = this.onTaskCreated;
-                                        this.createTask({
-                                            data,
-                                            onTaskCreated,
-                                            file,
-                                            progress,
-                                            load,
-                                            error,
-                                            abort
-                                        });
-                                    },
-
-                                    fetch: null,
-                                    revert: null,
-                                    load: null
-                                }}
-                                allowRevert={false}
-                                acceptedFileTypes="video/*"
-                                fileValidateTypeLabelExpectedTypes="Expects a video file"
-                                onupdatefiles={fileItems => {
-                                    // Set currently active file objects to this.state
-                                    this.setState({
-                                        files: fileItems.map(
-                                            fileItem => fileItem.file
-                                        )
                                     });
-                                }}
-                                onprocessfiles={() => {
-                                    this.setState({ files: [] });
-                                }}
-                            />
-                        </section>
-                    </Grid.Row>
-                    {this.state.loading ? (
-                        <Dimmer active loader />
-                    ) : (
-                        videoInfoCards
-                    )}
-                </Page.Content>
-            </SiteWrapper>
-        );
-    }
-}
+                                },
+
+                                fetch: null,
+                                revert: null,
+                                load: null
+                            }}
+                            allowRevert={false}
+                            acceptedFileTypes="video/*"
+                            fileValidateTypeLabelExpectedTypes="Expects a video file"
+                            onupdatefiles={fileItems => {
+                                // Set currently active file objects
+                                setFiles(
+                                    fileItems.map(fileItem => fileItem.file)
+                                );
+                            }}
+                            onprocessfiles={() => {
+                                setFiles([]);
+                            }}
+                        />
+                    </section>
+                </Grid.Row>
+                {videos == null ? (
+                    <Dimmer active loader />
+                ) : (
+                        <PaginatedInfoCardList
+                            iterableResourceObjs={videos.results}
+                            onPageChange={() => { }}
+                            pageCount={Math.ceil(videos.count / videos.results.length)}
+                            makeTitle={makeVideoCardTitle}
+                            makeOptions={
+                                resourceObj => makeVideoCardOptions({
+                                    resourceObj: resourceObj,
+                                    onDelete: () => {
+                                        setVideos(null);
+                                        // TODO(junjuew): somehow without delays
+                                        // information fetched would still
+                                        // contain the deleted item
+                                        setTimeout(loadVideos, 1000);
+                                    }
+                                })
+                            }
+                            makeBody={makeVideoCardBody}
+                        />
+                    )
+                }
+            </Page.Content>
+        </SiteWrapper>
+    );
+};
 export default VideoPage;
