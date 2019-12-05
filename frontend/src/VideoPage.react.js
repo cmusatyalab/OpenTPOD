@@ -99,21 +99,26 @@ const makeVideoCardBody = resourceObj => {
 };
 
 const VideoPage = ({ ...props }) => {
-    let history = useHistory();
     // in this class, a video is used as the equivalent of a CVAT tasks
     // as CVAT only allows a single video in a task
     const [videos, setVideos] = useState(null);
     const [files, setFiles] = useState([]);
+    const [curPage, setCurPage] = useState(null);
 
     // fetch task/video information
-    const loadVideos = () => {
-        fetchJSON(endpoints.tasks, "GET").then(resp => {
-            setVideos(resp);
-        });
+    const loadVideos = newPage => {
+        if (newPage !== curPage) {
+            let url = new URI(endpoints.tasks);
+            url.setSearch("page", newPage);
+            fetchJSON(url, "GET").then(resp => {
+                setVideos(resp);
+                setCurPage(newPage);
+            });
+        }
     };
 
     useEffect(() => {
-        loadVideos();
+        loadVideos(1);
     }, []);
 
     // called when a new task/video has finished creation
@@ -127,7 +132,8 @@ const VideoPage = ({ ...props }) => {
         // the correct way is to get a method that
         // is able to retrieve the information about whether the extraction
         // process has finished or not.
-        setTimeout(loadVideos, 10000);
+        // setTimeout(loadVideos, 10000);
+        loadVideos(curPage);
     };
 
     const createTask = ({
@@ -247,7 +253,6 @@ const VideoPage = ({ ...props }) => {
                 ) : (
                     <PaginatedInfoCardList
                         iterableResourceObjs={videos.results}
-                        onPageChange={() => {}}
                         pageCount={Math.ceil(
                             videos.count / videos.results.length
                         )}
@@ -257,11 +262,15 @@ const VideoPage = ({ ...props }) => {
                                 resourceObj: resourceObj,
                                 onDelete: () => {
                                     setVideos(null);
-                                    loadVideos();
+                                    loadVideos(curPage);
                                 }
                             })
                         }
                         makeBody={makeVideoCardBody}
+                        onPageChange={data => {
+                            let newPage = data.selected + 1;
+                            loadVideos(newPage);
+                        }}
                     />
                 )}
             </Page.Content>

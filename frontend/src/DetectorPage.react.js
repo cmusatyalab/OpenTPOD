@@ -184,16 +184,22 @@ const DetectorDetailCard = ({ detector }) => {
 const DetectorPage = ({ ...props }) => {
     let history = useHistory();
     const [detectors, setDetectors] = useState(null);
+    const [curPage, setCurPage] = useState(null);
 
-    const loadDetectors = () => {
-        setDetectors(null);
-        fetchJSON(endpoints.detectors, "GET").then(resp => {
-            setDetectors(resp);
-        });
+    const loadDetectors = newPage => {
+        if (newPage !== curPage) {
+            setDetectors(null);
+            let url = new URI(endpoints.detectors);
+            url.setSearch("page", newPage);
+            fetchJSON(url, "GET").then(resp => {
+                setDetectors(resp);
+                setCurPage(newPage);
+            });
+        }
     };
 
     useEffect(() => {
-        loadDetectors();
+        loadDetectors(1);
     }, []);
 
     return (
@@ -261,7 +267,7 @@ const DetectorPage = ({ ...props }) => {
                         }}
                         onDelete={() => {
                             setDetectors(null);
-                            loadDetectors();
+                            loadDetectors(curPage);
                         }}
                     />
                 )}

@@ -77,7 +77,7 @@ const PaginatedInfoCardList = ({
     makeOptions,
     makeBody,
     cardColumnWidth = 6,
-    pageNavOffset = 10,
+    pageNavOffset = 0,
     ...rest
 }) => (
     <>
@@ -89,19 +89,14 @@ const PaginatedInfoCardList = ({
                     breakLabel={"..."}
                     pageCount={pageCount}
                     marginPagesDisplayed={1}
-                    pageRangeDisplayed={2}
+                    pageRangeDisplayed={5}
                     onPageChange={onPageChange}
                     containerClassName={"pagination react-paginate"}
-                    subContainerClassName={"pages pagination react-paginate"}
-                    pageLinkClassName={"list-group-item list-group-item-action"}
-                    previousLinkClassName={
-                        "list-group-item list-group-item-action"
-                    }
-                    nextLinkClassName={"list-group-item list-group-item-action"}
-                    breakLinkClassName={
-                        "list-group-item list-group-item-action"
-                    }
-                    activeClassName={"active"}
+                    pageLinkClassName={"btn btn-md btn-secondary"}
+                    previousLinkClassName={"btn btn-md btn-secondary"}
+                    nextLinkClassName={"btn btn-md btn-secondary"}
+                    breakLinkClassName={"btn btn-md btn-secondary"}
+                    activeClassName={"react-paginate-active"}
                 />
             </Grid.Col>
         </Grid.Row>
