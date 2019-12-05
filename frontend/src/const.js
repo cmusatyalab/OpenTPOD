@@ -24,4 +24,17 @@ const endpoints = {
 // django settings
 const PAGE_SIZE = 2;
 
-export { endpoints, PAGE_SIZE };
+// Style Select to fit into site's theme
+const reactSelectTablerStyles = {
+    control: (provided, state) => ({
+        ...provided,
+        border: "1px solid rgba(0, 40, 100, 0.12)",
+        borderRadius: "3px"
+    }),
+    placeholder: (provided, state) => ({
+        ...provided,
+        opacity: "0.6"
+    })
+};
+
+export { endpoints, PAGE_SIZE, reactSelectTablerStyles };

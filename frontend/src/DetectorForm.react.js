@@ -5,7 +5,7 @@ import AsyncPaginate from "react-select-async-paginate";
 import { Formik } from "formik";
 import URI from "urijs";
 import { Dimmer, Form, FormTextInput, FormCard } from "tabler-react";
-import { endpoints } from "./const";
+import { endpoints, reactSelectTablerStyles } from "./const";
 import { fetchJSON } from "./util";
 import defaultStrings from "./DetectorPage.strings";
 import "./App.css";
@@ -61,19 +61,6 @@ const loadAndSearchTasks = async (search, options, { page }) => {
             page: nextPage
         }
     };
-};
-
-// Style Select to fit into site's theme
-const reactSelectTablerStyles = {
-    control: (provided, state) => ({
-        ...provided,
-        border: "1px solid rgba(0, 40, 100, 0.12)",
-        borderRadius: "3px"
-    }),
-    placeholder: (provided, state) => ({
-        ...provided,
-        opacity: "0.6"
-    })
 };
 
 const NewDetectorForm = ({ strings = {} }) => {
