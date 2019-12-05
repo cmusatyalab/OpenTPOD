@@ -1,6 +1,6 @@
 import * as React from "react";
 import { NavLink, withRouter } from "react-router-dom";
-import { endpoints } from "./url";
+import { endpoints } from "./const";
 
 import {
     Site,

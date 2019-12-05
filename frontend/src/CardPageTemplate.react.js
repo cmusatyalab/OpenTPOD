@@ -68,6 +68,7 @@ const InfoCardList = ({
 // a paginated list of info card supporting showing paginated results
 const PaginatedInfoCardList = ({
     iterableResourceObjs,
+    forcePage,
     onPageChange,
     pageCount,
     Title,
@@ -90,6 +91,7 @@ const PaginatedInfoCardList = ({
                     pageCount={pageCount}
                     marginPagesDisplayed={1}
                     pageRangeDisplayed={5}
+                    forcePage={forcePage}
                     onPageChange={onPageChange}
                     containerClassName={"pagination react-paginate"}
                     pageLinkClassName={"btn btn-md btn-secondary"}

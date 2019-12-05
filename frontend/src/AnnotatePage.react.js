@@ -4,7 +4,7 @@ import { LabelManagementPanel } from "./Label.react";
 import SiteWrapper from "./SiteWrapper.react";
 import { fetchJSON } from "./util";
 import URI from "urijs";
-import { endpoints } from "./url";
+import { endpoints } from "./const";
 import Iframe from "react-iframe";
 import windowSize from "react-window-size";
 

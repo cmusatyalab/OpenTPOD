@@ -12,8 +12,8 @@ import { Button, Dimmer, Grid, Page } from "tabler-react";
 import URI from "urijs";
 import { PaginatedInfoCardList } from "./CardPageTemplate.react.js";
 import SiteWrapper from "./SiteWrapper.react";
-import { endpoints } from "./url";
-import { fetchJSON, lineWrap } from "./util";
+import { endpoints, PAGE_SIZE } from "./const";
+import { fetchJSON, lineWrap, clamp } from "./util";
 import "./VideoPage.css";
 
 registerPlugin(FilePondPluginFileValidateType);
@@ -107,14 +107,13 @@ const VideoPage = ({ ...props }) => {
 
     // fetch task/video information
     const loadVideos = newPage => {
-        if (newPage !== curPage) {
-            let url = new URI(endpoints.tasks);
-            url.setSearch("page", newPage);
-            fetchJSON(url, "GET").then(resp => {
-                setVideos(resp);
-                setCurPage(newPage);
-            });
-        }
+        setVideos(null);
+        let url = new URI(endpoints.tasks);
+        url.setSearch("page", newPage);
+        fetchJSON(url, "GET").then(resp => {
+            setVideos(resp);
+            setCurPage(newPage);
+        });
     };
 
     useEffect(() => {
@@ -253,20 +252,30 @@ const VideoPage = ({ ...props }) => {
                 ) : (
                     <PaginatedInfoCardList
                         iterableResourceObjs={videos.results}
-                        pageCount={Math.ceil(
-                            videos.count / videos.results.length
-                        )}
+                        pageCount={Math.ceil(videos.count / PAGE_SIZE)}
                         makeTitle={makeVideoCardTitle}
                         makeOptions={resourceObj =>
                             makeVideoCardOptions({
                                 resourceObj: resourceObj,
                                 onDelete: () => {
-                                    setVideos(null);
-                                    loadVideos(curPage);
+                                    let page = curPage;
+                                    if (videos !== null)
+                                        page = clamp(
+                                            curPage,
+                                            1,
+                                            Math.ceil(
+                                                (videos.count - 1) / PAGE_SIZE
+                                            )
+                                        );
+                                    loadVideos(page);
                                 }
                             })
                         }
                         makeBody={makeVideoCardBody}
+                        // react-pagination start from 0
+                        // django pagination start from 1
+                        // hence the -1/+1
+                        forcePage={curPage - 1}
                         onPageChange={data => {
                             let newPage = data.selected + 1;
                             loadVideos(newPage);

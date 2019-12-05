@@ -6,8 +6,13 @@ import "./App.css";
 import { PaginatedInfoCardList } from "./CardPageTemplate.react.js";
 import { NewDetectorForm } from "./DetectorForm.react";
 import SiteWrapper from "./SiteWrapper.react";
-import { endpoints } from "./url";
-import { downloadByPoll as checkDownload, fetchJSON, lineWrap } from "./util";
+import { endpoints, PAGE_SIZE } from "./const";
+import {
+    downloadByPoll as checkDownload,
+    fetchJSON,
+    lineWrap,
+    clamp
+} from "./util";
 
 const fetchDetector = id => {
     /* Get detector json from backend*/
@@ -187,15 +192,15 @@ const DetectorPage = ({ ...props }) => {
     const [curPage, setCurPage] = useState(null);
 
     const loadDetectors = newPage => {
-        if (newPage !== curPage) {
-            setDetectors(null);
-            let url = new URI(endpoints.detectors);
-            url.setSearch("page", newPage);
-            fetchJSON(url, "GET").then(resp => {
-                setDetectors(resp);
-                setCurPage(newPage);
-            });
-        }
+        if (detectors !== null)
+            newPage = clamp(newPage, 1, Math.ceil(detectors.count / PAGE_SIZE));
+        setDetectors(null);
+        let url = new URI(endpoints.detectors);
+        url.setSearch("page", newPage);
+        fetchJSON(url, "GET").then(resp => {
+            setDetectors(resp);
+            setCurPage(newPage);
+        });
     };
 
     useEffect(() => {
@@ -230,10 +235,7 @@ const DetectorPage = ({ ...props }) => {
                 ) : (
                     <PaginatedInfoCardList
                         iterableResourceObjs={detectors.results}
-                        onPageChange={() => {}}
-                        pageCount={Math.ceil(
-                            detectors.count / detectors.results.length
-                        )}
+                        pageCount={Math.ceil(detectors.count / PAGE_SIZE)}
                         makeTitle={makeDetectorCardTitle}
                         Options={DetectorCardOptions}
                         makeBody={resourceObj =>
@@ -241,6 +243,11 @@ const DetectorPage = ({ ...props }) => {
                                 resourceObj: resourceObj
                             })
                         }
+                        forcePage={curPage - 1}
+                        onPageChange={data => {
+                            let newPage = data.selected + 1;
+                            loadDetectors(newPage);
+                        }}
                         onDownload={({
                             downloadUrl,
                             onDownloadSuccess = () => {},
@@ -266,8 +273,14 @@ const DetectorPage = ({ ...props }) => {
                             });
                         }}
                         onDelete={() => {
-                            setDetectors(null);
-                            loadDetectors(curPage);
+                            let page = curPage;
+                            if (detectors !== null)
+                                page = clamp(
+                                    curPage,
+                                    1,
+                                    Math.ceil((detectors.count - 1) / PAGE_SIZE)
+                                );
+                            loadDetectors(page);
                         }}
                     />
                 )}

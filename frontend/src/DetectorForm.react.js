@@ -5,7 +5,7 @@ import AsyncPaginate from "react-select-async-paginate";
 import { Formik } from "formik";
 import URI from "urijs";
 import { Dimmer, Form, FormTextInput, FormCard } from "tabler-react";
-import { endpoints } from "./url";
+import { endpoints } from "./const";
 import { fetchJSON } from "./util";
 import defaultStrings from "./DetectorPage.strings";
 import "./App.css";

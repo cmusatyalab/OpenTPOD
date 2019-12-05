@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Alert } from "tabler-react";
-import { endpoints } from "./url";
+import { endpoints } from "./const";
 
 function logFetchErrors(response) {
     if (!response.ok) {
@@ -83,10 +83,15 @@ function lineWrap(input, breakAt = 10) {
     return input;
 }
 
+function clamp(num, min, max) {
+    return num <= min ? min : num >= max ? max : num;
+}
+
 export {
     checkAuth,
     fetchJSON,
     checkDownload as downloadByPoll,
     withFormikStatus,
-    lineWrap
+    lineWrap,
+    clamp
 };

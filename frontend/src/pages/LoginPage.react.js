@@ -3,7 +3,7 @@ import { Formik } from "formik";
 import { LoginPage as TablerLoginPage, Alert } from "tabler-react";
 import { fetchJSON, withFormikStatus } from "../util";
 import { withRouter } from "react-router";
-import { endpoints } from "../url";
+import { endpoints } from "../const";
 
 class LoginPage extends React.Component {
     constructor(props) {
