@@ -106,26 +106,6 @@ const makeDetectorCardBody = ({ resourceObj }) => {
     );
 };
 
-// detector card to display detector information
-// TODO(junjuew): a deleted item sometimes still show up in the detector panel
-// after being redirected to the detector preview
-const DetectorPreviewCard = ({ detector, onDelete, ...rest }) => {
-    // null - no download
-    // false - created downloading job
-    // true - job avalable for download
-    const [downloadAvailable, setDownloadAvailable] = useState(null);
-    let history = useHistory();
-    return (
-        <Card>
-            <Card.Header>
-                <Card.Title>{lineWrap(detector.name)}</Card.Title>
-                <Card.Options></Card.Options>
-            </Card.Header>
-            <Card.Body></Card.Body>
-        </Card>
-    );
-};
-
 // detailed detector view with all of its field
 const DetectorDetailCard = ({ detector }) => {
     let visualizationUrl = URI.joinPaths(
