@@ -70,14 +70,27 @@ const makeVideoCardOptions = ({ resourceObj, onDelete }) => {
     );
 };
 
-const makeVideoCardBody = resourceObj => {
-    return resourceObj.loading ? (
+const VideoCardBody = ({ resourceObj }) => {
+    const [status, setStatus] = useState(null);
+
+    // get video status: one of [Queued, Started, Finished, Failed]
+    const loadStatus = () => {
+        setStatus(null);
+        let url = URI.joinPaths(resourceObj.url, "/status").toString();
+        fetchJSON(url, "GET").then(resp => {
+            setStatus(resp);
+            if (resp.state == "Queued" || resp.state == "Started")
+                setTimeout(loadStatus, 10000);
+        });
+    };
+
+    useEffect(() => {
+        loadStatus();
+    }, []);
+
+    return status && status.state == "Finished" ? (
         <div>
-            The video is being processed...
-            <Dimmer active loader />
-        </div>
-    ) : (
-        <div>
+            <b>Created Date:</b> {resourceObj.created_date} <br />
             <ReactPlayer
                 url={URI.joinPaths(
                     endpoints.mediaData,
@@ -88,12 +101,18 @@ const makeVideoCardBody = resourceObj => {
                 width="100%"
                 height="100%"
                 controls={true}
-                light={URI.joinPaths(
-                    endpoints.tasks,
-                    resourceObj.id.toString(),
-                    "/frames/0"
-                ).toString()} // expects string type
+                light={URI.joinPaths(resourceObj.url, "/frames/0").toString()} // expects string type
             />
+        </div>
+    ) : status && status.state == "Failed" ? (
+        <div>
+            <b>Error:</b> Failed to extract the video into images.
+            <br />
+        </div>
+    ) : (
+        <div>
+            The video is being processed...
+            <Dimmer active loader />
         </div>
     );
 };
@@ -121,8 +140,14 @@ const VideoPage = ({ ...props }) => {
     }, []);
 
     // called when a new task/video has finished creation
-    const onTaskCreated = () => {
+    const onTaskCreated = task => {
         setVideos(null);
+        let url = URI.joinPaths(endpoints.tasks, task.id.toString(), "status");
+
+        // wait until extraction is ready
+        fetchJSON(url, "GET").then(resp => {
+            console.log(resp);
+        });
         // TODO(junjuew): hacky. delaying video
         // information fetching for a few second to
         // give server some time to extract frames
@@ -167,7 +192,7 @@ const VideoPage = ({ ...props }) => {
                     if (request.status >= 200 && request.status < 300) {
                         // the load method accepts either a string (id) or an object
                         load(request.responseText);
-                        onTaskCreated();
+                        onTaskCreated(resp);
                     } else {
                         // Can call the error method if something is wrong, should exit after
                         error("File Upload Failed");
@@ -271,7 +296,7 @@ const VideoPage = ({ ...props }) => {
                                 }
                             })
                         }
-                        makeBody={makeVideoCardBody}
+                        Body={VideoCardBody}
                         // react-pagination start from 0
                         // django pagination start from 1
                         // hence the -1/+1
