@@ -11,7 +11,7 @@ import time
 from ast import literal_eval
 from datetime import datetime
 from distutils.dir_util import copy_tree
-from traceback import print_exception
+import traceback
 from urllib import error as urlerror
 from urllib import parse as urlparse
 from urllib import request as urlrequest
@@ -20,6 +20,7 @@ import django_rq
 import rq
 from django.conf import settings
 from django.db import transaction
+from logzero import logger
 from PIL import Image
 
 from . import datasets, models, provider
@@ -42,13 +43,22 @@ def _train(db_detector,
     db_detector.status = str(models.Status.TRAINING)
     db_detector.save()
 
-    detector.prepare()
-    detector.train()
+    try:
+        detector.prepare()
+        detector.train()
 
-    # refresh db obj as a long time has passed after training
-    db_detector = models.Detector.objects.get(id=db_detector.id)
-    db_detector.status = str(models.Status.TRAINED)
-    db_detector.save()
+        # refresh db obj as a long time has passed after training
+        db_detector = models.Detector.objects.get(id=db_detector.id)
+        db_detector.status = str(models.Status.TRAINED)
+    except Exception as e:
+        logger.error('ERROR: Training failed.')
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        logger.error(''.join(traceback.format_exception(
+            exc_type, exc_value,
+            exc_traceback)))
+        db_detector.status = str(models.Status.ERRORED)
+    finally:
+        db_detector.save()
 
 
 def export(db_detector):

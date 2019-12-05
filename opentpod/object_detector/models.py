@@ -14,7 +14,7 @@ class Status(enum.Enum):
     CREATED = 'created'
     TRAINING = 'training'
     TRAINED = 'trained'
-    ERROR = 'error'
+    ERRORED = 'error'
 
     @classmethod
     def choices(self):
