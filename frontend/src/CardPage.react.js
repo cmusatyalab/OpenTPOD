@@ -1,24 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
-import { Formik } from "formik";
-import URI from "urijs";
+import React from "react";
 import ReactPaginate from "react-paginate";
-import {
-    Button,
-    Card,
-    Dimmer,
-    Grid,
-    Page,
-    List,
-    Form,
-    FormTextInput,
-    FormCard
-} from "tabler-react";
-import SiteWrapper from "./SiteWrapper.react";
-import { endpoints } from "./url";
-import { fetchJSON, lineWrap, downloadByPoll as checkDownload } from "./util";
-import defaultStrings from "./DetectorPage.strings";
-import { NewDetectorForm } from "./DetectorForm.react";
+import { Card, Grid } from "tabler-react";
 import "./App.css";
 
 // info card to show resource information
@@ -112,8 +94,5 @@ const PaginatedInfoCardList = ({
         </Grid.Row>
     </>
 
-export {
-    InfoCard,
-    InfoCardList,
-    PaginatedInfoCardList
-};
+export { InfoCard, InfoCardList, PaginatedInfoCardList };
+

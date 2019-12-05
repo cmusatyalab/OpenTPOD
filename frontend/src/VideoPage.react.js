@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
 // Import the Image EXIF Orientation and Image Preview plugins
 // Note: These need to be installed separately
 // import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
 import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
 // Import FilePond styles
 import "filepond/dist/filepond.min.css";
+import React, { useEffect, useState } from "react";
 import { FilePond, registerPlugin } from "react-filepond";
 import ReactPlayer from "react-player";
-import ReactPaginate from "react-paginate";
-import { Button, Card, Dimmer, Grid, Page } from "tabler-react";
+import { useHistory } from "react-router-dom";
+import { Button, Dimmer, Grid, Page } from "tabler-react";
 import URI from "urijs";
+import { PaginatedInfoCardList } from "./CardPage.react.js";
 import SiteWrapper from "./SiteWrapper.react";
 import { endpoints } from "./url";
 import { fetchJSON, lineWrap } from "./util";
-import { PaginatedInfoCardList } from "./CardPage.react.js";
 import "./VideoPage.css";
 
 registerPlugin(FilePondPluginFileValidateType);
