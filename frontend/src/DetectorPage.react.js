@@ -84,7 +84,7 @@ const DetectorCardOptions = ({ resourceObj, onDownload, onDelete }) => {
                             resourceObj.id.toString()
                         ),
                         "DELETE"
-                    ).then(onDelete());
+                    ).then(onDelete);
                 }}
             ></Button>
         </>
@@ -261,76 +261,9 @@ const DetectorPage = ({ ...props }) => {
                         }}
                         onDelete={() => {
                             setDetectors(null);
-                            // TODO(junjuew): somehow without delays
-                            // information fetched would still
-                            // contain the deleted item
-                            setTimeout(loadDetectors, 1000);
+                            loadDetectors();
                         }}
                     />
-                    // <Grid>
-                    //     <Grid.Row alignItems="top">
-                    //         <Grid.Col>
-                    //             <Button
-                    //                 RootComponent="button"
-                    //                 color="primary"
-                    //                 size="lg"
-                    //                 icon="plus"
-                    //                 onClick={e => {
-                    //                     e.preventDefault();
-                    //                     history.push(endpoints.uiDetectorNew);
-                    //                 }}
-                    //             >
-                    //                 Create
-                    //         </Button>
-                    //         </Grid.Col>
-                    //         <Grid.Col offset={8}>
-                    //             <ReactPaginate
-                    //                 previousLabel={"<"}
-                    //                 nextLabel={">"}
-                    //                 breakLabel={"..."}
-                    //                 pageCount={Math.ceil(
-                    //                     detectors.count /
-                    //                     detectors.results.length
-                    //                 )}
-                    //                 marginPagesDisplayed={1}
-                    //                 pageRangeDisplayed={2}
-                    //                 onPageChange={() => { }}
-                    //                 containerClassName={
-                    //                     "pagination react-paginate"
-                    //                 }
-                    //                 subContainerClassName={
-                    //                     "pages pagination react-paginate"
-                    //                 }
-                    //                 pageLinkClassName={
-                    //                     "list-group-item list-group-item-action"
-                    //                 }
-                    //                 previousLinkClassName={
-                    //                     "list-group-item list-group-item-action"
-                    //                 }
-                    //                 nextLinkClassName={
-                    //                     "list-group-item list-group-item-action"
-                    //                 }
-                    //                 breakLinkClassName={
-                    //                     "list-group-item list-group-item-action"
-                    //                 }
-                    //                 activeClassName={"active"}
-                    //             />
-                    //         </Grid.Col>
-                    //     </Grid.Row>
-                    //     <Grid.Row>
-                    //         <DetectorCards
-                    //             detectors={detectors.results}
-                    //             onDelete={() => {
-                    //                 setDetectors(null);
-                    //                 // TODO(junjuew): somehow without delays
-                    //                 // detector information fetched would still
-                    //                 // contain the deleted detector
-                    //                 setTimeout(loadDetectors, 1000);
-                    //             }}
-                    //             {...props}
-                    //         />
-                    //     </Grid.Row>
-                    // </Grid>
                 )}
             </Page.Content>
         </SiteWrapper>

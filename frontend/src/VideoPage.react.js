@@ -61,7 +61,7 @@ const makeVideoCardOptions = ({ resourceObj, onDelete }) => {
                             resourceObj.id.toString()
                         ),
                         "DELETE"
-                    ).then(onDelete());
+                    ).then(onDelete);
                 }}
             >
                 Delete
@@ -257,10 +257,7 @@ const VideoPage = ({ ...props }) => {
                                 resourceObj: resourceObj,
                                 onDelete: () => {
                                     setVideos(null);
-                                    // TODO(junjuew): somehow without delays
-                                    // information fetched would still
-                                    // contain the deleted item
-                                    setTimeout(loadVideos, 1000);
+                                    loadVideos();
                                 }
                             })
                         }
