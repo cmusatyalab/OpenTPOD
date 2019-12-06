@@ -128,8 +128,14 @@ const DetectorDetailCard = ({ detector }) => {
                             e.preventDefault();
                             fetchJSON(visualizationUrl, "POST").then(resp => {
                                 setTimeout(() => {
+                                    let url = URI.joinPaths(
+                                        endpoints.detectors,
+                                        detector.id.toString(),
+                                        'tensorboard_proxy/index.html'
+                                    )
                                     window.open(
-                                        endpoints.tensorboard,
+                                        // endpoints.tensorboard,
+                                        url,
                                         "_blank"
                                     );
                                 }, 2000);
