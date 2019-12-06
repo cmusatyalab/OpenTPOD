@@ -6,6 +6,7 @@ import pathlib
 import re
 import shutil
 import signal
+import socket
 import subprocess
 import sys
 import time
@@ -18,6 +19,7 @@ from urllib import parse as urlparse
 from urllib import request as urlrequest
 
 import django_rq
+import psutil
 import rq
 from django.conf import settings
 from django.db import transaction
@@ -98,18 +100,29 @@ def _visualize_tensorboard(model_dir, pid_file_path):
         time.sleep(1000)
 
 
+def _find_open_port():
+    """Use socket's built in ability to find an open port."""
+    sock = socket.socket()
+    sock.bind(('', 0))
+    _, port = sock.getsockname()
+    sock.close()
+    return port
+
+
 def _visualize_tensorboard_subprocess(model_dir, pid_file_path):
+    # tensorboard will automatically find an available port to open
+    port = _find_open_port()
     cmd = ('tensorboard ' +
            '--logdir={} '.format(model_dir) +
            '--host={} '.format(settings.TENSORBOARD_HOST) +
-           '--port={} '.format(settings.TENSORBOARD_PORT))
+           '--port={}'.format(port))
     logger.info('\n===========================================\n')
-    logger.info('\n\Starting Tensorboard with following command: \n\n{}'.format(cmd))
+    logger.info('\n\tStarting Tensorboard with following command: \n\n{}'.format(cmd))
     logger.info('\n===========================================\n')
     process = subprocess.Popen(
         cmd.split())
     with open(pid_file_path, 'w') as f:
-        f.write(json.dumps(process.pid))
+        f.write(json.dumps({'pid': process.pid, 'port': port}))
 
 
 def visualize(db_detector):
@@ -130,14 +143,27 @@ def visualize(db_detector):
     # of killing a launched task. Somehow, celery is not showing the long-running
     # _visualize_tensorboard job as active, only as registerd..
     # kill running tb process if there is one
-    pid_file_path = (db_detector.get_model_dir() / 'tensorboard.pid').resolve()
+    pid_file_path = (db_detector.get_model_dir() / 'tensorboard.pinfo').resolve()
     if pid_file_path.exists():
         with open(pid_file_path, 'r') as f:
-            pid = json.loads(f.read())
-            try:
-                os.kill(pid, signal.SIGKILL)
-            except ProcessLookupError as e:
-                pass
+            subprocess_info = json.loads(f.read())
+            pid = subprocess_info['pid']
+            port = subprocess_info['port']
+            p = psutil.Process(pid)
+
+            for connection in p.connections():
+                if connection.laddr[1] == port:
+                    # if the process is still running
+                    # no need to launch a new process
+                    if connection.status == psutil.CONN_LISTEN:
+                        return
+                    else:
+                        # the process is somehow no longer listening on it
+                        # try kill it
+                        try:
+                            os.kill(pid, signal.SIGKILL)
+                        except ProcessLookupError as e:
+                            pass
 
     queue = django_rq.get_queue('tensorboard')
     rq_job = queue.enqueue_call(

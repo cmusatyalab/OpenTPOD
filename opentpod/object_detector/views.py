@@ -150,7 +150,15 @@ class DetectorViewSet(viewsets.ModelViewSet):
         """Proxy to tensorboard.
         remote_path is needed.
         """
-        # TODO (junjuew): make the port dynamic
-        remoteurl = 'http://{}:{}/'.format(settings.TENSORBOARD_HOST,
-                                           settings.TENSORBOARD_PORT) + remote_path
-        return proxy_view(request, remoteurl)
+        db_detector = self.get_object()
+        pid_file_path = (db_detector.get_model_dir() / 'tensorboard.pinfo').resolve()
+        if pid_file_path.exists():
+            with open(pid_file_path, 'r') as f:
+                subprocess_info = json.loads(f.read())
+                port = subprocess_info['port']
+            # TODO (junjuew): make the port dynamic
+            remoteurl = 'http://{}:{}/'.format(settings.TENSORBOARD_HOST,
+                                               port) + remote_path
+            return proxy_view(request, remoteurl)
+        else:
+            raise Http404
