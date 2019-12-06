@@ -16,7 +16,17 @@ urlpatterns = [
     path("auth/registration/", include('rest_auth.registration.urls')),
     path("django-rq/", include('django_rq.urls')),
     path("", include("opentpod.object_detector.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT
+) + static(
+    settings.STATIC_URL,
+    document_root=settings.STATIC_ROOT
+) + static(
+    settings.DATA_URL,
+    document_root=settings.DATA_ROOT
+)
+
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit

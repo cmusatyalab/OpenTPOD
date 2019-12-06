@@ -11,6 +11,9 @@ import environ
 ROOT_DIR = pathlib.Path(__file__).parents[2]
 APPS_DIR = ROOT_DIR / "opentpod"
 
+# variable directory to store data
+VAR_DIR = ROOT_DIR / "var"
+
 env = environ.Env()
 
 READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
@@ -172,9 +175,14 @@ STATICFILES_FINDERS = [
 # MEDIA
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = APPS_DIR / "media"
+MEDIA_ROOT = VAR_DIR / "media"
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = "/media/"
+
+# publicly accessible data directory
+DATA_ROOT = VAR_DIR / "data"
+DATA_URL = "/data/"
+os.makedirs(DATA_ROOT, exist_ok=True)
 
 # TEMPLATES
 # ------------------------------------------------------------------------------
@@ -384,16 +392,17 @@ CACHEOPS = {
 }
 CACHEOPS_DEGRADE_ON_FAILURE = True
 
-# opentpod
+# cvat settings
 # ------------------------------------------------------------------------------
 BASE_DIR = ROOT_DIR
-DATA_ROOT = MEDIA_ROOT / 'data'
-os.makedirs(DATA_ROOT, exist_ok=True)
-SHARE_ROOT = MEDIA_ROOT / 'share'
+SHARE_ROOT = VAR_DIR / 'share'
 os.makedirs(SHARE_ROOT, exist_ok=True)
-MODELS_ROOT = MEDIA_ROOT / 'models'
+MODELS_ROOT = VAR_DIR / 'models'
 os.makedirs(MODELS_ROOT, exist_ok=True)
-CACHE_DIR = DATA_ROOT / '.cache'
+
+# tpod requirements
+# ------------------------------------------------------------------------------
+CACHE_DIR = VAR_DIR / '.cache'
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB

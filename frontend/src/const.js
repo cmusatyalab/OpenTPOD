@@ -10,7 +10,7 @@ const endpoints = {
     detectorDownloadField: "model",
     detectorVisualizationField: "visualization/index.html",
     trainsets: "/api/opentpod/v1/trainsets",
-    mediaData: "/media/data/",
+    mediaData: "/data/",
     // front end handled routes
     uiVideo: "/video",
     uiLabel: "/label", // TODO (junjuew): still need this?

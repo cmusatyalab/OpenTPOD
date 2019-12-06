@@ -32,5 +32,5 @@ module.exports = function(app) {
     app.use(
         proxy("/static/rest_framework", { target: "http://127.0.0.1:5000" })
     );
-    app.use(proxy("/media/data", { target: "http://127.0.0.1:5000" }));
+    app.use(proxy("/data", { target: "http://127.0.0.1:5000" }));
 };
