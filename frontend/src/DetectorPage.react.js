@@ -126,20 +126,12 @@ const DetectorDetailCard = ({ detector }) => {
                         icon="tag"
                         onClick={e => {
                             e.preventDefault();
-                            fetchJSON(visualizationUrl, "POST").then(resp => {
-                                setTimeout(() => {
-                                    let url = URI.joinPaths(
-                                        endpoints.detectors,
-                                        detector.id.toString(),
-                                        'tensorboard_proxy/index.html'
-                                    )
-                                    window.open(
-                                        // endpoints.tensorboard,
-                                        url,
-                                        "_blank"
-                                    );
-                                }, 2000);
-                            });
+                            let url = URI.joinPaths(
+                                endpoints.detectors,
+                                detector.id.toString(),
+                                endpoints.detectorVisualizationField
+                            );
+                            window.open(url, "_blank");
                         }}
                     >
                         Visualize

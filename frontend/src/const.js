@@ -7,9 +7,8 @@ const endpoints = {
     detectors: "/api/opentpod/v1/detectors",
     detectorDnnTypes: "/api/opentpod/v1/detectors/types",
     dnnTrainingConfigs: "/api/opentpod/v1/detectors/training_configs",
-    tensorboard: "/api/opentpod/tensorboard/index.html",
     detectorDownloadField: "model",
-    detectorVisualizationField: "visualization",
+    detectorVisualizationField: "visualization/index.html",
     trainsets: "/api/opentpod/v1/trainsets",
     mediaData: "/media/data/",
     // front end handled routes

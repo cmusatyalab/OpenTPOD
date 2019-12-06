@@ -1,15 +1,19 @@
 """Tensorflow Object Detection API provider.
 """
-import subprocess
-import re
-import tempfile
-import shutil
-import pathlib
-import os
 import json
+import os
+import pathlib
+import re
+import shutil
+import subprocess
+import tempfile
+import time
 
+import psutil
+from django.http import Http404
 from logzero import logger
 from mako import template
+from proxy.views import proxy_view
 
 from opentpod.object_detector.provider import utils
 
@@ -203,3 +207,85 @@ class TFODDetector():
                 file_stem,
                 'zip',
                 temp_dir)
+
+    def _is_tensorboard_subprocess_running(self, pinfo_file_path):
+        if pinfo_file_path.exists():
+            with open(pinfo_file_path, 'r') as f:
+                subprocess_info = json.loads(f.read())
+                pid = subprocess_info['pid']
+                port = subprocess_info['port']
+                try:
+                    p = psutil.Process(pid)
+                    for connection in p.connections():
+                        if connection.laddr[1] == port:
+                            # if the process is still running
+                            # no need to launch a new process
+                            if connection.status == psutil.CONN_LISTEN:
+                                return True
+                            else:
+                                # the process is somehow no longer listening on
+                                # the correct port try kill it
+                                p.kill()
+                except psutil.NoSuchProcess as e:
+                    logger.info('No tensorboard process serving directory: {}'.format(
+                        self._output_dir))
+        return False
+
+    def _run_tensorboard_subprocess(self, pinfo_file_path):
+        port = utils._find_open_port()
+        cmd = ('tensorboard ' +
+               '--logdir={} '.format(self._output_dir) +
+               '--host=localhost ' +
+               '--port={}'.format(port))
+        logger.info('\n===========================================\n')
+        logger.info('\n\tStarting Tensorboard with following command: \n\n{}'.format(cmd))
+        logger.info('\n===========================================\n')
+        process = subprocess.Popen(
+            cmd.split())
+        with open(pinfo_file_path, 'w') as f:
+            f.write(json.dumps({'pid': process.pid, 'port': port}))
+        time.sleep(5)
+
+    def _run_tensorboard_subprocess_if_not_exist(self, pinfo_file_path):
+        is_running = self._is_tensorboard_subprocess_running(pinfo_file_path)
+        if not is_running:
+            self._run_tensorboard_subprocess(pinfo_file_path)
+
+    def visualize(self, request, path):
+        """Render visualization for current model.
+
+        (A hacky implementation) This method tries to launch a tensorboard
+        subprocess and then proxy django requests to it for visualization.
+        The subprocess information is stored in a file in the model directory to
+        record whether a process has been launched and the port it listens to.
+        This implementation can leads to many process (max is the # of detectors
+        available) being launched.
+
+        Arguments:
+            request {django http request} -- request coming in
+            path {request path} -- http request path stripped of api prefixes
+
+        Raises:
+            Http404: [description]
+            Http404: [description]
+
+        Returns:
+            Django HTTP response -- Returns a Django HTTP response for visualization.
+        """
+        if not self._output_dir.exists():
+            raise Http404('Model directory not exists. Has the model been trained?')
+
+        # tensorboard needs index.html to load correctly
+        if len(path) == 0:
+            path = 'index.html'
+
+        pinfo_file_path = (self._output_dir / 'tensorboard.pinfo').resolve()
+        self._run_tensorboard_subprocess_if_not_exist(pinfo_file_path)
+        if pinfo_file_path.exists():
+            with open(pinfo_file_path, 'r') as f:
+                subprocess_info = json.loads(f.read())
+                port = subprocess_info['port']
+            remoteurl = 'http://localhost:{}/'.format(port) + path
+            return proxy_view(request, remoteurl)
+        else:
+            raise Http404

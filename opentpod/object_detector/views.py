@@ -120,45 +120,13 @@ class DetectorViewSet(viewsets.ModelViewSet):
             rq_job.save_meta()
             return Response(status=status.HTTP_202_ACCEPTED, data={json.dumps('created')})
 
-    @action(detail=True, methods=['POST'])
-    def visualization(self, request, pk):
-        """Visualize Training Procedures.
-        Currently only support tensorboard
+    @action(detail=True,
+            methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+            url_path='visualization/(?P<remote_path>.+)')
+    def visualization(self, request, pk, remote_path):
+        """Model visualization. Proxying requests to individual
+        provider to render visualization in web UI.
         """
         db_detector = self.get_object()
-        bg_tasks.visualize(db_detector)
-        return Response(status=status.HTTP_202_ACCEPTED, data={json.dumps('created')})
-        # queue = django_rq.get_queue("tensorboard")
-        # rq_job = django_rq.get_current_job()
-        # if request.method == 'GET':
-        #     if rq_job:
-        #         if rq_job.is_finished:
-        #             return sendfile.sendfile(request, rq_job.meta["file_path"], attachment=True,
-        #                                     attachment_filename=str(
-        #                                         db_detector.get_export_file_path().name))
-        #         elif rq_job.is_failed:
-        #             exc_info = str(rq_job.exc_info)
-        #             rq_job.delete()
-        #             return Response(data=exc_info, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        #         else:
-        #             return Response(status=status.HTTP_202_ACCEPTED, data={json.dumps('created')})
-        #     else:
-        #         raise Http404
-
-    @action(detail=True, methods=['GET', 'POST'], url_path='tensorboard_proxy/(?P<remote_path>.+)')
-    def tensorboard_proxy(self, request, pk, remote_path):
-        """Proxy to tensorboard.
-        remote_path is needed.
-        """
-        db_detector = self.get_object()
-        pid_file_path = (db_detector.get_model_dir() / 'tensorboard.pinfo').resolve()
-        if pid_file_path.exists():
-            with open(pid_file_path, 'r') as f:
-                subprocess_info = json.loads(f.read())
-                port = subprocess_info['port']
-            # TODO (junjuew): make the port dynamic
-            remoteurl = 'http://{}:{}/'.format(settings.TENSORBOARD_HOST,
-                                               port) + remote_path
-            return proxy_view(request, remoteurl)
-        else:
-            raise Http404
+        detector = db_detector.get_detector_object()
+        return detector.visualize(request, remote_path)
