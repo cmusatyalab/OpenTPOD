@@ -54,6 +54,7 @@ class TFODDetector():
         self._config['train_input_path'] = str(self._input_dir.resolve() / 'train.tfrecord')
         self._config['eval_input_path'] = str(self._input_dir.resolve() / 'eval.tfrecord')
         self._config['label_map_path'] = str(self._input_dir.resolve() / 'label_map.pbtxt')
+        self._config['meta'] = str(self._input_dir.resolve() / 'meta')
 
     @property
     def training_parameters(self):
@@ -200,6 +201,12 @@ class TFODDetector():
             process = subprocess.Popen(
                 cmd.split())
             process.wait()
+
+            # copy some useful training files to export as well
+            shutil.copy2(self._config['pipeline_config_path'], temp_dir)
+            shutil.copy2(self._config['label_map_path'], temp_dir)
+            shutil.copy2(self._config['meta'], temp_dir)
+
             file_stem = str(pathlib.Path(output_file_path).parent
                             / pathlib.Path(output_file_path).stem)
             logger.debug(file_stem)
