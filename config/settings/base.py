@@ -80,7 +80,6 @@ THIRD_PARTY_APPS = [
     "cacheops",
     "sendfile",
     "dj_pagination",
-    "revproxy",
     "rules",
     "django_filters",
     "compressor",  # cvat template

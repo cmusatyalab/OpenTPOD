@@ -6,12 +6,13 @@ import pathlib
 import re
 import shutil
 import signal
+import subprocess
 import sys
 import time
+import traceback
 from ast import literal_eval
 from datetime import datetime
 from distutils.dir_util import copy_tree
-import traceback
 from urllib import error as urlerror
 from urllib import parse as urlparse
 from urllib import request as urlrequest
@@ -97,6 +98,20 @@ def _visualize_tensorboard(model_dir, pid_file_path):
         time.sleep(1000)
 
 
+def _visualize_tensorboard_subprocess(model_dir, pid_file_path):
+    cmd = ('tensorboard ' +
+           '--logdir={} '.format(model_dir) +
+           '--host={} '.format(settings.TENSORBOARD_HOST) +
+           '--port={} '.format(settings.TENSORBOARD_PORT))
+    logger.info('\n===========================================\n')
+    logger.info('\n\Starting Tensorboard with following command: \n\n{}'.format(cmd))
+    logger.info('\n===========================================\n')
+    process = subprocess.Popen(
+        cmd.split())
+    with open(pid_file_path, 'w') as f:
+        f.write(json.dumps(process.pid))
+
+
 def visualize(db_detector):
     """Visualize detector training procedures.
 
@@ -115,7 +130,7 @@ def visualize(db_detector):
     # of killing a launched task. Somehow, celery is not showing the long-running
     # _visualize_tensorboard job as active, only as registerd..
     # kill running tb process if there is one
-    pid_file_path = (settings.CACHE_DIR / 'tensorboard.pid').resolve()
+    pid_file_path = (db_detector.get_model_dir() / 'tensorboard.pid').resolve()
     if pid_file_path.exists():
         with open(pid_file_path, 'r') as f:
             pid = json.loads(f.read())
@@ -126,7 +141,7 @@ def visualize(db_detector):
 
     queue = django_rq.get_queue('tensorboard')
     rq_job = queue.enqueue_call(
-        func=_visualize_tensorboard,
-        args=(
-            str(db_detector.get_model_dir()), str(pid_file_path),),
+        func=_visualize_tensorboard_subprocess,
+        args=(str(db_detector.get_model_dir()), str(pid_file_path),),
+        result_ttl=86400  # result expires after 1 day
     )

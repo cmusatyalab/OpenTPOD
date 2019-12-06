@@ -1,14 +1,7 @@
-# modified by junjuew
-# Copyright (C) 2018 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
-
-from django.conf import settings
-from django.urls import include, path, re_path
+from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
-from revproxy.views import ProxyView
 
 from opentpod.object_detector import views
 
@@ -35,9 +28,4 @@ urlpatterns = [
     path('api/opentpod/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/opentpod/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/opentpod/v1/', include((router.urls))),
-    # tensorboard proxy.
-    # TODO(junjuew): use nginx for revproxy at deployment?
-    re_path(r"api/opentpod/tensorboard/(?P<path>.*)$", ProxyView.as_view(
-        upstream='http://{}:{}/'.format(settings.TENSORBOARD_HOST,
-        settings.TENSORBOARD_PORT)))
 ]

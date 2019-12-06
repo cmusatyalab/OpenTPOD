@@ -1,19 +1,21 @@
-import shutil
 import json
+import shutil
 
-from cvat.apps.authentication import auth
-from django.db.models import Q
-from django.shortcuts import render
-from rest_framework import permissions, viewsets, status
-from rest_framework.decorators import action
 import django_rq
 import sendfile
-
-from opentpod.object_detector import models, serializers
-from opentpod.object_detector import tasks as bg_tasks
-from opentpod.object_detector import provider
-from rest_framework.response import Response
+from cvat.apps.authentication import auth
+from django.conf import settings
+from django.db.models import Q
 from django.http import Http404
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from proxy.views import proxy_view
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from opentpod.object_detector import models, provider, serializers
+from opentpod.object_detector import tasks as bg_tasks
 
 
 class TrainSetViewSet(viewsets.ModelViewSet):
@@ -142,3 +144,13 @@ class DetectorViewSet(viewsets.ModelViewSet):
         #             return Response(status=status.HTTP_202_ACCEPTED, data={json.dumps('created')})
         #     else:
         #         raise Http404
+
+    @action(detail=True, methods=['GET', 'POST'], url_path='tensorboard_proxy/(?P<remote_path>.+)')
+    def tensorboard_proxy(self, request, pk, remote_path):
+        """Proxy to tensorboard.
+        remote_path is needed.
+        """
+        # TODO (junjuew): make the port dynamic
+        remoteurl = 'http://{}:{}/'.format(settings.TENSORBOARD_HOST,
+                                           settings.TENSORBOARD_PORT) + remote_path
+        return proxy_view(request, remoteurl)
