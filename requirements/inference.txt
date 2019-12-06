@@ -1,0 +1,6 @@
+tensorflow~=1.15
+tensorflow-serving-api~=1.15
+tf-object-detection
+logzero~=1.5.0
+opencv-python~=3.4
+fire~=0.2
