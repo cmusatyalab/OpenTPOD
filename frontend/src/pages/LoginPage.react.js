@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Formik } from "formik";
-import { LoginPage as TablerLoginPage, Alert } from "tabler-react";
+import { LoginPage as TablerLoginPage } from "tabler-react";
 import { fetchJSON, withFormikStatus } from "../util";
 import { withRouter } from "react-router";
 import { endpoints } from "../const";
@@ -49,7 +49,7 @@ class LoginPage extends React.Component {
                             })
                             .catch(e => {
                                 console.error(e);
-                                actions.setStatus("Login Failed: " + e);
+                                actions.setStatus("Login Failed: " + e.toString());
                             });
                     }}
                     render={({
