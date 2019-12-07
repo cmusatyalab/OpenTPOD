@@ -66,7 +66,7 @@ class Detector(models.Model):
         return '{}-{}'.format(self.pk, self.name)
 
     def get_dir(self):
-        return pathlib.Path(settings.DATA_ROOT) / 'detectors' / str(self.id)
+        return pathlib.Path(settings.VAR_DIR) / 'detectors' / str(self.id)
 
     def get_training_data_dir(self):
         return self.get_dir() / 'train-data'
