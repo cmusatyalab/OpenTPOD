@@ -19,10 +19,11 @@ urlpatterns = [
 ] + static(
     settings.STATIC_URL,
     document_root=settings.STATIC_ROOT
-) + static(
-    settings.DATA_URL,
-    document_root=settings.DATA_ROOT
 )
+# + static(  # django only serves static files when DEBUG=True
+#     settings.DATA_URL,
+#     document_root=settings.DATA_ROOT
+# )
 # + static(
 #     settings.MEDIA_URL,
 #     document_root=settings.MEDIA_ROOT
