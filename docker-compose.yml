@@ -1,41 +1,47 @@
 version: "3.2"
 volumes:
-  opentpod-data:
-  opentpod-redis-data:
+    opentpod-data:
+    opentpod-redis-data:
 services:
-  opentpod-db:
-    image: postgres:12.0-alpine
-    container_name: opentpod-db
-    restart: always
-    ports:
-      - ${OPENTPOD_DB_PORT}:5432
-    volumes:
-      - opentpod-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_DB: ${OPENTPOD_DB}
-      POSTGRES_PASSWORD: ${OPENTPOD_DB_PASSWORD}
-  opentpod-db-viewer:
-    image: adminer
-    container_name: opentpod-db-viewer
-    restart: always
-    depends_on:
-      - opentpod-db
-    ports:
-      - ${OPENTPOD_DB_VIEWER_PORT}:8080
-  opentpod-broker:
-    image: rabbitmq
-    hostname: opentpod-broker
-    ports:
-      - ${OPENTPOD_BROKER_PORT}:5672
-    environment:
-      RABBITMQ_DEFAULT_USER: ${OPENTPOD_RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${OPENTPOD_RABBITMQ_PASSWORD}
-  opentpod-redis:
-    container_name: opentpod-redis
-    image: redis:4.0.5-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - opentpod-redis-data:/data
-    ports:
-      - ${OPENTPOD_REDIS_PORT}:6379
+    opentpod-db:
+        image: postgres:12.0-alpine
+        container_name: opentpod-db
+        restart: always
+        ports:
+            - 127.0.0.1:${OPENTPOD_DB_PORT}:5432
+        volumes:
+            - opentpod-data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_DB: ${OPENTPOD_DB}
+            POSTGRES_PASSWORD: ${OPENTPOD_DB_PASSWORD}
+    opentpod-db-viewer:
+        image: adminer
+        container_name: opentpod-db-viewer
+        restart: always
+        depends_on:
+            - opentpod-db
+        ports:
+            - 127.0.0.1:${OPENTPOD_DB_VIEWER_PORT}:8080
+    opentpod-broker:
+        image: rabbitmq
+        hostname: opentpod-broker
+        ports:
+            - 127.0.0.1:${OPENTPOD_BROKER_PORT}:5672
+        environment:
+            RABBITMQ_DEFAULT_USER: ${OPENTPOD_RABBITMQ_USER}
+            RABBITMQ_DEFAULT_PASS: ${OPENTPOD_RABBITMQ_PASSWORD}
+    opentpod-redis:
+        container_name: opentpod-redis
+        image: redis:4.0.5-alpine
+        command: redis-server --appendonly yes
+        volumes:
+            - opentpod-redis-data:/data
+        ports:
+            - 127.0.0.1:${OPENTPOD_REDIS_PORT}:6379
+        command:
+            [
+                "sh",
+                "-c",
+                'exec redis-server --requirepass "$OPENTPOD_REDIS_PASSWORD"',
+            ]
