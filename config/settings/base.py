@@ -350,24 +350,18 @@ ACCOUNT_EMAIL_VERIFICATION = "optional"
 
 # Django-RQ
 # https://github.com/rq/django-rq
-RQ_REDIS_PORT = env.int("OPENTPOD_REDIS_PORT")
+REDIS_URL = env('REDIS_URL')
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
-        'PORT': RQ_REDIS_PORT,
-        'DB': 0,
+        'URL': REDIS_URL,
         'DEFAULT_TIMEOUT': '4h'
     },
     'low': {
-        'HOST': 'localhost',
-        'PORT': RQ_REDIS_PORT,
-        'DB': 0,
+        'URL': REDIS_URL,
         'DEFAULT_TIMEOUT': '24h'
     },
     'tensorboard': {
-        'HOST': 'localhost',
-        'PORT': RQ_REDIS_PORT,
-        'DB': 0,
+        'URL': REDIS_URL,
         'DEFAULT_TIMEOUT': '24h'
     },
 }
@@ -376,11 +370,7 @@ RQ_EXCEPTION_HANDLERS = ['cvat.apps.engine.views.rq_handler']
 
 # Cache DB access (e.g. for engine.task.get_frame)
 # https://github.com/Suor/django-cacheops
-CACHEOPS_REDIS = {
-    'host': 'localhost',  # redis-server is on same machine
-    'port': RQ_REDIS_PORT,
-    'db': 1,             # SELECT non-default redis database
-}
+CACHEOPS_REDIS = env('REDIS_CACHE_URL')
 CACHEOPS = {
     # Automatically cache any Task.objects.get() calls for 15 minutes
     # This also includes .first() and .last() calls.
