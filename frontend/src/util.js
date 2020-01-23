@@ -62,6 +62,21 @@ function checkDownload(url, interval, timeout, onSuccess, onFailure) {
     pollUrl();
 }
 
+const uiAuth = {
+    isAuthenticated: false,
+
+    login(data) {
+        return fetchJSON(endpoints.login, "POST", data).then(() => {
+            this.isAuthenticated = true;
+        });
+    },
+
+    logout() {
+        this.isAuthenticated = false;
+        return fetchJSON(endpoints.logout, "POST", {});
+    }
+};
+
 function checkAuth() {
     fetchJSON(endpoints.user, "GET")
         .then(resp => true)
@@ -114,7 +129,6 @@ function withTouchedErrors(fields = []) {
     };
 }
 
-export default withTouchedErrors;
 export {
     checkAuth,
     fetchJSON,
@@ -122,5 +136,6 @@ export {
     withFormikStatus,
     lineWrap,
     clamp,
-    withTouchedErrors
+    withTouchedErrors,
+    uiAuth
 };

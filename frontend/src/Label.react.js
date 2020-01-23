@@ -11,9 +11,6 @@ import {
 } from "tabler-react";
 import SiteWrapper from "./SiteWrapper.react";
 import CreatableSelect from "react-select/creatable";
-import { fetchJSON } from "./util";
-import URI from "urijs";
-import { endpoints } from "./const";
 
 function LabelCard({ labels, onRemove }) {
     const tags = labels.map((curLabel, index) => {
@@ -186,8 +183,10 @@ class LabelManagementPage extends React.Component {
         return (
             <SiteWrapper>
                 <Page.Content title="Label Dashboard">
-                    {// used by annotatepage.react.js
-                    /* <LabelManagementPanel /> */}
+                    {
+                        // used by annotatepage.react.js
+                        /* <LabelManagementPanel /> */
+                    }
                 </Page.Content>
             </SiteWrapper>
         );

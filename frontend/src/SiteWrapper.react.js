@@ -1,8 +1,8 @@
 import React from "react";
 import { NavLink, withRouter } from "react-router-dom";
-import { endpoints } from "./const";
-
 import { Site, Nav, Button, RouterContextProvider } from "tabler-react";
+import { endpoints } from "./const";
+import { uiAuth } from "./util.js";
 
 const navBarItems = [
     {
@@ -31,14 +31,19 @@ class SiteWrapper extends React.Component {
                     navItems: (
                         <Nav.Item type="div" className="d-none d-md-flex">
                             <Button
-                                href="https://github.com/junjuew/OpenTPOD"
-                                target="_blank"
                                 outline
                                 size="sm"
-                                RootComponent="a"
+                                RootComponent="button"
                                 color="primary"
+                                onClick={() => {
+                                    uiAuth.logout().then(() => {
+                                        this.props.history.push(
+                                            endpoints.uiHome
+                                        );
+                                    });
+                                }}
                             >
-                                Source code
+                                Log Out
                             </Button>
                         </Nav.Item>
                     )
@@ -75,4 +80,4 @@ class SiteWrapper extends React.Component {
     }
 }
 
-export default SiteWrapper;
+export default withRouter(SiteWrapper);

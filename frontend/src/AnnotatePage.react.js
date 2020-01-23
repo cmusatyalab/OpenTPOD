@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Iframe from "react-iframe";
 import Select from "react-select";
 import windowSize from "react-window-size";
-import { Dimmer, Grid, Page, Header } from "tabler-react";
+import { Dimmer, Grid, Page } from "tabler-react";
 import URI from "urijs";
 import { endpoints, reactSelectTablerStyles } from "./const";
 import { LabelManagementPanel } from "./Label.react";

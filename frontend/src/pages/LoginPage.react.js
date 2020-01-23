@@ -1,12 +1,11 @@
 import * as React from "react";
 import { Formik } from "formik";
 import { FormCard, FormTextInput, StandaloneFormPage } from "tabler-react";
-import { fetchJSON, withFormikStatus, withTouchedErrors } from "../util";
+import { uiAuth, withFormikStatus, withTouchedErrors } from "../util";
 import { withRouter } from "react-router";
 import { endpoints } from "../const";
 
 // Modifed from Tablers Login Page in order to customize logo
-//@flow
 const defaultStrings = {
     title: "Login to your Account",
     buttonText: "Login",
@@ -79,10 +78,6 @@ const TablerLoginPage = withTouchedErrors(["email", "password"])(
 );
 
 class LoginPage extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         return (
             <div>
@@ -115,14 +110,17 @@ class LoginPage extends React.Component {
                             email: email,
                             password: values.password
                         };
-                        fetchJSON(endpoints.login, "POST", data)
+                        uiAuth
+                            .login(data)
                             .then(() => {
                                 actions.setStatus("Login success: ");
                                 this.props.history.push(endpoints.uiVideo);
                             })
                             .catch(e => {
                                 console.error(e);
-                                actions.setStatus("Login Failed: " + e.message);
+                                e.text().then(text => {
+                                    actions.setStatus("Login Failed: " + text);
+                                });
                             });
                     }}
                     render={({
@@ -132,8 +130,7 @@ class LoginPage extends React.Component {
                         status,
                         handleChange,
                         handleBlur,
-                        handleSubmit,
-                        isSubmitting
+                        handleSubmit
                     }) => {
                         let el = (
                             <TablerLoginPage

@@ -77,7 +77,7 @@ const VideoCardBody = ({ resourceObj }) => {
         let url = URI.joinPaths(resourceObj.url, "/status").toString();
         fetchJSON(url, "GET").then(resp => {
             setStatus(resp);
-            if (resp.state == "Queued" || resp.state == "Started")
+            if (resp.state === "Queued" || resp.state === "Started")
                 setTimeout(loadStatus, 10000);
         });
     };
@@ -86,7 +86,7 @@ const VideoCardBody = ({ resourceObj }) => {
         loadStatus();
     }, []);
 
-    return status && status.state == "Finished" ? (
+    return status && status.state === "Finished" ? (
         <div>
             <b>Created Date:</b> {resourceObj.created_date} <br />
             <ReactPlayer
@@ -102,7 +102,7 @@ const VideoCardBody = ({ resourceObj }) => {
                 light={URI.joinPaths(resourceObj.url, "/frames/0").toString()} // expects string type
             />
         </div>
-    ) : status && status.state == "Failed" ? (
+    ) : status && status.state === "Failed" ? (
         <div>
             <b>Error:</b> Failed to extract the video into images.
             <br />

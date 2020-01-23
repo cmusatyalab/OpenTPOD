@@ -53,7 +53,7 @@ const DetectorCardOptions = ({ resourceObj, onDownload, onDelete }) => {
             >
                 Details
             </Button>
-            {resourceObj.status == "trained" && !downloading && (
+            {resourceObj.status === "trained" && !downloading && (
                 <Button
                     outline
                     color="info"
@@ -71,7 +71,7 @@ const DetectorCardOptions = ({ resourceObj, onDownload, onDelete }) => {
                     }}
                 ></Button>
             )}
-            {resourceObj.status == "trained" && downloading && (
+            {resourceObj.status === "trained" && downloading && (
                 <Button loading color="info" size="sm"></Button>
             )}
             <Button
@@ -108,11 +108,6 @@ const makeDetectorCardBody = ({ resourceObj }) => {
 
 // detailed detector view with all of its field
 const DetectorDetailCard = ({ detector }) => {
-    let visualizationUrl = URI.joinPaths(
-        endpoints.detectors,
-        detector.id.toString(),
-        endpoints.detectorVisualizationField
-    );
     return (
         <Card>
             <Card.Header>

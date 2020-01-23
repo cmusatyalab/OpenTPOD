@@ -127,7 +127,7 @@ const NewDetectorForm = ({ strings = {} }) => {
                 if (!values.name) {
                     errors.name = "Required";
                 }
-                if (values.tasks.length == 0) {
+                if (values.tasks.length === 0) {
                     errors.tasks = "Required";
                 }
                 if (!values.dnnType) {

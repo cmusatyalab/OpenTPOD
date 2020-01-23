@@ -1,11 +1,11 @@
 import * as React from "react";
 import {
-    // HashRouter as Router,
     BrowserRouter as Router,
-    Redirect,
     Route,
-    Switch
+    Switch,
+    Redirect
 } from "react-router-dom";
+// standard pages
 import {
     ForgotPasswordPage,
     LoginPage,
@@ -17,7 +17,6 @@ import {
     Error500,
     Error503
 } from "./pages";
-
 import VideoPage from "./VideoPage.react";
 import { LabelManagementPage } from "./Label.react";
 import AnnotatePage from "./AnnotatePage.react";
@@ -26,28 +25,54 @@ import {
     DetectorDetailPage,
     DetectorNewPage
 } from "./DetectorPage.react";
-
+import { endpoints } from "./const";
 import "tabler-react/dist/Tabler.css";
+import { uiAuth } from "./util.js";
+
+const AuthRequiredRoute = ({ component: Component, ...rest }) => (
+    <Route
+        {...rest}
+        render={props =>
+            uiAuth.isAuthenticated === true ? (
+                <Component {...props} />
+            ) : (
+                <Redirect to={endpoints.uiHome} />
+            )
+        }
+    />
+);
 
 function App(props) {
     return (
         <Router>
             <Switch>
                 <Route exact path="/" component={LoginPage} />
-                <Route exact path="/video" component={VideoPage} />
-                <Route exact path="/label" component={LabelManagementPage} />
-                <Route
+                <AuthRequiredRoute exact path="/video" component={VideoPage} />
+                <AuthRequiredRoute
+                    exact
+                    path="/label"
+                    component={LabelManagementPage}
+                />
+                <AuthRequiredRoute
                     exact
                     path="/annotate/tasks/:tid"
                     component={AnnotatePage}
                 />
-                <Route exact path="/detector" component={DetectorPage} />
-                <Route
+                <AuthRequiredRoute
+                    exact
+                    path="/detector"
+                    component={DetectorPage}
+                />
+                <AuthRequiredRoute
                     exact
                     path="/detector/:id"
                     component={DetectorDetailPage}
                 />
-                <Route exact path="/detector-new" component={DetectorNewPage} />
+                <AuthRequiredRoute
+                    exact
+                    path="/detector-new"
+                    component={DetectorNewPage}
+                />
                 <Route
                     exact
                     path="/forgot-password"

@@ -16,7 +16,8 @@ const endpoints = {
     uiLabel: "/label", // TODO (junjuew): still need this?
     uiAnnotate: "/annotate",
     uiDetector: "/detector",
-    uiDetectorNew: "/detector-new"
+    uiDetectorNew: "/detector-new",
+    uiHome: "/"
 };
 
 // this value should be the same as 'PAGE_SIZE' in backend
