@@ -63,16 +63,23 @@ function checkDownload(url, interval, timeout, onSuccess, onFailure) {
 }
 
 const uiAuth = {
-    isAuthenticated: false,
+    isAuthenticated() {
+        let isAuthenticated = sessionStorage.getItem("isAuthenticated");
+        if (isAuthenticated === null) {
+            return false;
+        } else {
+            return isAuthenticated === "true";
+        }
+    },
 
     login(data) {
         return fetchJSON(endpoints.login, "POST", data).then(() => {
-            this.isAuthenticated = true;
+            sessionStorage.setItem("isAuthenticated", "true");
         });
     },
 
     logout() {
-        this.isAuthenticated = false;
+        sessionStorage.setItem("isAuthenticated", "false");
         return fetchJSON(endpoints.logout, "POST", {});
     }
 };

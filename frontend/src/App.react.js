@@ -33,7 +33,7 @@ const AuthRequiredRoute = ({ component: Component, ...rest }) => (
     <Route
         {...rest}
         render={props =>
-            uiAuth.isAuthenticated === true ? (
+            uiAuth.isAuthenticated() === true ? (
                 <Component {...props} />
             ) : (
                 <Redirect to={endpoints.uiHome} />
