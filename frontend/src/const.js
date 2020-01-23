@@ -21,7 +21,7 @@ const endpoints = {
 
 // this value should be the same as 'PAGE_SIZE' in backend
 // django settings
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 9;
 
 // Style Select to fit into site's theme
 const reactSelectTablerStyles = {
