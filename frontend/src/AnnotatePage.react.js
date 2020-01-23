@@ -111,6 +111,15 @@ const AnnotatePage = ({ ...props }) => {
                                     />
                                 </Grid.Col>
                             </Grid.Row>
+                            <hr />
+                            <p>
+                                <a
+                                    href="https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/user_guide.md"
+                                    target="_blank"
+                                >
+                                    Read Here on How to Label{" "}
+                                </a>
+                            </p>
                         </Grid>
                     </>
                 )}
