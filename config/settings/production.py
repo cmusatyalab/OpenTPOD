@@ -11,8 +11,8 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["github.com/junjuew/Op
 
 # sendfiles
 SENDFILE_BACKEND = "sendfile.backends.nginx"
-SENDFILE_ROOT = DATA_ROOT
-SENDFILE_URL = '/data'
+SENDFILE_ROOT = VAR_DIR
+SENDFILE_URL = '/protected'
 
 # DATABASES
 # ------------------------------------------------------------------------------

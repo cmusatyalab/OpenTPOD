@@ -16,7 +16,6 @@ from proxy.views import proxy_view
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from sendfile import sendfile
 
 from opentpod.object_detector import models, provider, serializers
 from opentpod.object_detector import tasks as bg_tasks
@@ -140,13 +139,12 @@ class DetectorViewSet(viewsets.ModelViewSet):
 def task_data(request, task_id, data_path):
     """serving user's task data with permission checking.
     CVAT doesn't provide APIs to access all task data, e.g. uploaded videos.
-    A better solution is to perform permission checking in django only
-    and serves the file with nginx.
-    https://stackoverflow.com/questions/1156246/having-django-serve-downloadable-files
+    Using django-xsenfile in order to serve files with web server
+    https://github.com/johnsensible/django-sendfile
     """
     db_tasks = Task.objects.filter(pk=task_id, owner=request.user)
     if len(db_tasks) < 1:
         raise Http404
     db_task = db_tasks[0]
     file_path = os.path.abspath(os.path.realpath(os.path.join(db_task.get_task_dirname(), data_path)))
-    return sendfile(request, file_path)
+    return sendfile.sendfile(request, file_path)
