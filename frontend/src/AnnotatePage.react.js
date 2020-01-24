@@ -116,6 +116,7 @@ const AnnotatePage = ({ ...props }) => {
                                 <a
                                     href="https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/user_guide.md"
                                     target="_blank"
+                                    rel="noopener noreferrer"
                                 >
                                     Read Here on How to Label{" "}
                                 </a>
