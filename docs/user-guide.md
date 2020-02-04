@@ -17,7 +17,8 @@ Make sure to collect short video snippets from various viewing angles.
 ### Inference
 
 ```
-$ give me super-powers
+$ docker run -it --name=test --rm -p 8500:8500 -v (pwd)/saved_model:/models/myObjectDetector -e MODEL_NAME=myObjectDetector tensorflow/serving
+$ cd opentpod/object_detector/provider/tfod && python infer.py
 ```
 
 {% hint style="info" %}
