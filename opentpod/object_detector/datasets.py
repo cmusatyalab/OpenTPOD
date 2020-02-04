@@ -143,7 +143,7 @@ def dump_detector_annotations(
     db_dumper = cvat_models.AnnotationDumper.objects.get(
         display_name=dump_format)
 
-    labels = []
+    labels = set()
     # call cvat dump tool on each video in the trainset
     for db_task in db_tasks:
         task_annotations_file_path = dump_cvat_task_annotations(db_task,
@@ -162,7 +162,7 @@ def dump_detector_annotations(
         task_labels = get_label_map_from_cvat_tfrecord_zip(
             task_annotations_file_path
         )
-        labels.extend(task_labels)
+        labels.update(task_labels)
         os.remove(task_annotations_file_path)
 
     _dump_labelmap_file(labels,

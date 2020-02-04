@@ -14,6 +14,7 @@ def _train(db_detector,
            db_user,
            scheme,
            host):
+    """Launch the transfer learning of a DNN."""
     # dump annotations
     datasets.dump_detector_annotations(db_detector,
                                        db_tasks,
@@ -45,6 +46,7 @@ def _train(db_detector,
 
 
 def export(db_detector):
+    """Export DNN"""
     detector = db_detector.get_detector_object()
     detector.export(db_detector.get_export_file_path())
 
