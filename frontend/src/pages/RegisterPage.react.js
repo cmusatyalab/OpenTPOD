@@ -6,6 +6,16 @@ import { RegisterPage as TablerRegisterPage } from "tabler-react";
 import { withRouter } from "react-router";
 import { fetchJSON, withFormikStatus } from "../util";
 import { endpoints } from "../const";
+import { TablerLoginPage } from "./TablerLoginPage.react";
+
+const pageStrings = {
+    title: "Create a New Account",
+    buttonText: "Register",
+    emailLabel: "Email Address",
+    emailPlaceholder: "Enter email",
+    passwordLabel: "Password",
+    passwordPlaceholder: "Password"
+};
 
 class RegisterPage extends React.Component {
     constructor(props) {
@@ -14,7 +24,7 @@ class RegisterPage extends React.Component {
         // Add properties to it
         this.schema
             .is()
-            .min(6) // Minimum length 8
+            .min(6) // Minimum length 6
             .is()
             .max(24) // Maximum length 24
             .has()
@@ -26,7 +36,6 @@ class RegisterPage extends React.Component {
         return (
             <Formik
                 initialValues={{
-                    name: "",
                     email: "",
                     password: ""
                 }}
@@ -51,8 +60,9 @@ class RegisterPage extends React.Component {
                 onSubmit={(values, actions) => {
                     const data = {
                         email: values.email,
-                        username: values.name,
-                        password1: values.password, // choose not to verify the password
+                        username: values.email,
+                        // choose not to verify the password
+                        password1: values.password,
                         password2: values.password
                     };
                     fetchJSON(endpoints.registeration, "POST", data)
@@ -68,7 +78,11 @@ class RegisterPage extends React.Component {
                         })
                         .catch(e => {
                             console.error(e);
-                            actions.setStatus("Registration Failed: " + e.name);
+                            e.text().then(text => {
+                                actions.setStatus(
+                                    "Registration Failed: " + text
+                                );
+                            });
                         });
                 }}
                 render={({
@@ -81,13 +95,15 @@ class RegisterPage extends React.Component {
                     handleSubmit
                 }) => {
                     let el = (
-                        <TablerRegisterPage
+                        <TablerLoginPage
                             onSubmit={handleSubmit}
                             onChange={handleChange}
                             onBlur={handleBlur}
                             values={values}
                             errors={errors}
                             touched={touched}
+                            strings={pageStrings}
+                            imageURL={endpoints.logo}
                         />
                     );
                     return withFormikStatus(el, status);

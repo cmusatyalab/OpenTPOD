@@ -2,7 +2,7 @@ const endpoints = {
     login: "/auth/login/",
     logout: "/auth/logout/",
     user: "/auth/user/",
-    registration: "/auth/registration/",
+    registeration: "/auth/registration/",
     tasks: "/api/v1/tasks",
     detectors: "/api/opentpod/v1/detectors",
     detectorDnnTypes: "/api/opentpod/v1/detectors/types",
@@ -11,9 +11,12 @@ const endpoints = {
     detectorVisualizationField: "visualization/index.html",
     trainsets: "/api/opentpod/v1/trainsets",
     mediaData: "/task_data/",
+    logo: "/tpod-logo.png",
     // front end handled routes
+    uiSignup: "/signup",
+    uiLogin: "/login",
     uiVideo: "/video",
-    uiLabel: "/label", // TODO (junjuew): still need this?
+    uiLabel: "/label",
     uiAnnotate: "/annotate",
     uiDetector: "/detector",
     uiDetectorNew: "/detector-new",

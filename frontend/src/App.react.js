@@ -46,31 +46,35 @@ function App(props) {
     return (
         <Router>
             <Switch>
-                <Route exact path="/" component={LoginPage} />
-                <AuthRequiredRoute exact path="/video" component={VideoPage} />
+                <Route exact path={endpoints.uiHome} component={LoginPage} />
                 <AuthRequiredRoute
                     exact
-                    path="/label"
+                    path={endpoints.uiVideo}
+                    component={VideoPage}
+                />
+                <AuthRequiredRoute
+                    exact
+                    path={endpoints.uiLabel}
                     component={LabelManagementPage}
                 />
                 <AuthRequiredRoute
                     exact
-                    path="/annotate/tasks/:tid"
+                    path={endpoints.uiLabel + "/tasks/:tid"}
                     component={AnnotatePage}
                 />
                 <AuthRequiredRoute
                     exact
-                    path="/detector"
+                    path={endpoints.uiDetector}
                     component={DetectorPage}
                 />
                 <AuthRequiredRoute
                     exact
-                    path="/detector/:id"
+                    path={endpoints.uiDetector + "/:id"}
                     component={DetectorDetailPage}
                 />
                 <AuthRequiredRoute
                     exact
-                    path="/detector-new"
+                    path={endpoints.uiDetectorNew}
                     component={DetectorNewPage}
                 />
                 <Route
@@ -78,8 +82,12 @@ function App(props) {
                     path="/forgot-password"
                     component={ForgotPasswordPage}
                 />
-                <Route exact path="/login" component={LoginPage} />
-                <Route exact path="/register" component={RegisterPage} />
+                <Route exact path={endpoints.uiLogin} component={LoginPage} />
+                <Route
+                    exact
+                    path={endpoints.uiSignup}
+                    component={RegisterPage}
+                />
                 <Route exact path="/400" component={Error400} />
                 <Route exact path="/401" component={Error401} />
                 <Route exact path="/403" component={Error403} />
