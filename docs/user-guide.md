@@ -1,8 +1,10 @@
 ---
-description: 'Watch the Usage Demo Video: https://www.youtube.com/watch?v=B_PX5SSSLJM'
+description: Explains how to use OpenTPOD to create custom object detectors.
 ---
 
 # User Guide
+
+Watch the Usage Demo Video: [https://www.youtube.com/watch?v=B\_PX5SSSLJM](https://www.youtube.com/watch?v=B_PX5SSSLJM)
 
 ### Collect Training Videos
 
