@@ -12,7 +12,7 @@ import { Button, Dimmer, Grid, Page } from "tabler-react";
 import URI from "urijs";
 import { PaginatedInfoCardList } from "./CardPageTemplate.react.js";
 import SiteWrapper from "./SiteWrapper.react";
-import { endpoints, PAGE_SIZE } from "./const";
+import { endpoints, PAGE_SIZE, session_storage_key } from "./const";
 import { fetchJSON, lineWrap, clamp } from "./util";
 import "./VideoPage.css";
 
@@ -222,10 +222,16 @@ const VideoPage = ({ ...props }) => {
                                     abort
                                 ) => {
                                     // create CVAT task first
+                                    let userId = sessionStorage.getItem(
+                                        session_storage_key.userId
+                                    );
+                                    console.log(userId);
                                     let data = {
                                         name: file.name,
                                         labels: [],
-                                        image_quality: 100
+                                        image_quality: 100,
+                                        owner: userId,
+                                        assignee: userId
                                     };
                                     createTask({
                                         data,

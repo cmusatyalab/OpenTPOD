@@ -21,7 +21,7 @@ class LoginPage extends React.Component {
                         }
                         return errors;
                     }}
-                    onSubmit={(values, actions) => {
+                    onSubmit={async (values, actions) => {
                         let email = "";
                         let username = "";
                         if (
@@ -38,18 +38,16 @@ class LoginPage extends React.Component {
                             email: email,
                             password: values.password
                         };
-                        uiAuth
-                            .login(data)
-                            .then(() => {
-                                actions.setStatus("Login success: ");
-                                this.props.history.push(endpoints.uiVideo);
-                            })
-                            .catch(e => {
-                                console.error(e);
-                                e.text().then(text => {
-                                    actions.setStatus("Login Failed: " + text);
-                                });
+                        try {
+                            await uiAuth.login(data);
+                            actions.setStatus("Login success: ");
+                            this.props.history.push(endpoints.uiVideo);
+                        } catch (e) {
+                            console.error(e);
+                            e.text().then(text => {
+                                actions.setStatus("Login Failed: " + text);
                             });
+                        }
                     }}
                     render={({
                         values,

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Alert } from "tabler-react";
-import { endpoints } from "./const";
+import { endpoints, session_storage_key } from "./const";
 
 function logFetchErrors(response) {
     if (!response.ok) {
@@ -64,7 +64,9 @@ function checkDownload(url, interval, timeout, onSuccess, onFailure) {
 
 const uiAuth = {
     isAuthenticated() {
-        let isAuthenticated = sessionStorage.getItem("isAuthenticated");
+        let isAuthenticated = sessionStorage.getItem(
+            session_storage_key.isAuthenticated
+        );
         if (isAuthenticated === null) {
             return false;
         } else {
@@ -72,14 +74,15 @@ const uiAuth = {
         }
     },
 
-    login(data) {
-        return fetchJSON(endpoints.login, "POST", data).then(() => {
-            sessionStorage.setItem("isAuthenticated", "true");
-        });
+    async login(data) {
+        let resp = await fetchJSON(endpoints.login, "POST", data);
+        resp = await fetchJSON(endpoints.userInfo, "GET");
+        sessionStorage.setItem(session_storage_key.isAuthenticated, "true");
+        sessionStorage.setItem(session_storage_key.userId, resp.id);
     },
 
     logout() {
-        sessionStorage.setItem("isAuthenticated", "false");
+        sessionStorage.setItem(session_storage_key.isAuthenticated, "false");
         return fetchJSON(endpoints.logout, "POST", {});
     }
 };

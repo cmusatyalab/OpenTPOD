@@ -7,6 +7,7 @@ const endpoints = {
     detectors: "/api/opentpod/v1/detectors",
     detectorDnnTypes: "/api/opentpod/v1/detectors/types",
     dnnTrainingConfigs: "/api/opentpod/v1/detectors/training_configs",
+    userInfo: "/api/v1/users/self",
     detectorDownloadField: "model",
     detectorVisualizationField: "visualization/index.html",
     trainsets: "/api/opentpod/v1/trainsets",
@@ -21,6 +22,11 @@ const endpoints = {
     uiDetector: "/detector",
     uiDetectorNew: "/detector-new",
     uiHome: "/"
+};
+
+const session_storage_key = {
+    userId: "userId",
+    isAuthenticated: "isAuthenticated"
 };
 
 // this value should be the same as 'PAGE_SIZE' in backend
@@ -40,4 +46,4 @@ const reactSelectTablerStyles = {
     })
 };
 
-export { endpoints, PAGE_SIZE, reactSelectTablerStyles };
+export { endpoints, PAGE_SIZE, reactSelectTablerStyles, session_storage_key };

@@ -89,6 +89,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "cvat.apps.authentication",  # needed to take CVAT permission system into account
     "cvat.apps.engine",
     "cvat.apps.annotation",
     "opentpod.object_detector",
