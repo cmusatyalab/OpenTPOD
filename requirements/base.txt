@@ -16,6 +16,9 @@ django-model-utils==3.2.0  # https://github.com/jazzband/django-model-utils
 django-allauth==0.39.1  # https://github.com/pennersr/django-allauth
 django-crispy-forms==1.7.2  # https://github.com/django-crispy-forms/django-crispy-forms
 django-redis==4.10.0  # https://github.com/niwinz/django-redis
+django-debug-toolbar==2.0  # https://github.com/jazzband/django-debug-toolbar
+django-extensions==2.1.9  #
+https://github.com/django-extensions/django-extensions
 
 # Django REST Framework
 djangorestframework==3.9.0  # https://github.com/encode/django-rest-framework
@@ -55,11 +58,17 @@ furl==2.0.0
 pascal_voc_writer==0.1.4
 pdf2image==1.6.0
 scikit-image>=0.14.0
-tensorflow==1.15.2
+tensorflow-gpu==1.15.2
 pycocotools-fix
-# python-ldap==3.0.0 # is causing trouble. need ldap2-dev package
+# python-ldap==3.0.0 # is causing trouble. need ldap2-dev package. omiting for now
 
 # object detector
 tf-object-detection
 mako==1.1.0
 psutil==5.6.7
+
+# supervisord
+supervisor==4.1.0
+
+# logging
+logzero==1.5.0

@@ -1,6 +1,6 @@
 version: "3.2"
 volumes:
-    opentpod-data:
+    opentpod-db-data:
     opentpod-redis-data:
 services:
     opentpod-db:
@@ -10,7 +10,7 @@ services:
         ports:
             - 127.0.0.1:${OPENTPOD_DB_PORT}:5432
         volumes:
-            - opentpod-data:/var/lib/postgresql/data
+            - opentpod-db-data:/var/lib/postgresql/data
         environment:
             POSTGRES_USER: root
             POSTGRES_DB: ${OPENTPOD_DB}
