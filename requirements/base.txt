@@ -17,8 +17,7 @@ django-allauth==0.39.1  # https://github.com/pennersr/django-allauth
 django-crispy-forms==1.7.2  # https://github.com/django-crispy-forms/django-crispy-forms
 django-redis==4.10.0  # https://github.com/niwinz/django-redis
 django-debug-toolbar==2.0  # https://github.com/jazzband/django-debug-toolbar
-django-extensions==2.1.9  #
-https://github.com/django-extensions/django-extensions
+django-extensions==2.1.9  # https://github.com/django-extensions/django-extensions
 
 # Django REST Framework
 djangorestframework==3.9.0  # https://github.com/encode/django-rest-framework

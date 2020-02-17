@@ -1,5 +1,6 @@
 version: "3.2"
 volumes:
+    opentpod-data:
     opentpod-db-data:
     opentpod-redis-data:
 services:
@@ -22,15 +23,15 @@ services:
         depends_on:
             - opentpod-db
         ports:
-            - 127.0.0.1:${OPENTPOD_DB_VIEWER_PORT}:8080
+            - 127.0.0.1:${OPENTPOD_DB_VIEWER_PORT}:20000
     opentpod-broker:
         image: rabbitmq
-        hostname: opentpod-broker
+        container_name: opentpod-broker
         ports:
             - 127.0.0.1:${OPENTPOD_BROKER_PORT}:5672
         environment:
-            RABBITMQ_DEFAULT_USER: ${OPENTPOD_RABBITMQ_USER}
-            RABBITMQ_DEFAULT_PASS: ${OPENTPOD_RABBITMQ_PASSWORD}
+            - RABBITMQ_DEFAULT_USER=${OPENTPOD_RABBITMQ_USER}
+            - RABBITMQ_DEFAULT_PASS=${OPENTPOD_RABBITMQ_PASSWORD}
     opentpod-redis:
         container_name: opentpod-redis
         image: redis:4.0.5-alpine
@@ -45,3 +46,29 @@ services:
                 "-c",
                 'exec redis-server --requirepass "$OPENTPOD_REDIS_PASSWORD"',
             ]
+    opentpod-nginx:
+        image: nginx:latest
+        container_name: opentpod-nginx
+        ports:
+            - 127.0.0.1:30000:80
+        volumes:
+            - opentpod-data:/root/openTPOD
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx/opentpod.nginx.conf:/etc/nginx/opentpod.nginx.conf:ro
+    opentpod:
+        build: .
+        container_name: opentpod
+        ports:
+            - 127.0.0.1:3001:3001
+        volumes:
+            - opentpod-data:/root/openTPOD
+        environment:
+            - PYTHONDONTWRITEBYTECODE
+            - DJANGO_DEBUG
+            - DJANGO_SECRET_KEY
+            - DJANGO_ALLOWED_HOSTS
+            - REDIS_URL
+            - REDIS_CACHE_URL
+            - DATABASE_URL
+            - CELERY_BROKER_URL
+            - USE_DOCKER

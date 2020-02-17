@@ -48,14 +48,15 @@ RUN add-apt-repository ppa:deadsnakes/ppa -y && \
 RUN python -m pip install -U pip setuptools
 
 # Add and switch to a non-root user
-ENV USER="opentpod"
-ENV HOME="/home/${USER}"
-RUN adduser --shell /bin/bash --disabled-password --gecos "" ${USER}
-USER ${USER}
-RUN mkdir ${HOME}/openTPOD
+# ENV USER="opentpod"
+# ENV HOME="/home/${USER}"
+# RUN adduser --shell /bin/bash --disabled-password --gecos "" ${USER}
+# USER ${USER}
+# RUN mkdir -p ${HOME}/openTPOD
 
 # Install and initialize CVAT, copy all necessary files
-WORKDIR ${HOME}/openTPOD
+RUN mkdir -p /root/openTPOD
+WORKDIR /root/openTPOD
 COPY requirements/ ./requirements/
 RUN python -m pip install --no-cache-dir -r requirements/production.txt
 
@@ -68,13 +69,8 @@ COPY www/ ./www/
 COPY static/ ./static/
 COPY manage.py ./manage.py
 
-# need to set the environs in some way
-
-# make sure all binary installed by python can be found
-ENV PATH="${HOME}/.local/bin/:${PATH}"
-
 # RUN mkdir data share media keys logs /tmp/supervisord
 # RUN python3 manage.py collectstatic
 
-# EXPOSE 8080 8443
-# ENTRYPOINT ["/usr/bin/supervisord"]
+EXPOSE 8000
+CMD ["supervisord", "-n", "-c", "supervisord/production.conf"]
