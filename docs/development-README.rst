@@ -18,7 +18,15 @@ Installation
 
     $ conda env create -f requirements/environment-dev.yml
     $ ln -s third_party/cvat/cvat cvat
-    $ docker-compose up -d
+    $ # for developemnt
+    $ source .envrc
+    $ docker-compose up
+    $ supervisord -n -c supervisord/dev.conf
+    $ # for deployment
+    $ source .envrc.prod
+    $ docker-compose -f docker-compose.prod.yml up
+
+    $ # old instructions
     $ python manage.py migrate
     $ python manage.py createsuperuser
     $ python manage.py collectstatic

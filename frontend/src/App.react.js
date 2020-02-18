@@ -59,7 +59,7 @@ function App(props) {
                 />
                 <AuthRequiredRoute
                     exact
-                    path={endpoints.uiLabel + "/tasks/:tid"}
+                    path={endpoints.uiAnnotate + "/tasks/:tid"}
                     component={AnnotatePage}
                 />
                 <AuthRequiredRoute

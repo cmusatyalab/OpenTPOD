@@ -31,7 +31,7 @@ const session_storage_key = {
 
 // this value should be the same as 'PAGE_SIZE' in backend
 // django settings
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 10;
 
 // Style Select to fit into site's theme
 const reactSelectTablerStyles = {
