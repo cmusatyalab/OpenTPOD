@@ -62,6 +62,14 @@ services:
         build: .
         container_name: opentpod
         volumes:
+            - ./config:/root/openTPOD/config:ro
+            - ./cvat:/root/openTPOD/cvat:ro
+            - ./opentpod:/root/openTPOD/opentpod:ro
+            - ./static:/root/openTPOD/static:ro
+            - ./django-static:/root/openTPOD/django-static:ro
+            - ./www:/root/openTPOD/www:ro
+            - ./manage.py:/root/openTPOD/manage.py:ro
+            - ./supervisord:/root/openTPOD/supervisord
             - opentpod-data-var:/root/openTPOD/var
         ports:
             - 127.0.0.1:20001:8000

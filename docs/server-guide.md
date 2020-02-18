@@ -4,17 +4,42 @@ description: Explains how to setup OpenTPOD server.
 
 # Installation
 
-```
+The server can be started in either **debug** or **deployment** configurations.
+
+### Debug
+
+This would create infrastructures inside containers while running the django
+development server natively on the host.
+
+Opened port:
+    * 0.0.0.0:3001: react server port, specified in .envrc
+    * localhost:5000: django development app server
+
+```bash
 $ conda env create -f requirements/environment-dev.yml
+$ conda activate opentpod-env
 $ ln -s third_party/cvat/cvat cvat
-$ # for developemnt
 $ source .envrc
 $ docker-compose up
 $ supervisord -n -c supervisord/dev.conf
-$ # for deployment
-$ source .envrc.prod
-$ docker-compose -f docker-compose.prod.yml up
+```
 
+### Deployment
+
+This configurations runs everything inside containers.
+
+```bash
+$ source .envrc.prod
+$ docker-compose -f docker-compose.prod.yml build
+$ docker-compose -f docker-compose.prod.yml up
+```
+
+Opened port:
+    * 0.0.0.0:20000: nginx web server, serving static files
+    * 127.0.0.1:20001: gunicorn app server
+
+### Without Using supervisord
+```
 $ # old instructions
 $ python manage.py migrate
 $ python manage.py createsuperuser
@@ -25,6 +50,4 @@ $ cd frontend
 $ npm i
 $ npm run-script watch
 ```
-
-An example client code to query TF serving container can be found under [opentpod/object\_detector/provider/tfod/infer.py](https://github.com/junjuew/OpenTPOD/blob/master/opentpod/object_detector/provider/tfod/infer.py).
 

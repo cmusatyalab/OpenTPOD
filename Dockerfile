@@ -40,12 +40,6 @@ RUN add-apt-repository ppa:deadsnakes/ppa -y && \
     dpkg-reconfigure -f noninteractive tzdata && \
     rm -rf /var/lib/apt/lists/*
 
-# python3.7 \
-# python3.7-dev \
-# python3-pip \
-# ln -fs /usr/bin/python3.7 /usr/bin/python && \
-# RUN python -m pip install -U pip setuptools
-
 # use conda to manage requirements
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
@@ -61,19 +55,6 @@ WORKDIR /root/openTPOD
 COPY requirements/ ./requirements/
 
 RUN ["/bin/bash", "-lc", "conda env create -f requirements/environment.yml"]
-# RUN python -m pip install --no-cache-dir -r requirements/production.txt
-
-COPY config/ ./config/
-COPY cvat/ ./cvat/
-COPY opentpod/ ./opentpod/
-COPY nginx/ ./nginx/
-COPY supervisord/ ./supervisord/
-COPY www/ ./www/
-COPY static/ ./static/
-COPY manage.py ./manage.py
-
-# RUN mkdir data share media keys logs /tmp/supervisord
-# RUN python3 manage.py collectstatic
 
 EXPOSE 8000
 CMD ["/bin/bash", "-lc", "conda activate opentpod-env && supervisord -n -c supervisord/production.conf"]
