@@ -1,0 +1,36 @@
+# python setup
+export PYTHONDONTWRITEBYTECODE=1
+
+# react setup
+export BROWSER=none
+export PORT=3001
+
+# opentpod envrons
+export OPENTPOD_TESTING=false
+
+# DB
+export OPENTPOD_DB_HOST="localhost"
+export OPENTPOD_DB="<db-name>"
+export OPENTPOD_DB_PASSWORD="<db-password>"
+export OPENTPOD_DB_PORT="<db-port>"
+export OPENTPOD_DB_VIEWER_PORT="<db-viewer-port>"
+
+# Redis
+export OPENTPOD_REDIS_HOST="localhost"
+export OPENTPOD_REDIS_PASSWORD="<redis-password>"
+export OPENTPOD_REDIS_PORT="<redis-port>"
+
+# Rabbitmq
+export OPENTPOD_RABBITMQ_USER="opentpod"
+export OPENTPOD_RABBITMQ_PASSWORD="<rabbitmq-password>"
+export OPENTPOD_BROKER_PORT="<rabbit-mq-port>"
+
+# Django specific environs
+export DJANGO_DEBUG=true
+export DJANGO_SECRET_KEY="<djangoo-secret-key>"
+export DJANGO_ALLOWED_HOSTS="<host-name-of-your-server>"
+export REDIS_URL="redis://:${OPENTPOD_REDIS_PASSWORD}@${OPENTPOD_REDIS_HOST}:${OPENTPOD_REDIS_PORT}/0"
+export REDIS_CACHE_URL="redis://:${OPENTPOD_REDIS_PASSWORD}@${OPENTPOD_REDIS_HOST}:${OPENTPOD_REDIS_PORT}/1"
+export DATABASE_URL="postgres://root:${OPENTPOD_DB_PASSWORD}@${OPENTPOD_DB_HOST}:${OPENTPOD_DB_PORT}/${OPENTPOD_DB}"
+export CELERY_BROKER_URL=${REDIS_URL}
+export USE_DOCKER=false

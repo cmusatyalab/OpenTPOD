@@ -31,3 +31,7 @@ an object detection DNN model.
 ## Usage Video
 
 https://www.youtube.com/watch?v=B_PX5SSSLJM
+
+## Installation and Deployment
+
+See [docs/server-guide.md](docs/server-guide.md).

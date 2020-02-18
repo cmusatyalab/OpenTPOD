@@ -2,7 +2,29 @@
 description: Explains how to setup OpenTPOD server.
 ---
 
-# Installation
+# Guide to Setup the Server
+
+## What is in this repository
+
+* [config](../config): Django website configuration files.
+* requirements: Conda and pip requirement files for development and deployment.
+* opentpod: Main Django module for OpenTPOD.
+* cvat: a symlink to third_party/cvat. Integrated third party annotation tool CVAT. This symlink is needed here for it to be treated as a Django module as well.
+* keys: a keys directory with an empty module to make CVAT behave nicely.
+* supervisord: supervisord configurations to launch the server.
+* nginx: nginx configuration files.
+* docker-compose.yml: debug Docker compose file.
+* docker-compose.prod.yml: Docker compose file for deployment.
+* Dockerfile: Dockerfile to build the openTPOD container image.
+* .envrc.example: Example environment variables to set.
+* manage.py: Django manage.py file to run Django default functionalities.
+* third_party: git submodules referencing CVAT releases.
+* frontend: React-based frontend. Created using the create-react-app.
+* build_frontend.sh: Script to build frontend React code and collect Django
+  static files together into static and www directory for serving.
+* docs: Gitbook Documentation
+
+## Installation
 
 The server can be started in either **debug** or **deployment** configurations.
 
@@ -16,6 +38,7 @@ Opened port:
     * localhost:5000: django development app server
 
 ```bash
+$ # copy and modify .envrc.example to .envrc
 $ conda env create -f requirements/environment-dev.yml
 $ conda activate opentpod-env
 $ ln -s third_party/cvat/cvat cvat
@@ -29,6 +52,7 @@ $ supervisord -n -c supervisord/dev.conf
 This configurations runs everything inside containers.
 
 ```bash
+$ # copy and modify .envrc.example to .envrc.prod
 $ source .envrc.prod
 $ docker-compose -f docker-compose.prod.yml build
 $ docker-compose -f docker-compose.prod.yml up
