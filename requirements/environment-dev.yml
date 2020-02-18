@@ -2,6 +2,7 @@
 name: opentpod-env
 channels:
     - defaults
+    - anaconda
     - conda-forge
 dependencies:
     - pip=19.1.1
@@ -14,5 +15,6 @@ dependencies:
     - pudb
     - rope
     - nodejs
+    - tensorflow-gpu=1.15.0
     - pip:
           - -r local.txt

@@ -64,3 +64,5 @@ services:
             - DATABASE_URL
             - CELERY_BROKER_URL
             - USE_DOCKER
+            - NVIDIA_VISIBLE_DEVICES=all # needed for this to be cuda devices to be visible
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
