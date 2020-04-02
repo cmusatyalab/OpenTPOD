@@ -23,17 +23,9 @@ services:
         depends_on:
             - opentpod-db
         ports:
-            - 127.0.0.1:${OPENTPOD_DB_VIEWER_PORT}:20000
+            - 127.0.0.1:${OPENTPOD_DB_VIEWER_PORT}:8080
         depends_on:
             - opentpod-db
-    opentpod-broker:
-        image: rabbitmq
-        container_name: opentpod-broker
-        environment:
-            - RABBITMQ_DEFAULT_USER=${OPENTPOD_RABBITMQ_USER}
-            - RABBITMQ_DEFAULT_PASS=${OPENTPOD_RABBITMQ_PASSWORD}
-        ports:
-            - 127.0.0.1:${OPENTPOD_BROKER_PORT}:5672
     opentpod-redis:
         container_name: opentpod-redis
         image: redis:4.0.5-alpine

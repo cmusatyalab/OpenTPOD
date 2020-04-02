@@ -9,6 +9,8 @@ from zipfile import ZipFile
 
 import tensorflow as tf
 import numpy as np
+from object_detection.protos import string_int_label_map_pb2
+from google.protobuf import text_format
 
 from cvat.apps.engine import annotation as cvat_annotation
 from cvat.apps.annotation import models as cvat_models
@@ -46,6 +48,7 @@ def dump_cvat_task_annotations(
                                                          db_user.username,
                                                          timestamp,
                                                          db_dumper.format.lower()))
+
     cvat_annotation.dump_task_data(
         task_id, db_user, output_file_path, db_dumper, scheme, host)
     return output_file_path
@@ -99,7 +102,12 @@ def get_label_map_from_cvat_tfrecord_zip(cvat_tf_record_zip):
         with ZipFile(cvat_tf_record_zip) as cur_zip:
             with cur_zip.open('label_map.pbtxt', 'r') as f:
                 content = f.read().decode('utf-8')
-                labels = re.findall(r"\tname: '(\w+)'\n", content)
+                labels = []
+                cur_label_map = string_int_label_map_pb2.StringIntLabelMap()
+                text_format.Merge(content, cur_label_map)
+                for item in cur_label_map.item:
+                    if item.name not in labels:
+                        labels.append(item.name)
                 return labels
 
 
@@ -143,7 +151,7 @@ def dump_detector_annotations(
     db_dumper = cvat_models.AnnotationDumper.objects.get(
         display_name=dump_format)
 
-    labels = set()
+    labels = []
     # call cvat dump tool on each video in the trainset
     for db_task in db_tasks:
         task_annotations_file_path = dump_cvat_task_annotations(db_task,
@@ -162,7 +170,9 @@ def dump_detector_annotations(
         task_labels = get_label_map_from_cvat_tfrecord_zip(
             task_annotations_file_path
         )
-        labels.update(task_labels)
+        for label in task_labels:
+            if label not in labels:
+                labels.append(label)
         os.remove(task_annotations_file_path)
 
     _dump_labelmap_file(labels,
