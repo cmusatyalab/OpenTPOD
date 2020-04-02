@@ -7,10 +7,12 @@ import {
     Page,
     Card,
     List,
-    Form
+    Form,
+    FormTextInput
 } from "tabler-react";
 import SiteWrapper from "./SiteWrapper.react";
 import CreatableSelect from "react-select/creatable";
+import { Formik } from "formik";
 
 function LabelCard({ labels, onRemove }) {
     const tags = labels.map((curLabel, index) => {
@@ -51,30 +53,58 @@ function NewLabelCard({ onCancel, onSave }) {
                 <Card.Title>New Object of Interest</Card.Title>
             </Card.Header>
             <Card.Body>
-                <Form onSubmit={onSave}>
-                    <Form.Group>
-                        <Grid.Row className="align-items-center">
-                            <Grid.Col sm={2}>Text:</Grid.Col>
-                            <Grid.Col sm={10}>
-                                <Form.Input type="text" name="labelValue" />
-                            </Grid.Col>
-                        </Grid.Row>
-                    </Form.Group>
-                    <Form.Group>
-                        <Button.List className="mt-4" align="right">
-                            <Button
-                                color="secondary"
-                                type="button"
-                                onClick={onCancel}
-                            >
-                                Cancel
-                            </Button>
-                            <Button color="primary" type="submit">
-                                Save
-                            </Button>
-                        </Button.List>
-                    </Form.Group>
-                </Form>
+                <Formik
+                    validate={values => {
+                        let errors = {};
+                        if (/^[A-Z0-9a-z]+$/i.test(values.labelValue)) {
+                        } else {
+                            errors.labelValue =
+                                "Invalid Label Name. Aphanumeric Characters [A-Za-z0-9] only.";
+                        }
+                        return errors;
+                    }}
+                    onSubmit={(values, { setSubmitting }) => {
+                        setSubmitting(true);
+                        onSave(values);
+                    }}
+                    render={({
+                        values,
+                        errors,
+                        handleChange,
+                        handleSubmit
+                    }) => (
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group>
+                                <Grid.Row className="align-items-center">
+                                    <Grid.Col sm={2}>Text:</Grid.Col>
+                                    <Grid.Col sm={10}>
+                                        <FormTextInput
+                                            name="labelValue"
+                                            value={values && values.labelValue}
+                                            error={errors && errors.labelValue}
+                                            onSubmit={handleSubmit}
+                                            onChange={handleChange}
+                                        />
+                                    </Grid.Col>
+                                </Grid.Row>
+                            </Form.Group>
+                            <Form.Group>
+                                <Button.List className="mt-4" align="right">
+                                    <Button
+                                        color="secondary"
+                                        type="button"
+                                        onClick={onCancel}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button color="primary" type="submit">
+                                        Save
+                                    </Button>
+                                </Button.List>
+                            </Form.Group>
+                        </Form>
+                    )}
+                />
             </Card.Body>
         </Card>
     );
@@ -90,9 +120,8 @@ class LabelManagementPanel extends React.Component {
         this.setState({ rightPanel: "labels" });
     };
 
-    onNewLabelCardSave = e => {
-        e.preventDefault();
-        const labelValue = e.target.labelValue.value;
+    onNewLabelCardSave = values => {
+        const labelValue = values.labelValue;
         this.props.onAddLabel(labelValue);
         this.setState({
             rightPanel: "labels"
