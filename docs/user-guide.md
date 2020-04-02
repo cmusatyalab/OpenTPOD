@@ -26,7 +26,12 @@ The training process generates downloadable Tensorflow models in the end. Click 
 
 ### Inference
 
-Extract the downloaded zip file and serve the "saved\_model" directory with Tensorflow serving container image. It will start a gRPC server at port 8500 and a HTTP/JSON server at port 8501.
+Extract the downloaded zip file and serve the "saved\_model" directory with Tensorflow serving container image. 
+
+* Go into the directory of "saved\_model". The current directory should have subdirectories names like "00001", etc.
+* Run the following command.
+
+It will start a gRPC server at port 8500 and a HTTP/JSON server at port 8501.
 
 ```
 $ docker run -it --name=inference --rm\
