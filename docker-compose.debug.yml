@@ -1,0 +1,90 @@
+# should be used together with docker-compose for production development
+# docker-compose -f docker-compose.prod.yml up -d
+version: "3.2"
+volumes:
+    opentpod-data-var:
+    opentpod-db-data:
+    opentpod-redis-data:
+services:
+    opentpod-db:
+        image: postgres:12.0-alpine
+        container_name: opentpod-db
+        restart: always
+        volumes:
+            - opentpod-db-data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_DB: ${OPENTPOD_DB}
+            POSTGRES_PASSWORD: ${OPENTPOD_DB_PASSWORD}
+    opentpod-db-viewer:
+        image: adminer
+        container_name: opentpod-db-viewer
+        restart: always
+        depends_on:
+            - opentpod-db
+        ports:
+            - 127.0.0.1:${OPENTPOD_DB_VIEWER_PORT}:8080
+        depends_on:
+            - opentpod-db
+    opentpod-redis:
+        container_name: opentpod-redis
+        image: redis:4.0.5-alpine
+        command: redis-server --appendonly yes
+        volumes:
+            - opentpod-redis-data:/data
+        command:
+            [
+                "sh",
+                "-c",
+                'exec redis-server --requirepass "$OPENTPOD_REDIS_PASSWORD"',
+            ]
+    opentpod-nginx:
+        image: nginx:latest
+        container_name: opentpod-nginx
+        ports:
+            - 0.0.0.0:20000:80
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx/opentpod.nginx.conf:/etc/nginx/opentpod.nginx.conf:ro
+            - ./static:/root/openTPOD/static:ro
+            - ./django-static:/root/openTPOD/django-static:ro
+            - ./www:/root/openTPOD/www:ro
+            - opentpod-data-var:/root/openTPOD/var
+        depends_on:
+            - opentpod
+    opentpod:
+        build: .
+        container_name: opentpod
+        volumes:
+            - ./config:/root/openTPOD/config:ro
+            - ./cvat:/root/openTPOD/cvat:ro
+            - ./opentpod:/root/openTPOD/opentpod:ro
+            - ./static:/root/openTPOD/static:ro
+            - ./django-static:/root/openTPOD/django-static:ro
+            - ./www:/root/openTPOD/www:ro
+            - ./manage.py:/root/openTPOD/manage.py:ro
+            - ./supervisord:/root/openTPOD/supervisord
+            - opentpod-data-var:/root/openTPOD/var
+        ports:
+            - 127.0.0.1:20001:8000
+        environment:
+            - PYTHONDONTWRITEBYTECODE
+            - DJANGO_DEBUG
+            - DJANGO_SECRET_KEY
+            - DJANGO_ALLOWED_HOSTS
+            - REDIS_URL
+            - REDIS_CACHE_URL
+            - DATABASE_URL
+            - CELERY_BROKER_URL
+            - USE_DOCKER
+            - NVIDIA_VISIBLE_DEVICES=all # needed for this to be cuda devices to be visible
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        depends_on:
+            - opentpod-db
+            - opentpod-redis
+        command:
+            [
+                "/bin/bash"
+            ]
+        stdin_open: true
+        tty: true
