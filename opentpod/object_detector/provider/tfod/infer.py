@@ -45,6 +45,11 @@ class TFServingPredictor():
         # fix output result types
         if 'detection_classes' in parsed_results:
             parsed_results['detection_classes'] = parsed_results['detection_classes'].astype(np.int64)
+        # parsed_results has the following keys and values
+        # num_detections: number of detections
+        # detection_scores: 2d array of confidence, [image_idx, bbx_idx]
+        # detection_classes: 2d array, [image_idx, bbx_idx]
+        # detection_boxes: 3d array, [image_idx, bbx_idx] is [ymin, xmin, ymax, xmax]
         return parsed_results
 
 
