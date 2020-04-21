@@ -75,3 +75,10 @@ $ npm i
 $ npm run-script watch
 ```
 
+## Administration
+
+#### Give users permission to access the system
+
+1. Go to /admin/auth/user and login with an administrator account.
+2. Click on the user name you want to modify.
+3. In "Permissions >> Groups", choose the appropriate permission group for the user. Normal users should be assigned "user" group while administrator accounts should be assigned "admin" group.
