@@ -24,6 +24,7 @@ import os
 import tempfile
 import tensorflow as tf
 from tensorflow.core.protobuf import saver_pb2
+from object_detection.core import standard_fields as fields
 from object_detection.builders import graph_rewriter_builder
 from object_detection.builders import model_builder
 from object_detection.utils import config_util
@@ -104,6 +105,18 @@ def _export_inference_graph(input_type,
         input_shape=input_shape,
         output_collection_name=output_collection_name,
         graph_hook_fn=graph_hook_fn)
+
+    # OpenTPOD: popping unnecessary outputs for object detection inference.
+    # see
+    # https://github.com/tensorflow/models/blob/master/research/object_detection/core/standard_fields.py
+    outputs.pop(fields.DetectionResultFields.detection_multiclass_scores, None)
+    outputs.pop(fields.DetectionResultFields.detection_features, None)
+    outputs.pop(fields.DetectionResultFields.detection_masks, None)
+    outputs.pop(fields.DetectionResultFields.detection_boundaries, None)
+    outputs.pop(fields.DetectionResultFields.detection_keypoints, None)
+    outputs.pop(fields.DetectionResultFields.raw_detection_boxes, None)
+    outputs.pop(fields.DetectionResultFields.raw_detection_scores, None)
+    outputs.pop(fields.DetectionResultFields.detection_anchor_indices, None)
 
     profile_inference_graph(tf.get_default_graph())
     saver_kwargs = {}
