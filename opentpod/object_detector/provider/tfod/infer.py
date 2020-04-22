@@ -10,17 +10,22 @@ import cv2
 import fire
 import numpy as np
 import tensorflow as tf
-from grpc.beta import implementations
+import grpc
 from logzero import logger
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
-from tensorflow_serving.apis import predict_pb2, prediction_service_pb2
+from tensorflow_serving.apis import predict_pb2, prediction_service_pb2_grpc
 
 
 class TFServingPredictor():
     def __init__(self, host, port, model_name):
-        self.channel = implementations.insecure_channel(host, int(port))
-        self.stub = prediction_service_pb2.beta_create_PredictionService_stub(self.channel)
+        options = [
+            ('grpc.max_message_length', 500 * 1024 * 1024),
+            ('grpc.max_send_message_length', 500 * 1024 * 1024),
+            ('grpc.max_receive_message_length', 500 * 1024 * 1024),
+        ]
+        self.channel = grpc.insecure_channel('{}:{}'.format(host, int(port)), options=options)
+        self.stub = prediction_service_pb2_grpc.PredictionServiceStub(self.channel)
         self.model_name = model_name
 
     def infer_file(self, image_file_path):
