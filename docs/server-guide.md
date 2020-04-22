@@ -28,25 +28,6 @@ description: Explains how to setup OpenTPOD server.
 
 The server can be started in either **debug** or **deployment** configurations.
 
-### Debug
-
-This would create infrastructures inside containers while running the django
-development server natively on the host.
-
-Opened port:
-    * 0.0.0.0:3001: react server port, specified in .envrc
-    * localhost:5000: django development app server
-
-```bash
-$ # copy and modify .envrc.example to .envrc
-$ conda env create -f requirements/environment-dev.yml
-$ conda activate opentpod-env
-$ ln -s third_party/cvat/cvat cvat
-$ source .envrc
-$ docker-compose up
-$ supervisord -n -c supervisord/dev.conf
-```
-
 ### Deployment
 
 This configurations runs everything inside containers.
@@ -62,14 +43,42 @@ Opened port:
     * 0.0.0.0:20000: nginx web server, serving static files
     * 127.0.0.1:20001: gunicorn app server
 
-### Without Using supervisord
+### Backend Debugging Inside Contaienrs (Recommended)
+
+This would create infrastructures inside containers while running the django
+development server natively on the host.
+
+Opened port:
+    * 0.0.0.0:3001: react server port, specified in .envrc
+    * localhost:5000: django development app server
+
+```bash
+$ # copy and modify .envrc.example to .envrc.prod
+$ source .envrc.prod
+$ docker-compose -f docker-compose.debug.yml build
+$ docker-compose -f docker-compose.debug.yml up
+$ # access opentpod container
+$ docker-compose -f docker-compose.debug.yml exec opentpod /bin/bash
+$ # inside opentpod container
+$ conda activate opentpod-env
+$ # modify the code as you see fit
+$ # to launch the server and testing
+$ python manage.py migrate
+$ python manage.py rqworker default low tensorboard
+$ python manage.py runserver 0.0.0.0:8000
 ```
-$ # old instructions
+
+### Debugging Backend and Frontend Natively 
+```
+$ # install all the dependencies
+$ # run backend server
 $ python manage.py migrate
 $ python manage.py createsuperuser
 $ python manage.py collectstatic
-$ python manage.py rqworker default low
+$ python manage.py rqworker default low tensorboard
 $ python manage.py runserver 0.0.0.0:5000
+$
+$ # launch npm dev server for serving frontend code
 $ cd frontend
 $ npm i
 $ npm run-script watch
