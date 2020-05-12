@@ -1,37 +1,49 @@
 # OpenTPOD
 
-Open-Source Toolkit for Painless Object Detection.
+*Create deep learning based object detectors without writing a single line of code.*
 
-## Motivation
+OpenTPOD is an all-in-one open-source tool for nonexperts to create custom deep
+neural network object detectors. It is designed to lower the barrier of entry
+and facilitates the end-to-end authoring workflow of custom object detection
+using state-of-art deep learning methods.
 
-Training a DNN for custom object detection is not trivial. In particular, it
-involves constructing a correctly-labeled training data set with millions of
-positive and negative examples. The training process itself may take days to
-complete, and requires a set of arcane procedures to ensure both convergence and
-efficacy of the model. Fortunately, one does not typically need to train a DNN
-from scratch. Rather, pretrained models based on public image data sets such as
-ImageNet are publicly available. Developers can adapt these pretrained models to
-detect custom classes for new applications, through a process called transfer
-learning. The key assumption of transfer learning is that much of the training
-that teaches the model to discover low-level features, such as edges, textures,
-shapes, and patterns that are useful in distinguishing objects can be reused.
-Thus, adapting a pretrained model for new object classes requires only thousands
-or tens of thousands of examples and hours of training time. However, even with
-transfer learning, collecting a labeled training set of several thousand
-examples per object class can be a daunting and painful task. In addition,
-implementing object detection DNNs itself requires expertise and takes time.
+It provides the following features via an easy-to-use web interface.
 
-OpenTPOD is a web-based tool to streamline the process of creating DNN-based
-object detectors for fast prototyping. It provides an assistive labeling
-interface for speedy annotation and a DNN training and evaluation portal that
-leverages transfer learning to hide the nuances of DNN creation. It greatly
-reduces the labeling effort while constructing a dataset, and automates training
-an object detection DNN model.
+* Training data management.
+* Data annotation through seamless integration with [OpenCV CVAT Labeling Tool](https://github.com/opencv/cvat).
+* One-click training/fine-tuning of object detection deep neural networks,
+  including SSD MobileNet, Faster RCNN Inception, and Faster RCNN ResNet.
+* One-click model export for inference with Tensorflow Serving.
+* Extensible architecture for easy addition of new deep neural network architectures.
 
-## Usage Video
+## Demo Video
 
-https://www.youtube.com/watch?v=B_PX5SSSLJM
+[![OpenTPOD Demo Video](http://img.youtube.com/vi/UHnNLrD6jTo/0.jpg)](https://youtu.be/UHnNLrD6jTo)
 
-## Installation and Deployment
 
-See [docs/server-guide.md](docs/server-guide.md).
+## Documentation
+
+* [Motivation](docs/motivation.md)
+* [User Guide](docs/user-guide.md)
+* [Installation and Administration Guide](docs/server-guide.md)
+* [Developer Guide](docs/notes.md)
+
+## Citations
+
+Please cite the following thesis if you find OpenTPOD helps your research.
+
+```
+@phdthesis{wang2020scaling,
+  title={Scaling Wearable Cognitive Assistance},
+  author={Wang, Junjue},
+  year={2020},
+  school={CMU-CS-20-107, CMU School of Computer Science}
+}
+```
+
+## Acknowledgement
+
+This research was supported by the National Science Foundation (NSF) under grant
+number CNS-1518865. Additional support was provided by Intel, Vodafone, Deutsche
+Telekom, Verizon, Crown Castle, Seagate, VMware, MobiledgeX, InterDigital, and
+the Conklin Kistler family fund.

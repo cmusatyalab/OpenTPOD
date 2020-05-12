@@ -1,10 +1,16 @@
 ---
-description: Explains how to setup OpenTPOD server.
+description: Explains how to setup and administer an OpenTPOD server.
 ---
 
 # Guide to Setup the Server
 
-## What is in this repository
+## Background
+
+### OpenTPOD Architecture
+
+![OpenTPOD Architecture](tpod-arch.png)
+
+### What is in this repository
 
 * [config](../config): Django website configuration files.
 * requirements: Conda and pip requirement files for development and deployment.
@@ -26,14 +32,28 @@ description: Explains how to setup OpenTPOD server.
 
 ## Installation
 
-The server can be started in either **debug** or **deployment** configurations.
+First, clone this repository with submodules.
+
+```bash
+git clone --recurse-submodules -j8 https://github.com/cmusatyalab/OpenTPOD.git
+```
+
+Then, configure the environmental variables, mostly setting passwords by copying
+and editing .envrc.example file.
+
+```
+$ cp .envrc.example .envrc.prod
+$ vim .envrc.prod
+```
+
+The server can be started in either **deployment** or **debug** configurations.
 
 ### Deployment
 
 This configurations runs everything inside containers.
 
 ```bash
-$ # copy and modify .envrc.example to .envrc.prod
+$ # make sure you have copied and modified .envrc.example to .envrc.prod
 $ source .envrc.prod
 $ docker-compose -f docker-compose.prod.yml build
 $ docker-compose -f docker-compose.prod.yml up
@@ -43,7 +63,7 @@ Opened port:
     * 0.0.0.0:20000: nginx web server, serving static files
     * 127.0.0.1:20001: gunicorn app server
 
-### Backend Debugging Inside Contaienrs (Recommended)
+### Debugging Backend inside Containers (Recommended)
 
 This would create infrastructures inside containers while running the django
 development server natively on the host.
@@ -53,7 +73,7 @@ Opened port:
     * localhost:5000: django development app server
 
 ```bash
-$ # copy and modify .envrc.example to .envrc.prod
+$ # make sure you have copied and modified .envrc.example to .envrc.prod
 $ source .envrc.prod
 $ docker-compose -f docker-compose.debug.yml build
 $ docker-compose -f docker-compose.debug.yml up
@@ -68,9 +88,9 @@ $ python manage.py rqworker default low tensorboard
 $ python manage.py runserver 0.0.0.0:8000
 ```
 
-### Debugging Backend and Frontend Natively 
+### Debugging Backend and Frontend without Containers 
 ```
-$ # install all the dependencies
+$ # install all the dependencies, follow Dockerfile
 $ # run backend server
 $ python manage.py migrate
 $ python manage.py createsuperuser

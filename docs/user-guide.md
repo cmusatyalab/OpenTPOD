@@ -18,7 +18,18 @@ OpenTPOD assists users to annotate the training videos by integrating an externa
 
 ### Launch Training
 
-Go to "Detector" tab and fill out the training form to launch the DNN training process without writing a single line of code. Under the hood, OpenTPOD automates the transfer learning process. OpenTPOD supports several state-of-the-art object detection networks, including FasterRCNN-ResNet\] and SSD-MobileNet. These different networks exhibit varying accuracy versus speed trade-offs. While FasterRCNN-ResNet achieves higher accuracies on standard datasets, its training and inference time are significantly longer than SSD-MobileNet. Application developers should choose the appropriate DNN network based on their accuracy and latency constraints. Negative examples are mined from the video background; these are parts of the frames not included in the object bounding boxes. The OpenTPOD web GUI provides training monitoring through Tensorflow visualization library Tensorboard.
+Go to "Detector" tab and fill out the training form to launch the DNN training
+process without writing a single line of code. Under the hood, OpenTPOD
+automates the transfer learning process. OpenTPOD supports several
+state-of-the-art object detection networks, including FasterRCNN-ResNet and
+SSD-MobileNet. These different networks exhibit varying accuracy versus speed
+trade-offs. While FasterRCNN-ResNet achieves higher accuracies on standard
+datasets, its training and inference time are significantly longer than
+SSD-MobileNet. Application developers should choose the appropriate DNN network
+based on their accuracy and latency constraints. Negative examples are mined
+from the video background; these are parts of the frames not included in the
+object bounding boxes. The OpenTPOD web GUI provides training monitoring through
+Tensorflow visualization library Tensorboard.
 
 ### Download
 
