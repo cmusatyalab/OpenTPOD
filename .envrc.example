@@ -3,10 +3,14 @@
 ################################################################
 # Change the variables below for access and security.
 ################################################################
-export DJANGO_ALLOWED_HOSTS="<host-name-of-your-server>"
-export OPENTPOD_DB_PASSWORD="secret!change me!"
-export OPENTPOD_REDIS_PASSWORD="secret!change me!"
+# set django's ALLOWED_HOSTS variable: https://docs.djangoproject.com/en/3.0/ref/settings/
+export DJANGO_ALLOWED_HOSTS="<host-name-or-ip-of-your-server>,localhost,127.0.0.1"
+# set django's secret key
 export DJANGO_SECRET_KEY="secret!change me!"
+# set database password
+export OPENTPOD_DB_PASSWORD="secret!change me!"
+# set redis password
+export OPENTPOD_REDIS_PASSWORD="secret!change me!"
 
 ################################################################
 # Default environment setup.
