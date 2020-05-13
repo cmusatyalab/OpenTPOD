@@ -112,7 +112,7 @@ $ npm run-script watch
 Users can create accounts by following the *sign up* link on the login page. 
 However, newly created accounts do not have access to the website functionalities 
 until an administrator explicitly gives the account permission. 
-See [below](#### Grant users permission to access the system) for granting users permissions to access the website.
+See [below](####Grant-users-permission-to-access-the-system) for granting users permissions to access the website.
 
 #### Grant users permission to access the system
 
