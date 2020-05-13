@@ -19,7 +19,7 @@ description: Explains how to setup and administer an OpenTPOD server.
 * keys: a keys directory with an empty module to make CVAT behave nicely.
 * supervisord: supervisord configurations to launch the server.
 * nginx: nginx configuration files.
-* docker-compose.yml: debug Docker compose file.
+* docker-compose.debug.yml: debug Docker compose file.
 * docker-compose.prod.yml: Docker compose file for deployment.
 * Dockerfile: Dockerfile to build the openTPOD container image.
 * .envrc.example: Example environment variables to set.
@@ -28,7 +28,7 @@ description: Explains how to setup and administer an OpenTPOD server.
 * frontend: React-based frontend. Created using the create-react-app.
 * build_frontend.sh: Script to build frontend React code and collect Django
   static files together into static and www directory for serving.
-* docs: Gitbook Documentation
+* docs: documentation
 
 ## Installation
 
@@ -72,10 +72,6 @@ docker-compose -f docker-compose.prod.yml exec opentpod bash -lc '/opt/conda/env
 This would create infrastructures inside containers while running the django
 development server natively on the host.
 
-Opened port:
-    * 0.0.0.0:3001: react server port, specified in .envrc
-    * localhost:5000: django development app server
-
 ```bash
 $ # make sure you have copied and modified .envrc.example to .envrc.prod
 $ source .envrc.prod
@@ -101,11 +97,11 @@ $ python manage.py migrate
 $ python manage.py createsuperuser
 $ python manage.py collectstatic
 $ python manage.py rqworker default low tensorboard
-$ python manage.py runserver 0.0.0.0:5000
+$ python manage.py runserver 0.0.0.0:8000
 $
 $ # launch npm dev server for serving frontend code
 $ cd frontend
-$ npm i
+$ npm install
 $ npm run-script watch
 ```
 
