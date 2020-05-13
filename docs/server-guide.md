@@ -35,7 +35,7 @@ description: Explains how to setup and administer an OpenTPOD server.
 First, clone this repository with submodules.
 
 ```bash
-git clone --recurse-submodules -j8 https://github.com/cmusatyalab/OpenTPOD.git
+git clone --recurse-submodules https://github.com/cmusatyalab/OpenTPOD.git
 ```
 
 Then, configure the environmental variables, mostly setting passwords by copying
@@ -59,13 +59,13 @@ $ docker-compose -f docker-compose.prod.yml build
 $ docker-compose -f docker-compose.prod.yml up
 ```
 
-The server may take a few mintues to start up, as it builds its React frontend. After the server is up, indicated by log message "listening at..", create an administrative account.
+The server may take a few mintues to start up, as it builds its React frontend. After the server is up, indicated by log message "listening at..", create an administrative account with the following command.
 
 ```bash
 docker-compose -f docker-compose.prod.yml exec opentpod bash -lc '/opt/conda/envs/opentpod-env/bin/python manage.py createsuperuser'
 ```
 
-**You can access the website with the admin account at http://<host-or-ip-name>:20000/.**
+Now, you can access the website with the admin account at **http://host-or-ip-name:20000/**.
 
 ### Debugging Backend inside Containers (Recommended)
 
@@ -80,12 +80,11 @@ $ docker-compose -f docker-compose.debug.yml up
 $ # access opentpod container
 $ docker-compose -f docker-compose.debug.yml exec opentpod /bin/bash
 $ # inside opentpod container
-$ conda activate opentpod-env
 $ # modify the code as you see fit
 $ # to launch the server and testing
 $ ./build_frontend.sh
 $ python manage.py migrate
-$ python manage.py rqworker default low tensorboard
+$ python manage.py rqworker default low tensorboard &
 $ python manage.py runserver 0.0.0.0:8000
 ```
 
@@ -96,7 +95,7 @@ $ # run backend server
 $ python manage.py migrate
 $ python manage.py createsuperuser
 $ python manage.py collectstatic
-$ python manage.py rqworker default low tensorboard
+$ python manage.py rqworker default low tensorboard &
 $ python manage.py runserver 0.0.0.0:8000
 $
 $ # launch npm dev server for serving frontend code
@@ -105,6 +104,15 @@ $ npm install
 $ npm run-script watch
 ```
 
+## Uninstallation
+
+```bash
+$ docker-compose -f docker-compose.prod.yml down
+$ # or if you want to remove all your data as well, use
+$ docker-compose -f docker-compose.prod.yml down -v
+```
+
+
 ## Administration
 
 #### Create User Accounts
@@ -112,7 +120,7 @@ $ npm run-script watch
 Users can create accounts by following the *sign up* link on the login page. 
 However, newly created accounts do not have access to the website functionalities 
 until an administrator explicitly gives the account permission. 
-See [below](#### Grant users permission to access the system) for granting users permissions to access the website.
+See [below](####Grant-users-permission-to-access-the-system) for granting users permissions to access the website.
 
 #### Grant users permission to access the system
 
