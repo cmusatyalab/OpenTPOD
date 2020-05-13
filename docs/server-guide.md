@@ -59,13 +59,13 @@ $ docker-compose -f docker-compose.prod.yml build
 $ docker-compose -f docker-compose.prod.yml up
 ```
 
-The server may take a few mintues to start up, as it builds its React frontend. After the server is up, indicated by log message "listening at..", create an administrative account.
+The server may take a few mintues to start up, as it builds its React frontend. After the server is up, indicated by log message "listening at..", create an administrative account with the following command.
 
 ```bash
 docker-compose -f docker-compose.prod.yml exec opentpod bash -lc '/opt/conda/envs/opentpod-env/bin/python manage.py createsuperuser'
 ```
 
-**You can access the website with the admin account at http://<host-or-ip-name>:20000/.**
+Now, you can access the website with the admin account at **http://host-or-ip-name:20000/**.
 
 ### Debugging Backend inside Containers (Recommended)
 
