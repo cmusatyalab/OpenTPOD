@@ -12,7 +12,8 @@ It provides the following features via an easy-to-use web interface.
 * Training data management.
 * Data annotation through seamless integration with [OpenCV CVAT Labeling Tool](https://github.com/opencv/cvat).
 * One-click training/fine-tuning of object detection deep neural networks,
-  including SSD MobileNet, Faster RCNN Inception, and Faster RCNN ResNet.
+  including SSD MobileNet, Faster RCNN Inception, and Faster RCNN ResNet, using
+  Tensorflow (with and without GPU).
 * One-click model export for inference with Tensorflow Serving.
 * Extensible architecture for easy addition of new deep neural network architectures.
 
