@@ -35,7 +35,7 @@ description: Explains how to setup and administer an OpenTPOD server.
 First, clone this repository with submodules.
 
 ```bash
-git clone --recurse-submodules -j8 https://github.com/cmusatyalab/OpenTPOD.git
+git clone --recurse-submodules https://github.com/cmusatyalab/OpenTPOD.git
 ```
 
 Then, configure the environmental variables, mostly setting passwords by copying
