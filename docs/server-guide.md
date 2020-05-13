@@ -12,7 +12,7 @@ description: Explains how to setup and administer an OpenTPOD server.
 
 ### What is in this repository
 
-* [config](../config): Django website configuration files.
+* config: Django website configuration files.
 * requirements: Conda and pip requirement files for development and deployment.
 * opentpod: Main Django module for OpenTPOD.
 * cvat: a symlink to third_party/cvat. Integrated third party annotation tool CVAT. This symlink is needed here for it to be treated as a Django module as well.
@@ -43,7 +43,7 @@ and editing .envrc.example file.
 
 ```
 $ cp .envrc.example .envrc.prod
-$ vim .envrc.prod
+$ vi .envrc.prod
 ```
 
 The server can be started in either **deployment** or **debug** configurations.
@@ -59,9 +59,13 @@ $ docker-compose -f docker-compose.prod.yml build
 $ docker-compose -f docker-compose.prod.yml up
 ```
 
-Opened port:
-    * 0.0.0.0:20000: nginx web server, serving static files
-    * 127.0.0.1:20001: gunicorn app server
+The server may take a few mintues to start up, as it builds its React frontend. After the server is up, indicated by log message "listening at..", create an administrative account.
+
+```bash
+docker-compose -f docker-compose.prod.yml exec opentpod bash -lc '/opt/conda/envs/opentpod-env/bin/python manage.py createsuperuser'
+```
+
+**You can access the website with the admin account at http://<host-or-ip-name>:20000/.**
 
 ### Debugging Backend inside Containers (Recommended)
 
@@ -83,6 +87,7 @@ $ # inside opentpod container
 $ conda activate opentpod-env
 $ # modify the code as you see fit
 $ # to launch the server and testing
+$ ./build_frontend.sh
 $ python manage.py migrate
 $ python manage.py rqworker default low tensorboard
 $ python manage.py runserver 0.0.0.0:8000
@@ -106,7 +111,14 @@ $ npm run-script watch
 
 ## Administration
 
-#### Give users permission to access the system
+#### Create User Accounts
+
+Users can create accounts by following the *sign up* link on the login page. 
+However, newly created accounts do not have access to the website functionalities 
+until an administrator explicitly gives the account permission. 
+See [below](#### Grant users permission to access the system) for granting users permissions to access the website.
+
+#### Grant users permission to access the system
 
 1. Go to /admin/auth/user and login with an administrator account.
 2. Click on the user name you want to modify.

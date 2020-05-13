@@ -16,6 +16,8 @@ Note that the image background is randomly cropped to be used as negative exampl
 
 OpenTPOD assists users to annotate the training videos by integrating an external labeling tool into the GUI. Uers can annotate objects by draw bounding boxes on the uploaded video frames. To facilitate the annotation process, OpenTPOD leverages the fact that the individual frames come from a continuous video shoot. It automatically generates bounding box in subsequent frames using linear interpolation. As a result, users only need to label a few key frames in a video with the rest of frames auto-populated with generated labels. 
 
+The details on how to use the annotation tool can be found [here](https://github.com/opencv/cvat/blob/v0.4.1/cvat/apps/documentation/user_guide.md#interface-of-the-annotation-tool). **Note: Make sure to save your annotations by clicking "Open Menu >> Save Work".**
+
 ### Launch Training
 
 Go to "Detector" tab and fill out the training form to launch the DNN training

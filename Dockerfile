@@ -55,6 +55,7 @@ WORKDIR /root/openTPOD
 COPY requirements/ ./requirements/
 
 RUN ["/bin/bash", "-lc", "conda env create -f requirements/environment.yml"]
+RUN ["/bin/bash", "-lc", "echo 'conda activate opentpod-env' >> ~/.bashrc"]
 
 EXPOSE 8000
-CMD ["/bin/bash", "-lc", "conda activate opentpod-env && supervisord -n -c supervisord/production.conf"]
+CMD ["/bin/bash", "-lc", "conda activate opentpod-env && ./build_frontend.sh && supervisord -n -c supervisord/production.conf"]
