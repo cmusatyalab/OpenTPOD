@@ -80,12 +80,11 @@ $ docker-compose -f docker-compose.debug.yml up
 $ # access opentpod container
 $ docker-compose -f docker-compose.debug.yml exec opentpod /bin/bash
 $ # inside opentpod container
-$ conda activate opentpod-env
 $ # modify the code as you see fit
 $ # to launch the server and testing
 $ ./build_frontend.sh
 $ python manage.py migrate
-$ python manage.py rqworker default low tensorboard
+$ python manage.py rqworker default low tensorboard &
 $ python manage.py runserver 0.0.0.0:8000
 ```
 
@@ -96,7 +95,7 @@ $ # run backend server
 $ python manage.py migrate
 $ python manage.py createsuperuser
 $ python manage.py collectstatic
-$ python manage.py rqworker default low tensorboard
+$ python manage.py rqworker default low tensorboard &
 $ python manage.py runserver 0.0.0.0:8000
 $
 $ # launch npm dev server for serving frontend code
@@ -104,6 +103,15 @@ $ cd frontend
 $ npm install
 $ npm run-script watch
 ```
+
+## Uninstallation
+
+```bash
+$ docker-compose -f docker-compose.prod.yml down
+$ # or if you want to remove all your data as well, use
+$ docker-compose -f docker-compose.prod.yml down -v
+```
+
 
 ## Administration
 
