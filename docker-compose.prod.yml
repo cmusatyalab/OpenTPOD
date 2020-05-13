@@ -61,7 +61,7 @@ services:
             - ./opentpod:/root/openTPOD/opentpod:ro
             - ./build_frontend.sh:/root/openTPOD/build_frontend.sh:ro
             - ./manage.py:/root/openTPOD/manage.py:ro
-            - ./django-static:/root/openTPOD/django-static
+            - ./static:/root/openTPOD/static
             - ./frontend:/root/openTPOD/frontend
             - ./www:/root/openTPOD/www
             - ./supervisord:/root/openTPOD/supervisord
