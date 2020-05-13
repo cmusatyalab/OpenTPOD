@@ -47,7 +47,6 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/opentpod.nginx.conf:/etc/nginx/opentpod.nginx.conf:ro
             - ./static:/root/openTPOD/static:ro
-            - ./django-static:/root/openTPOD/django-static:ro
             - ./www:/root/openTPOD/www:ro
             - opentpod-data-var:/root/openTPOD/var
         depends_on:
