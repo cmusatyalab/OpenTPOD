@@ -28,6 +28,7 @@ It provides the following features via an easy-to-use web interface.
 * [User Guide](docs/user-guide.md)
 * [Installation and Administration Guide](docs/server-guide.md)
 * [Developer Guide](docs/notes.md)
+* [Detailed Description and Context in this PhD Thesis Section 6.3](https://junjuew.github.io/assets/thesis.pdf)
 
 ## Citations
 
