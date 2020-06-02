@@ -40,7 +40,7 @@
   * [manage.py (Django admin script)](../manage.py): Admin script for OpenTPOD Django app server. Read more about how to use Django's manage.py [here](https://docs.djangoproject.com/en/3.0/ref/django-admin/).
   * [object_detector Django Module](../opentpod/object_detector): Django module serving object detector related Restful APIs, e.g. creating and deleting object detector, creating and deleting training sets.
   * [cvat Django Module](../cvat): External Django module serving video management, annotation Restful APIs and the annotation web app. This is a Git submodule pulling from upstream [CVAT](https://github.com/opencv/cvat) repository.
-  * [cvat_ui_adapter Django Module](../opentpod/cvat_ui_adapter): Django module integration CVAT into OpenTPOD. This modules is an adapater to serve CVAT frontend files to the browser client. This is needed as OpenTPOD's frontend is written in React and served by nginx web server while CVAT's frontend is mosty server-side rendered by the Django template engine.
+  * [cvat_ui_adapter Django Module](../opentpod/cvat_ui_adapter): Django module integrating CVAT into OpenTPOD. This modules is an adapater to serve CVAT frontend files to the browser client. This is needed as OpenTPOD's frontend is written in React and served by nginx web server while CVAT's frontend is mosty server-side rendered by the Django template engine.
 * Task Queue: Redis is used both as a caching layer for database and a task queue. It is defined in the docker-compose file as the following. Other containers access this Redis instance at "opentpod-redis:6379". 6379 is the default port for Redis.
 ```
 opentpod-redis:
