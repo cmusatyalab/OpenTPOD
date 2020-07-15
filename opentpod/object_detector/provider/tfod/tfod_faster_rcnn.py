@@ -171,6 +171,17 @@ class TFODFasterRCNNResNet101(TFODFasterRCNNResNetGeneric):
     def feature_extractor_type(self):
         return 'faster_rcnn_resnet101'
 
+# class Floss(TFODFasterRCNNResNetGeneric):
+#     def __init__(self, config):
+#         super().__init__(config)
+
+#     @property
+#     def pretrained_model_url(self):
+#         return 'http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_coco_2018_01_28.tar.gz'
+
+#     @property
+#     def feature_extractor_type(self):
+#         return 'faster_rcnn_resnet101'
 
 class TFODFasterRCNNResNet50(TFODFasterRCNNResNetGeneric):
     def __init__(self, config):

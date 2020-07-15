@@ -11,7 +11,9 @@ const endpoints = {
     detectorDownloadField: "model",
     detectorVisualizationField: "visualization/index.html",
     trainsets: "/api/opentpod/v1/trainsets",
+    detectormodels: "/api/opentpod/v1/detectormodels",
     mediaData: "/task_data/",
+    fileLoad: "/media/TrainModel",
     logo: "/static/tpod-logo.png",
     // front end handled routes
     uiSignup: "/signup",
@@ -21,6 +23,9 @@ const endpoints = {
     uiAnnotate: "/annotate",
     uiDetector: "/detector",
     uiDetectorNew: "/detector-new",
+    uiLoadData:"/load-data",
+    uiLoadModel:"/load-model",
+    uiModelNew:"/load-model-new",
     uiHome: "/"
 };
 

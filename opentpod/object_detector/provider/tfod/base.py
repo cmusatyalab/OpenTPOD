@@ -9,6 +9,7 @@ import subprocess
 import tempfile
 import time
 
+import os
 import psutil
 from django.http import Http404
 from logzero import logger
@@ -74,19 +75,27 @@ class TFODDetector():
 
     def cache_pretrained_model(self):
         """Download and cache pretrained model if not existed."""
-        if utils.get_cache_entry(self.pretrained_model_cache_entry) is None:
-            logger.info('downloading and caching pretrained model from tensorflow website')
-            logger.info('url: {}'.format(self.pretrained_model_url))
-            utils.download_and_extract_url_tarball_to_cache_dir(
-                self.pretrained_model_url, self.pretrained_model_cache_entry)
+        if str(self.__class__.__name__) != 'DetectorSelfModel':
+            if utils.get_cache_entry(self.pretrained_model_cache_entry) is None:
+                logger.info('downloading and caching pretrained model from tensorflow website')
+                logger.info('url: {}'.format(self.pretrained_model_url))
+                utils.download_and_extract_url_tarball_to_cache_dir(
+                    self.pretrained_model_url, self.pretrained_model_cache_entry)
 
     def get_pretrained_model_checkpoint(self):
-        cache_entry_dir = utils.get_cache_entry(self.pretrained_model_cache_entry)
-        potential_pretained_model_files = list(cache_entry_dir.glob('**/model.ckpt*'))
-        if len(potential_pretained_model_files) == 0:
-            raise ValueError('Failed to find pretrained model in {}'.format(cache_entry_dir))
-        fine_tune_model_dir = potential_pretained_model_files[0].parent
-        return str(fine_tune_model_dir.resolve() / 'model.ckpt')
+        logger.info('get to get ckpt')
+        if str(self.__class__.__name__) != 'DetectorSelfModel':
+            cache_entry_dir = utils.get_cache_entry(self.pretrained_model_cache_entry)
+            potential_pretained_model_files = list(cache_entry_dir.glob('**/model.ckpt*'))
+            if len(potential_pretained_model_files) == 0:
+                raise ValueError('Failed to find pretrained model in {}'.format(cache_entry_dir))
+            fine_tune_model_dir = potential_pretained_model_files[0].parent
+            return str(fine_tune_model_dir.resolve() / 'model.ckpt')
+        else:
+            logger.info(str(os.path.join(self.pretrained_model_url, 'model.ckpt')))
+            if self.pretrained_model_url == '':
+                return None # raise error
+            return str(os.path.join(self.pretrained_model_url, 'model.ckpt'))
 
     def prepare_config(self):
         # num_classes are the number of classes to learn
@@ -147,6 +156,9 @@ class TFODDetector():
         logger.info('\n===========================================\n')
         logger.info('\n\nlaunching training with the following parameters: \n{}\n\n'.format(
             '\n'.join(argv)))
+        # logger.info('luanzhen: config path: {}\n'.format(self._config['pipeline_config_path']))
+        # logger.info('luanzhen: output path: {}\n'.format(self._output_dir))
+        # logger.info('luanzhen: this is a test2\n')
         logger.info('\n===========================================\n')
         FLAGS(argv)
         self._check_training_data_dir(FLAGS)
@@ -197,15 +209,25 @@ class TFODDetector():
             )
             logger.info('\n===========================================\n')
             logger.info('\n\nExporting trained model with following command: \n\n{}'.format(cmd))
+            # logger.info('test4: path: {} {}\n'.format(str(temp_dir), type(temp_dir)))
+            # logger.info('test4: output_file_path: {}\n'.format(output_file_path))
             logger.info('\n===========================================\n')
             process = subprocess.Popen(
                 cmd.split())
             process.wait()
 
             # copy some useful training files to export as well
-            shutil.copy2(self._config['pipeline_config_path'], temp_dir)
+            # shutil.copy2(self._config['pipeline_config_path'], temp_dir)
+            subdir = temp_dir + '/data'
+            # subdir_model = temp_dir + '/model'
+            os.makedirs(subdir)
+            # os.makedirs(subdir_model)
+            # filesrc = temp_dir + 'model.ckpt.*'
             shutil.copy2(self._config['label_map_path'], temp_dir)
             shutil.copy2(self._config['meta'], temp_dir)
+            shutil.copy2(self._config['train_input_path'], subdir)
+            shutil.copy2(self._config['eval_input_path'], subdir)
+            # shutil.move(filesrc, subdir_model)
 
             file_stem = str(pathlib.Path(output_file_path).parent
                             / pathlib.Path(output_file_path).stem)

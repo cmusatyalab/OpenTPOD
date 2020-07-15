@@ -18,6 +18,8 @@ import {
     Error503
 } from "./pages";
 import VideoPage from "./VideoPage.react";
+import DataPage from "./LoadDataPage.react";
+// import ModelPage from "./LoadModelPage.react";
 import { LabelManagementPage } from "./Label.react";
 import AnnotatePage from "./AnnotatePage.react";
 import {
@@ -25,6 +27,7 @@ import {
     DetectorDetailPage,
     DetectorNewPage
 } from "./DetectorPage.react";
+import { LoadModelPage,ModelNewPage } from "./LoadModelPage.react"
 import { endpoints } from "./const";
 import "tabler-react/dist/Tabler.css";
 import { uiAuth } from "./util.js";
@@ -54,8 +57,19 @@ function App(props) {
                 />
                 <AuthRequiredRoute
                     exact
+                    path={endpoints.uiLoadData}
+                    component={DataPage}
+                />
+                <AuthRequiredRoute
+                    exact
                     path={endpoints.uiLabel}
                     component={LabelManagementPage}
+                />
+                <AuthRequiredRoute
+                    exact
+                    // path={endpoints.detectormodels}
+                    path={endpoints.uiLoadModel}
+                    component={LoadModelPage}
                 />
                 <AuthRequiredRoute
                     exact
@@ -76,6 +90,11 @@ function App(props) {
                     exact
                     path={endpoints.uiDetectorNew}
                     component={DetectorNewPage}
+                />
+                <AuthRequiredRoute
+                    exact
+                    path={endpoints.uiModelNew}
+                    component={ModelNewPage}
                 />
                 <Route
                     exact

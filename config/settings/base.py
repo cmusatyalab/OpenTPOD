@@ -179,6 +179,7 @@ STATICFILES_FINDERS = [
 MEDIA_ROOT = VAR_DIR
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = "/media/"
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # publicly accessible data directory
 DATA_ROOT = VAR_DIR / "data"
@@ -373,6 +374,8 @@ SHARE_ROOT = VAR_DIR / 'share'
 os.makedirs(SHARE_ROOT, exist_ok=True)
 MODELS_ROOT = VAR_DIR / 'models'
 os.makedirs(MODELS_ROOT, exist_ok=True)
+TRAINMODEL_ROOT = VAR_DIR / 'TrainModel'
+os.makedirs(TRAINMODEL_ROOT, exist_ok=True)
 
 # tpod requirements
 # ------------------------------------------------------------------------------

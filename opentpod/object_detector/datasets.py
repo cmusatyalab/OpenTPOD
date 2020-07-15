@@ -16,6 +16,8 @@ from cvat.apps.engine import annotation as cvat_annotation
 from cvat.apps.annotation import models as cvat_models
 import collections
 import json
+from logzero import logger
+import shutil
 
 tf.compat.v1.enable_eager_execution()
 
@@ -152,33 +154,65 @@ def dump_detector_annotations(
     db_dumper = cvat_models.AnnotationDumper.objects.get(
         display_name=dump_format)
 
+    count = 0
+    logger.info("this is a testtt")
+    logger.info(output_dir)
     labels = []
     # call cvat dump tool on each video in the trainset
     for db_task in db_tasks:
-        task_annotations_file_path = dump_cvat_task_annotations(db_task,
-                                                                db_user,
-                                                                db_dumper,
-                                                                scheme,
-                                                                host)
-        # cvat's tfrecord does not contain image data. here we add the image
-        # data into the tfrecord file as a feature 'image/data'
-        fix_cvat_tfrecord(db_task.get_data_dirname(),
-                          task_annotations_file_path,
-                          output_dir / (
-            os.path.splitext(
-                os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
-        )
-        task_labels = get_label_map_from_cvat_tfrecord_zip(
-            task_annotations_file_path
-        )
-        for label in task_labels:
-            if label not in labels:
-                labels.append(label)
-        os.remove(task_annotations_file_path)
+        logger.info(db_task)
+        logger.info(db_task.get_data_dirname())
+        logger.info(os.path.abspath(db_task.get_data_dirname() + "/../.upload"))
+        
+        if (str(db_task).endswith('.tfrecord')):
+            filePath = os.path.abspath(db_task.get_data_dirname() + "/../.upload/" + str(db_task))
+            srcPath = str(output_dir) + "/default" + str(count) + ".tfrecord"
+            shutil.copy2(filePath, srcPath)
+            count += 1
+            # logger.info("get here")
+        elif (str(db_task).endswith('.pbtxt')):
+            filePath = os.path.abspath(db_task.get_data_dirname() + "/../.upload/" + str(db_task))
+            logger.info(filePath)
+            with open(filePath, 'r') as f:
+                content = f.read()
+                # labelsForHere = []
+                cur_label_map = string_int_label_map_pb2.StringIntLabelMap()
+                text_format.Merge(content, cur_label_map)
+                for item in cur_label_map.item:
+                    if item.name not in labels:
+                        logger.info(item.name)
+                        labels.append(item.name)
+        else:
+            # logger.info("works")
+            task_annotations_file_path = dump_cvat_task_annotations(db_task,
+                                                                    db_user,
+                                                                    db_dumper,
+                                                                    scheme,
+                                                                    host)
+            # cvat's tfrecord does not contain image data. here we add the image
+            # data into the tfrecord file as a feature 'image/data'
+            fix_cvat_tfrecord(db_task.get_data_dirname(),
+                            task_annotations_file_path,
+                            output_dir / (
+                os.path.splitext(
+                    os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
+            )
+            logger.info(os.path.splitext(os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
+            task_labels = get_label_map_from_cvat_tfrecord_zip(
+                task_annotations_file_path
+            )
+            logger.info(task_labels)
+            logger.info(task_annotations_file_path)
+            for label in task_labels:
+                logger.info(label)
+                if label not in labels:
+                    labels.append(label)
+            os.remove(task_annotations_file_path)
 
-    _dump_labelmap_file(labels,
-                        output_labelmap_file_path)
+    _dump_labelmap_file(labels, output_labelmap_file_path)
     split_train_eval_tfrecord(output_dir)
+        # count += 1
+            
 
 
 def split_train_eval_tfrecord(data_dir):

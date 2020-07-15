@@ -17,6 +17,21 @@ const navBarItems = [
         to: endpoints.uiDetector,
         icon: "code",
         LinkComponent: withRouter(NavLink)
+    },
+    {
+        value: "Load Data",
+        to: endpoints.uiLoadData,
+        icon: "code",
+        LinkComponent: withRouter(NavLink),
+        useExact: true
+    },
+    {
+        value: "Load Model",
+        // to: endpoints.detectormodels,
+        to: endpoints.uiLoadModel,
+        icon: "code",
+        LinkComponent: withRouter(NavLink),
+        useExact: true
     }
 ];
 

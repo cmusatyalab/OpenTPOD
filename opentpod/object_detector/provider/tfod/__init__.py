@@ -1,2 +1,3 @@
 from .tfod_faster_rcnn import TFODFasterRCNNResNet101, TFODFasterRCNNResNet50
 from .tfod_ssd import TFODSSDMobileNetV2
+from .tfod_self_defined import DetectorSelfModel

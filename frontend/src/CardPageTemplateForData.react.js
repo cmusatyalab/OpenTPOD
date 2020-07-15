@@ -33,9 +33,8 @@ const InfoCardList = ({
     // resourceObj and produce UI elements
     // Title, Options, Body have precedence over make... functions
     let cards = iterableResourceObjs.map((item, index) => {
+        console.log(item.name)
         if (item.name.endsWith(".tfrecord") || item.name.endsWith(".pbtxt")) {
-            return ""
-        }
         return (
             <Grid.Col auto key={index} sm={cardColumnWidth}>
                 <InfoCard
@@ -63,8 +62,12 @@ const InfoCardList = ({
                     {...rest}
                 />
             </Grid.Col>
-        );
+        );}
+        else {
+            return ""
+        }
     });
+
     return <>{cards}</>;
 };
 
