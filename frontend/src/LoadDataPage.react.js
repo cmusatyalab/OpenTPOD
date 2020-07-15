@@ -10,7 +10,7 @@ import ReactPlayer from "react-player";
 import { useHistory } from "react-router-dom";
 import { Button, Dimmer, Grid, Page } from "tabler-react";
 import URI from "urijs";
-import { PaginatedInfoCardList } from "./CardPageTemplate.react.js";
+import { PaginatedInfoCardList } from "./CardPageTemplateForData.react.js";
 import SiteWrapper from "./SiteWrapper.react";
 import { endpoints, PAGE_SIZE, session_storage_key } from "./const";
 import { fetchJSON, lineWrap, clamp } from "./util";
@@ -26,25 +26,7 @@ const makeVideoCardOptions = ({ resourceObj, onDelete }) => {
     let history = useHistory();
     return (
         <>
-            <Button
-                outline
-                RootComponent="button"
-                color="primary"
-                size="sm"
-                icon="tag"
-                onClick={e => {
-                    e.preventDefault();
-                    history.push(
-                        URI.joinPaths(
-                            endpoints.uiAnnotate,
-                            "tasks",
-                            resourceObj.id.toString()
-                        ).toString()
-                    ); // only considered 1st job
-                }}
-            >
-                Label
-            </Button>
+
             <Button
                 outline
                 RootComponent="button"
@@ -75,6 +57,7 @@ const VideoCardBody = ({ resourceObj }) => {
     const loadStatus = () => {
         setStatus(null);
         let url = URI.joinPaths(resourceObj.url, "/status").toString();
+        // console.log(url)
         fetchJSON(url, "GET").then(resp => {
             setStatus(resp);
             if (resp.state === "Queued" || resp.state === "Started")
@@ -86,36 +69,28 @@ const VideoCardBody = ({ resourceObj }) => {
         loadStatus();
     }, []);
 
-    return status && status.state === "Finished" ? (
+    // return status && status.state === "Finished" ? (
+        
+    return (
         <div>
             <b>Created Date:</b> {resourceObj.created_date} <br />
-            <ReactPlayer
-                url={URI.joinPaths(
-                    endpoints.mediaData,
-                    resourceObj.id.toString(),
-                    ".upload",
-                    resourceObj.name
-                )}
-                width="100%"
-                height="100%"
-                controls={true}
-                light={URI.joinPaths(resourceObj.url, "/frames/0").toString()} // expects string type
-            />
-        </div>
-    ) : status && status.state === "Failed" ? (
-        <div>
-            <b>Error:</b> Failed to extract the video into images.
-            <br />
-        </div>
-    ) : (
-        <div>
-            The video is being processed...
-            <Dimmer active loader />
-        </div>
-    );
+        </div>);
+        
+    
+    // ) : status && status.state === "Failed" ? (
+    //     <div>
+    //         <b>Error:</b> Failed to extract the video into images.
+    //         <br />
+    //     </div>
+    // ) : (
+    //     <div>
+    //         The video is being processed...
+    //         <Dimmer active loader />
+    //     </div>
+    // );
 };
 
-const VideoPage = ({ ...props }) => {
+const DataPage = ({ ...props }) => {
     // in this class, a video is used as the equivalent of a CVAT tasks
     // as CVAT only allows a single video in a task
     const [videos, setVideos] = useState(null);
@@ -131,7 +106,10 @@ const VideoPage = ({ ...props }) => {
             setVideos(resp);
             setCurPage(newPage);
         });
+        // console.log(url)
     };
+    
+    // console.log(videos)
 
     useEffect(() => {
         loadVideos(1);
@@ -163,6 +141,8 @@ const VideoPage = ({ ...props }) => {
                     "POST",
                     URI.joinPaths(endpoints.tasks, resp.id.toString(), "data")
                 );
+                // console.log(endpoints.tasks)
+                // console.log(resp.id.toString())
                 // Should call the progress method to update the progress to 100% before calling load
                 // Setting computable to false switches the loading indicator to infinite mode
                 request.upload.onprogress = e => {
@@ -208,7 +188,7 @@ const VideoPage = ({ ...props }) => {
                 <Grid.Row>
                     <section className="container">
                         <FilePond
-                            labelIdle="Drag & Drop videos or Click to Browse."
+                            labelIdle="Drag & Drop files or Click to Browse."
                             files={files}
                             allowMultiple={true}
                             server={{
@@ -225,7 +205,7 @@ const VideoPage = ({ ...props }) => {
                                     let userId = sessionStorage.getItem(
                                         session_storage_key.userId
                                     );
-                                    console.log(userId);
+                                    
                                     let data = {
                                         name: file.name,
                                         labels: [],
@@ -249,8 +229,9 @@ const VideoPage = ({ ...props }) => {
                                 load: null
                             }}
                             allowRevert={false}
-                            acceptedFileTypes="video/*"
-                            fileValidateTypeLabelExpectedTypes="Expects a video file"
+                            allowFileTypeValidation={false}
+                            acceptedFileTypes={[".tfrecord", ".pbtxt"]}
+                            // fileValidateTypeLabelExpectedTypes="Expects a tfrecord file"
                             onupdatefiles={fileItems => {
                                 // Set currently active file objects
                                 setFiles(
@@ -302,7 +283,4 @@ const VideoPage = ({ ...props }) => {
         </SiteWrapper>
     );
 };
-
-
-
-export default VideoPage;
+export default DataPage;

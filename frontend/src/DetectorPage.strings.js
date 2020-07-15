@@ -1,6 +1,8 @@
 const strings = {
     title: "Create New Detector",
     buttonText: "Create Detector",
+    modeltitle: "Create New Model",
+    modelbuttonText: "Create Model",
     nameLabel: "Name",
     namePlaceholder: "Enter name",
     emailLabel: "Email Address",

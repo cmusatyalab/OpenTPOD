@@ -1,0 +1,45 @@
+#!/bin/bash
+
+################################################################
+# Change the variables below for access and security.
+################################################################
+# set django's ALLOWED_HOSTS variable: https://docs.djangoproject.com/en/3.0/ref/settings/
+export DJANGO_ALLOWED_HOSTS="128.2.209.119,localhost,127.0.0.1"
+# set django's secret key
+export DJANGO_SECRET_KEY="12345"
+# set database password
+export OPENTPOD_DB_PASSWORD="12345"
+# set redis password
+export OPENTPOD_REDIS_PASSWORD="12345"
+
+################################################################
+# Default environment setup.
+# Do not change, unless you know what you are doing
+################################################################
+
+# python setup
+export PYTHONDONTWRITEBYTECODE=1
+
+# react setup
+export BROWSER=none
+export PORT=3001
+
+# opentpod envrons
+export OPENTPOD_TESTING=false
+
+# DB
+export OPENTPOD_DB_HOST="opentpod-db"
+export OPENTPOD_DB="opentpod"
+export OPENTPOD_DB_PORT="5432"
+export OPENTPOD_DB_VIEWER_PORT="18080"
+
+# Redis
+export OPENTPOD_REDIS_HOST="opentpod-redis"
+export OPENTPOD_REDIS_PORT="6379"
+
+# Django specific environs
+export DJANGO_DEBUG=false
+export REDIS_URL="redis://:${OPENTPOD_REDIS_PASSWORD}@${OPENTPOD_REDIS_HOST}:${OPENTPOD_REDIS_PORT}/0"
+export REDIS_CACHE_URL="redis://:${OPENTPOD_REDIS_PASSWORD}@${OPENTPOD_REDIS_HOST}:${OPENTPOD_REDIS_PORT}/1"
+export DATABASE_URL="postgres://root:${OPENTPOD_DB_PASSWORD}@${OPENTPOD_DB_HOST}:${OPENTPOD_DB_PORT}/${OPENTPOD_DB}"
+export CELERY_BROKER_URL=${REDIS_URL}

@@ -19,13 +19,53 @@ from rest_framework.response import Response
 
 from opentpod.object_detector import models, provider, serializers
 from opentpod.object_detector import tasks as bg_tasks
-
+from logzero import logger
+import zipfile
 
 class TrainSetViewSet(viewsets.ModelViewSet):
     queryset = models.TrainSet.objects.all()
     serializer_class = serializers.TrainSetSerializer
     search_fields = ("name", "owner__username")
 
+class DetectorModelViewSet(viewsets.ModelViewSet):
+    queryset = models.DetectorModel.objects.all()
+    serializer_class = serializers.DetectorModelSerializer
+    search_fields = ("name", "owner__username")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        # Don't filter queryset for admin
+        if auth.has_admin_role(user) or self.detail:
+            return queryset
+        else:
+            return queryset.filter(Q(owner=user)).distinct()
+            
+    def perform_create(self, serializer):
+        selfmodel = serializer.save()
+
+    def perform_destroy(self, selfmodel):
+        logger.info('get delete in view')
+        shutil.rmtree(selfmodel.getPath())
+        selfmodel.delete()
+
+    def setmodelt2default(seld, selfmodel):
+        return selfmodel.getFilePath()
+    #     logger.info("this is a test in view")
+    #     currentModel = serializer.save()
+    #     logger.info(currentModel.name)
+    #     logger.info(currentModel.getPath())
+        # with zipfile.ZipFile(currentModel.getPath(), 'r') as zip_ref:
+        #     zip_ref.extractall()
+        # if request.method == 'POST':
+        #     logger.info("this is a post request")
+
+    # def put(self, request, filename, format=None):
+    #     logger.info("detail view")
+    # def upload_file(request):
+    #     logger.info("detail view")
+    # def perform_destroy(self, currentModel):
+    #     os.remove(currentModel.getPath())
 
 class DetectorViewSet(viewsets.ModelViewSet):
     queryset = models.Detector.objects.all()
@@ -46,6 +86,7 @@ class DetectorViewSet(viewsets.ModelViewSet):
         db_detector = serializer.save()
         db_detector.get_training_data_dir().mkdir(parents=True)
         db_detector.get_model_dir().mkdir(parents=True)
+        # db_detector.get_pretrain_dir().mkdir(parents=True)
         bg_tasks.train(
             db_detector,
             self.request.user,

@@ -11,8 +11,10 @@ from logzero import logger
 def get_cache_entry(entry_name):
     cache_dir = settings.CACHE_DIR / entry_name
     if cache_dir.exists():
+        # logger.info('test5: {} exists'.format(entry_name))
         return cache_dir
     else:
+        # logger.info('test5: {} not exists'.format(entry_name))
         return None
 
 

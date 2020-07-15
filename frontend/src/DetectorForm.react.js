@@ -12,6 +12,7 @@ import "./App.css";
 
 // get tasks information to populate available tasks select field
 const fetchTasks = async page => {
+    // console.log(page.toString)
     let url = new URI(endpoints.tasks);
     url.addSearch("page", page);
     return await fetchJSON(url.toString(), "GET");
@@ -19,6 +20,8 @@ const fetchTasks = async page => {
 
 // for task AsyncPaginate select
 const filterTasksByName = async searchString => {
+    console.log("here")
+    console.log(searchString)
     let url = new URI(endpoints.tasks);
     url.addSearch("name", searchString);
     return await fetchJSON(url.toString(), "GET");
@@ -80,6 +83,7 @@ const NewDetectorForm = ({ strings = {} }) => {
     const fetchAvailableDnnTypes = () => {
         fetchJSON(endpoints.detectorDnnTypes, "GET").then(resp => {
             let types = JSON.parse(resp);
+            console.log(types)
             let typeOptions = types.map(item => ({
                 value: item[0],
                 label: item[1]
@@ -90,6 +94,7 @@ const NewDetectorForm = ({ strings = {} }) => {
 
     // fetch training configuration of currently selected dnn type
     const updateTrainingConfig = (selectedOption, curFormValues) => {
+        console.log(curFormValues)
         if (selectedOption != null) {
             let dnnTypeString = selectedOption.value;
             setTrainingConfigLoading(true);
@@ -110,6 +115,8 @@ const NewDetectorForm = ({ strings = {} }) => {
                     setTrainingConfigLoading(false);
                 });
         }
+        console.log("this is two")
+        console.log(curFormValues)
     };
 
     useEffect(() => {

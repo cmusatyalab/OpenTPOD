@@ -1,14 +1,31 @@
 import pathlib
 import json
 import enum
-
+import os
 from cvat.apps.engine.models import Task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 
-from opentpod.object_detector import provider
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
+# from jobqueue import job_function, job_status, job_progress
+
+from opentpod.object_detector import provider
+from django.core.files.storage import FileSystemStorage
+from logzero import logger
+
+import shutil
+import zipfile
+import threading
+import os.path
+import time
+import concurrent.futures
+
+from opentpod.object_detector.helper import Zip2Model
+
+# modellist = []
 
 class Status(enum.Enum):
     CREATED = 'created'
@@ -38,6 +55,65 @@ class TrainSet(models.Model):
     def __str__(self):
         return self.name
 
+def upload_file_handler(instance, filename):
+    return os.path.join('TrainModel', filename)
+
+class DetectorModel(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    # feature_extractor_type = models.CharField(max_length=256, default="", blank=False)
+    created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    file = models.FileField(upload_to=upload_file_handler)
+
+    logger.info(owner)
+    # logger.info(name)
+    # logger.info(self.file.name)
+    # temp = provider.DetectorSelfModel(name, file.name, feature_extractor_type)
+    # configFile = models.FileField(upload_to=upload_file_handler, storage=FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT)))
+    # upload_to="background/"
+
+    class Meta:
+        ordering = ['id']
+
+    def __init__(self, *args, **kwargs):
+        super(DetectorModel, self).__init__(*args, **kwargs)
+        logger.info(self.name)
+        # logger.info(self.feature_extractor_type)
+        logger.info(self.getId())
+        logger.info(self.getFileName())
+        logger.info(self.getPath())
+
+    def save(self, *args, **kwargs):
+        super(DetectorModel, self).save(*args, **kwargs)
+        logger.info("able to get here")
+        # savingpath = os.path.abspath(self.file.name)
+        # logger.info(self.file.path)
+        # str(pathlib.Path(settings.VAR_DIR)) + '/TrainModel/' + self.file.name
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(Zip2Model, self.file.path, self.name)
+            self.unzipresult = future.result()
+            # unzipprocess = threading.Thread(target=Zip2Model, args=(self.file.path, self.name,))
+            # unzipprocess.start()
+        
+        logger.info("after thread")
+    
+    def getPath(self):
+        return os.path.join(settings.TRAINMODEL_ROOT, self.name)
+
+    def getUnzip(self):
+        return self.unzipresult
+
+    def getFilePath(self):
+        return self.unzipprocess.file
+
+    def getFileName(self):
+        return self.file.name
+
+    def __str__(self):
+        return self.name
+
+    def getId(self):
+        return self.id
 
 class Detector(models.Model):
     """Trained Detector
@@ -73,6 +149,9 @@ class Detector(models.Model):
 
     def get_model_dir(self):
         return self.get_dir() / 'models'
+
+    # def get_pretrain_dir(self):
+    #     return self.get_dir() / 'pretrain'
 
     def get_export_file_path(self):
         return self.get_dir() / '{}-frozen-graph.zip'.format(self.name)

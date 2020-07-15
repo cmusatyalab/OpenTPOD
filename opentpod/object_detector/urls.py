@@ -21,6 +21,7 @@ schema_view = get_schema_view(
 router = routers.DefaultRouter(trailing_slash=False)
 router.register('detectors', views.DetectorViewSet)
 router.register('trainsets', views.TrainSetViewSet)
+router.register('detectormodels', views.DetectorModelViewSet)
 
 urlpatterns = [
     # documentation for API
