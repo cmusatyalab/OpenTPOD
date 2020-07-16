@@ -59,7 +59,7 @@ def upload_file_handler(instance, filename):
     return os.path.join('TrainModel', filename)
 
 class DetectorModel(models.Model):
-    name = models.CharField(max_length=256, unique=True)
+    # name = models.CharField(max_length=256, unique=True)
     owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     # feature_extractor_type = models.CharField(max_length=256, default="", blank=False)
     created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -75,45 +75,46 @@ class DetectorModel(models.Model):
     class Meta:
         ordering = ['id']
 
-    def __init__(self, *args, **kwargs):
-        super(DetectorModel, self).__init__(*args, **kwargs)
-        logger.info(self.name)
+    # def __init__(self, *args, **kwargs):
+    #     super(DetectorModel, self).__init__(*args, **kwargs)
+        # logger.info(self.name)
         # logger.info(self.feature_extractor_type)
-        logger.info(self.getId())
-        logger.info(self.getFileName())
-        logger.info(self.getPath())
+        # logger.info(self.getId())
+        # logger.info(self.getFileName())
+        # logger.info(self.getPath())
 
-    def save(self, *args, **kwargs):
-        super(DetectorModel, self).save(*args, **kwargs)
-        logger.info("able to get here")
+    # def save(self, *args, **kwargs):
+    #     super(DetectorModel, self).save(*args, **kwargs)
+    #     logger.info("able to get here")
         # savingpath = os.path.abspath(self.file.name)
         # logger.info(self.file.path)
         # str(pathlib.Path(settings.VAR_DIR)) + '/TrainModel/' + self.file.name
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(Zip2Model, self.file.path, self.name)
-            self.unzipresult = future.result()
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
+        #     future = executor.submit(Zip2Model, self.file.path, self.name)
+        #     self.unzipresult = future.result()
             # unzipprocess = threading.Thread(target=Zip2Model, args=(self.file.path, self.name,))
             # unzipprocess.start()
         
-        logger.info("after thread")
+        # logger.info("after thread")
     
-    def getPath(self):
-        return os.path.join(settings.TRAINMODEL_ROOT, self.name)
+    # def getPath(self):
+    #     return os.path.join(settings.TRAINMODEL_ROOT, self.name)
 
-    def getUnzip(self):
-        return self.unzipresult
+    # def getUnzip(self):
+    #     return self.unzipresult
 
-    def getFilePath(self):
-        return self.unzipprocess.file
+    # def getFilePath(self):
+    #     return self.unzipprocess.file
 
-    def getFileName(self):
-        return self.file.name
+    # def getFileName(self):
+    #     return self.file.name
 
     def __str__(self):
-        return self.name
+        return self.file.name
+        # return self.name
 
-    def getId(self):
-        return self.id
+    # def getId(self):
+    #     return self.id
 
 class Detector(models.Model):
     """Trained Detector

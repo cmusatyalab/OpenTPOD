@@ -57,7 +57,7 @@ services:
         volumes:
             - ./config:/root/openTPOD/config:ro
             - ./cvat:/root/openTPOD/cvat:ro
-            - ./opentpod:/root/openTPOD/opentpod:ro
+            - ./opentpod:/root/openTPOD/opentpod
             - ./build_frontend.sh:/root/openTPOD/build_frontend.sh:ro
             - ./manage.py:/root/openTPOD/manage.py:ro
             - ./static:/root/openTPOD/static

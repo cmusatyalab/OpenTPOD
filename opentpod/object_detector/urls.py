@@ -5,6 +5,9 @@ from rest_framework import permissions, routers
 
 from opentpod.object_detector import views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 schema_view = get_schema_view(
     openapi.Info(
         title="OpenTPOD REST API",
@@ -31,4 +34,5 @@ urlpatterns = [
     path('api/opentpod/v1/', include((router.urls))),
     # for serving data files
     path('task_data/<int:task_id>/<path:data_path>', views.task_data),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
+  + static(settings.TRAINMODEL_URL, document_root=settings.TRAINMODEL_ROOT)
