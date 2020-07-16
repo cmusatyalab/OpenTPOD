@@ -176,10 +176,10 @@ STATICFILES_FINDERS = [
 # MEDIA
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-root
-MEDIA_ROOT = VAR_DIR
+MEDIA_ROOT = VAR_DIR #/ "TrainModel"
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = "/media/"
-os.makedirs(MEDIA_ROOT, exist_ok=True)
+# os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # publicly accessible data directory
 DATA_ROOT = VAR_DIR / "data"
@@ -374,6 +374,8 @@ SHARE_ROOT = VAR_DIR / 'share'
 os.makedirs(SHARE_ROOT, exist_ok=True)
 MODELS_ROOT = VAR_DIR / 'models'
 os.makedirs(MODELS_ROOT, exist_ok=True)
+
+TRAINMODEL_URL = "/media/TrainModel/"
 TRAINMODEL_ROOT = VAR_DIR / 'TrainModel'
 os.makedirs(TRAINMODEL_ROOT, exist_ok=True)
 

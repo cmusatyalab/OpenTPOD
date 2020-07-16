@@ -22,7 +22,7 @@ const NewDetectorForm = ({ strings = {} }) => {
         name: "",
         model: null
     });
-    const [videos, setVideos] = useState(null);
+    // const [videos, setVideos] = useState(null);
     const [files, setFiles] = useState([]);
     const [curPage, setCurPage] = useState(null);
 
@@ -35,19 +35,30 @@ const NewDetectorForm = ({ strings = {} }) => {
         error,
         abort
     }) => {
-        fetchJSON(endpoints.mediaData, "POST", data)
-            .then(resp => {
+        // fetchJSON(endpoints.detectormodels, "POST", data)
+        //     .then(resp => {
                 // fieldName is the name of the input field
                 // file is the actual file object to send
-                const batchOfFiles = new FormData();
-                batchOfFiles.append("client_files[0]", file);
+                console.log("getting here")
+                const formData = new FormData();
+                formData.append("file", file);
                 const request = new XMLHttpRequest();
+                
                 request.open(
                     "POST",
-                    URI.joinPaths(endpoints.mediaData, resp.id.toString(), "data")
+                    endpoints.detectormodels
+                    // URI.joinPaths(endpoints.detectormodels, resp.id.toString())
                 );
-                // Should call the progress method to update the progress to 100% before calling load
-                // Setting computable to false switches the loading indicator to infinite mode
+                
+                // const batchOfFiles = new FormData();
+                // batchOfFiles.append("client_files[0]", file);
+                // const request = new XMLHttpRequest();
+                // request.open(
+                //     "POST",
+                //     URI.joinPaths(endpoints.mediaData, resp.id.toString(), "data")
+                // );
+                // // Should call the progress method to update the progress to 100% before calling load
+                // // Setting computable to false switches the loading indicator to infinite mode
                 request.upload.onprogress = e => {
                     progress(e.lengthComputable, e.loaded, e.total);
                 };
@@ -67,7 +78,9 @@ const NewDetectorForm = ({ strings = {} }) => {
                         abort();
                     }
                 };
-                request.send(batchOfFiles);
+                // request.send(batchOfFiles);
+                // formData.append("owner", "root")
+                request.send(formData);
                 // Should expose an abort method so the request can be cancelled
                 return {
                     abort: () => {
@@ -77,12 +90,12 @@ const NewDetectorForm = ({ strings = {} }) => {
                         abort();
                     }
                 };
-            })
-            .catch(e => {
-                console.error(e);
-                error(e);
-                abort();
-            });
+            // })
+            // .catch(e => {
+            //     console.error(e);
+            //     error(e);
+            //     abort();
+            // });
     };
     
 
@@ -106,11 +119,11 @@ const NewDetectorForm = ({ strings = {} }) => {
                 setSubmitting(true);
                 let data = {
                     name: values.name,
-                    file: files[0]
+                    // file: files[0]
                 };
                 console.log(data);
-                console.log(videos)
-                console.log(files)
+                // console.log(videos)
+                // console.log(files)
                 fetchJSON(endpoints.detectormodels, "POST", data).then(resp => {
                     history.push(endpoints.uiLoadModel);
                 });
@@ -132,7 +145,7 @@ const NewDetectorForm = ({ strings = {} }) => {
                         title={strings.modeltitle || defaultStrings.modeltitle}
                         onSubmit={handleSubmit}
                     >
-                        <FormTextInput
+                        {/* <FormTextInput
                             name="name"
                             label={
                                 strings.nameLabel || defaultStrings.nameLabel
@@ -145,13 +158,61 @@ const NewDetectorForm = ({ strings = {} }) => {
                             error={errors && errors.name}
                             onSubmit={handleSubmit}
                             onChange={handleChange}
-                        />
+                        /> */}
                         <FilePond
                             labelIdle="Drag & Drop Model File or Click to Browse. (in .zip)"
                             files={files}
                             allowMultiple={true}
                             // server={endpoints.detectormodels}
-                            server='/media/TrainModel/test.zip'
+                            // server='/media/TrainModel/test.zip'
+                            // server={endpoints.detectormodels}
+                            server={{
+                                process: (
+                                    fieldName,
+                                    file,
+                                    metadata,
+                                    load,
+                                    error,
+                                    progress,
+                                    abort
+                                ) => {
+                                    // create CVAT task first
+                                    let userId = sessionStorage.getItem(
+                                        session_storage_key.userId
+                                    );
+                                    console.log(userId);
+                                    let data = {
+                                        name: file.name,
+                                        // labels: [],
+                                        // image_quality: 100,
+                                        owner: userId,
+                                        // assignee: userId
+                                    };
+                                    createTask({
+                                        data,
+                                        // onTaskCreated,
+                                        file,
+                                        progress,
+                                        load,
+                                        error,
+                                        abort
+                                    });
+                                },
+
+                                fetch: null,
+                                revert: null,
+                                load: null
+                            }}
+                            allowRevert={false}
+                            onupdatefiles={fileItems => {
+                                // Set currently active file objects
+                                setFiles(
+                                    fileItems.map(fileItem => fileItem.file)
+                                );
+                            }}
+                            onprocessfiles={() => {
+                                setFiles([]);
+                            }}
                             // allowRevert={false}
                             // acceptedFileTypes="video/*"
                             // fileValidateTypeLabelExpectedTypes="Expects a video file"
@@ -164,8 +225,8 @@ const NewDetectorForm = ({ strings = {} }) => {
                             // onprocessfiles={() => {
                             //     setFiles([]);
                             // }}
-                            onSubmit={handleSubmit}
-                            onChange={handleChange}
+                            // onSubmit={handleSubmit}
+                            // onChange={handleChange}
                         />
                     </FormCard>
                 )

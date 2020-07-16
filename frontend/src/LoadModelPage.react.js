@@ -13,7 +13,7 @@ import { Button, Card, Dimmer, Form, Grid, Page } from "tabler-react";
 import URI from "urijs";
 
 import "./App.css";
-import { PaginatedInfoCardList } from "./CardPageTemplate.react.js";
+import { PaginatedInfoCardList } from "./CardPageTemplateForModel.react";
 
 import { NewDetectorForm } from "./LoadModelForm.react";
 
@@ -52,7 +52,7 @@ const makeModelCardOptions = ({ resourceObj, onDelete }) => {
 };
 
 const makeModelTitle = resourceObj => {
-    return lineWrap(resourceObj.name);
+    return lineWrap(resourceObj.id.toString());
 };
 
 const makeModelCardBody = ({ resourceObj }) => {

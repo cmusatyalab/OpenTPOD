@@ -30,7 +30,7 @@ class TrainSetViewSet(viewsets.ModelViewSet):
 class DetectorModelViewSet(viewsets.ModelViewSet):
     queryset = models.DetectorModel.objects.all()
     serializer_class = serializers.DetectorModelSerializer
-    search_fields = ("name", "owner__username")
+    search_fields = ("owner__username")
 
     def get_queryset(self):
         queryset = super().get_queryset()
