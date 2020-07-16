@@ -75,17 +75,17 @@ class DetectorModel(models.Model):
     class Meta:
         ordering = ['id']
 
-    # def __init__(self, *args, **kwargs):
-    #     super(DetectorModel, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(DetectorModel, self).__init__(*args, **kwargs)
         # logger.info(self.name)
         # logger.info(self.feature_extractor_type)
         # logger.info(self.getId())
         # logger.info(self.getFileName())
         # logger.info(self.getPath())
 
-    # def save(self, *args, **kwargs):
-    #     super(DetectorModel, self).save(*args, **kwargs)
-    #     logger.info("able to get here")
+    def save(self, *args, **kwargs):
+        super(DetectorModel, self).save(*args, **kwargs)
+        logger.info("able to get here")
         # savingpath = os.path.abspath(self.file.name)
         # logger.info(self.file.path)
         # str(pathlib.Path(settings.VAR_DIR)) + '/TrainModel/' + self.file.name
@@ -95,7 +95,7 @@ class DetectorModel(models.Model):
             # unzipprocess = threading.Thread(target=Zip2Model, args=(self.file.path, self.name,))
             # unzipprocess.start()
         
-        # logger.info("after thread")
+        logger.info("after thread")
     
     # def getPath(self):
     #     return os.path.join(settings.TRAINMODEL_ROOT, self.name)
@@ -113,8 +113,8 @@ class DetectorModel(models.Model):
         return self.file.name
         # return self.name
 
-    # def getId(self):
-    #     return self.id
+    def getId(self):
+        return self.id
 
 class Detector(models.Model):
     """Trained Detector

@@ -52,7 +52,10 @@ const makeModelCardOptions = ({ resourceObj, onDelete }) => {
 };
 
 const makeModelTitle = resourceObj => {
-    return lineWrap(resourceObj.id.toString());
+    var array = resourceObj.file.toString().split('/')
+    // console.log(array[array.length - 1])
+    return lineWrap(array[array.length - 1].toString());
+    // return lineWrap(resourceObj.id.toString());
 };
 
 const makeModelCardBody = ({ resourceObj }) => {

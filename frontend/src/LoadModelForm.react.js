@@ -18,17 +18,19 @@ const NewDetectorForm = ({ strings = {} }) => {
     // const [model, setmodel] = useState(null);
     // form values. Set as a state variable as we're updating it
     // both from default values of the backend and user input
-    const [formInitialValues, setFormInitialValues] = useState({
-        name: "",
-        model: null
-    });
+    // const [formInitialValues, setFormInitialValues] = useState({
+    //     name: "",
+    //     model: null
+    // });
     // const [videos, setVideos] = useState(null);
     const [files, setFiles] = useState([]);
-    const [curPage, setCurPage] = useState(null);
+    // const [curPage, setCurPage] = useState(null);
 
     const createTask = ({
-        data,
+        // data,
         // onTaskCreated,
+        userId,
+        fieldName,
         file,
         progress,
         load,
@@ -39,7 +41,7 @@ const NewDetectorForm = ({ strings = {} }) => {
         //     .then(resp => {
                 // fieldName is the name of the input field
                 // file is the actual file object to send
-                console.log("getting here")
+                console.log(fieldName)
                 const formData = new FormData();
                 formData.append("file", file);
                 const request = new XMLHttpRequest();
@@ -79,7 +81,7 @@ const NewDetectorForm = ({ strings = {} }) => {
                     }
                 };
                 // request.send(batchOfFiles);
-                // formData.append("owner", "root")
+                formData.append("owner", userId)
                 request.send(formData);
                 // Should expose an abort method so the request can be cancelled
                 return {
@@ -100,72 +102,24 @@ const NewDetectorForm = ({ strings = {} }) => {
     
 
     return (
-        <Formik
-            enableReinitialize={true}
-            initialValues={formInitialValues}
-            validate={values => {
-                let errors = {};
-                if (!values.name) {
-                    errors.name = "Required";
-                }
-                // values.model = files[0]
-                console("validate values: " + JSON.stringify(values));
-                return errors;
-            }}
-            onSubmit={(
-                values,
-                { setSubmitting /* setErrors, setValues and other goodies */ }
-            ) => {
-                setSubmitting(true);
-                let data = {
-                    name: values.name,
-                    // file: files[0]
-                };
-                console.log(data);
-                // console.log(videos)
-                // console.log(files)
-                fetchJSON(endpoints.detectormodels, "POST", data).then(resp => {
-                    history.push(endpoints.uiLoadModel);
-                });
-            }}
-            render={({
-                values,
-                errors,
-                handleChange,
-                handleSubmit,
-                isSubmitting
-            }) =>
-                isSubmitting ? (
-                    <Dimmer active loader />
-                ) : (
+        // <Formik
+        //     render={({
+        //         values,
+        //         errors,
+        //         handleChange,
+        //         handleSubmit,
+        //         isSubmitting
+        //     }) =>
+                // isSubmitting ? (
+                //     <Dimmer active loader />
+                // ) : 
+                // (
                     <FormCard
-                        buttonText={
-                            strings.modelbuttonText || defaultStrings.modelbuttonText
-                        }
-                        title={strings.modeltitle || defaultStrings.modeltitle}
-                        onSubmit={handleSubmit}
                     >
-                        {/* <FormTextInput
-                            name="name"
-                            label={
-                                strings.nameLabel || defaultStrings.nameLabel
-                            }
-                            placeholder={
-                                strings.namePlaceholder ||
-                                defaultStrings.namePlaceholder
-                            }
-                            value={values && values.name}
-                            error={errors && errors.name}
-                            onSubmit={handleSubmit}
-                            onChange={handleChange}
-                        /> */}
                         <FilePond
                             labelIdle="Drag & Drop Model File or Click to Browse. (in .zip)"
                             files={files}
                             allowMultiple={true}
-                            // server={endpoints.detectormodels}
-                            // server='/media/TrainModel/test.zip'
-                            // server={endpoints.detectormodels}
                             server={{
                                 process: (
                                     fieldName,
@@ -180,17 +134,9 @@ const NewDetectorForm = ({ strings = {} }) => {
                                     let userId = sessionStorage.getItem(
                                         session_storage_key.userId
                                     );
-                                    console.log(userId);
-                                    let data = {
-                                        name: file.name,
-                                        // labels: [],
-                                        // image_quality: 100,
-                                        owner: userId,
-                                        // assignee: userId
-                                    };
                                     createTask({
-                                        data,
-                                        // onTaskCreated,
+                                        userId,
+                                        fieldName,
                                         file,
                                         progress,
                                         load,
@@ -213,25 +159,11 @@ const NewDetectorForm = ({ strings = {} }) => {
                             onprocessfiles={() => {
                                 setFiles([]);
                             }}
-                            // allowRevert={false}
-                            // acceptedFileTypes="video/*"
-                            // fileValidateTypeLabelExpectedTypes="Expects a video file"
-                            // onupdatefiles={fileItems => {
-                            //     // Set currently active file objects
-                            //     setFiles(
-                            //         fileItems.map(fileItem => fileItem.file)
-                            //     );
-                            // }}
-                            // onprocessfiles={() => {
-                            //     setFiles([]);
-                            // }}
-                            // onSubmit={handleSubmit}
-                            // onChange={handleChange}
                         />
                     </FormCard>
-                )
-            }
-        />
+        //         )
+        //     }
+        // />
     );
 };
 
