@@ -28,7 +28,9 @@ def _train(db_detector,
     db_detector.save()
 
     try:
-        detector.prepare()
+        # logger.info(db_user)
+        # logger.info(db_detector.getId())
+        detector.prepare(db_detector.getId())
         detector.train()
 
         # refresh db obj as a long time has passed after training

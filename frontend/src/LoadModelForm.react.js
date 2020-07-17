@@ -150,6 +150,8 @@ const NewDetectorForm = ({ strings = {} }) => {
                                 load: null
                             }}
                             allowRevert={false}
+                            allowFileTypeValidation={false}
+                            acceptedFileTypes={[".zip"]}
                             onupdatefiles={fileItems => {
                                 // Set currently active file objects
                                 setFiles(

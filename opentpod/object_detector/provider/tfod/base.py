@@ -17,6 +17,7 @@ from mako import template
 from proxy.views import proxy_view
 
 from opentpod.object_detector.provider import utils
+from django.conf import settings
 
 
 class TFODDetector():
@@ -82,7 +83,7 @@ class TFODDetector():
                 utils.download_and_extract_url_tarball_to_cache_dir(
                     self.pretrained_model_url, self.pretrained_model_cache_entry)
 
-    def get_pretrained_model_checkpoint(self):
+    def get_pretrained_model_checkpoint(self, id):
         logger.info('get to get ckpt')
         if str(self.__class__.__name__) != 'DetectorSelfModel':
             cache_entry_dir = utils.get_cache_entry(self.pretrained_model_cache_entry)
@@ -92,12 +93,22 @@ class TFODDetector():
             fine_tune_model_dir = potential_pretained_model_files[0].parent
             return str(fine_tune_model_dir.resolve() / 'model.ckpt')
         else:
-            logger.info(str(os.path.join(self.pretrained_model_url, 'model.ckpt')))
-            if self.pretrained_model_url == '':
+            modelpath = os.path.join(settings.TRAINMODEL_ROOT, str(id), 'modelpath')
+            logger.info(modelpath)
+            if not os.path.exists(modelpath):
                 return None # raise error
-            return str(os.path.join(self.pretrained_model_url, 'model.ckpt'))
+            premodel = open(modelpath, 'r')
+            model = premodel.read()
+            premodel.close()
+            logger.info(model)
+            logger.info(os.path.isdir(model))
+            if os.path.isdir(model):
+                logger.info('ckpt exist')
+                return str(os.path.join(model, 'model.ckpt'))
+            logger.info('ckpt not exist')
+            return None
 
-    def prepare_config(self):
+    def prepare_config(self, id):
         # num_classes are the number of classes to learn
         with open(self._config['label_map_path'], 'r') as f:
             content = f.read()
@@ -108,23 +119,48 @@ class TFODDetector():
         # which transfer learning is done
         if ('fine_tune_checkpoint' not in self._config) or (
                 self._config['fine_tune_checkpoint'] is None):
-            self._config['fine_tune_checkpoint'] = self.get_pretrained_model_checkpoint()
+            self._config['fine_tune_checkpoint'] = self.get_pretrained_model_checkpoint(id)
 
         # use default values for training parameters if not given
         for parameter, value in self.training_parameters.items():
             if parameter not in self._config:
                 self._config[parameter] = value
 
-    def prepare_config_pipeline_file(self):
-        pipeline_config = template.Template(
-            self.pipeline_config_template).render(**self._config)
-        with open(self._config['pipeline_config_path'], 'w') as f:
-            f.write(pipeline_config)
+    def prepare_config_pipeline_file(self, id):
+        if str(self.__class__.__name__) != 'DetectorSelfModel':
+            pipeline_config = template.Template(
+                self.pipeline_config_template).render(**self._config)
+            with open(self._config['pipeline_config_path'], 'w') as f:
+                f.write(pipeline_config)
+        else:
+            modelpath = os.path.join(settings.TRAINMODEL_ROOT, str(id), 'modelpath')
+            logger.info(modelpath)
+            if not os.path.exists(modelpath):
+                return None # raise error
+            premodel = open(modelpath, 'r')
+            path = premodel.read()
+            premodel.close()
+            logger.info(path)
+            if not os.path.exists(path):
+                logger.info(path + ' not exist')
+                return None
+            configpath = os.path.join(path, 'pipeline.config')
+            logger.info(configpath)
+            if not os.path.exists(configpath):
+                logger.info(configpath + ' not exist')
+                return None
+            fp = open(configpath, 'r')
+            contents = fp.read()
+            fp.close()
+            pipeline_config = template.Template(contents).render(**self._config)
+            with open(self._config['pipeline_config_path'], 'w') as f:
+                f.write(pipeline_config)
+            
 
-    def prepare(self):
+    def prepare(self, id):
         """Prepare files needed for training."""
-        self.prepare_config()
-        self.prepare_config_pipeline_file()
+        self.prepare_config(id)
+        self.prepare_config_pipeline_file(id)
 
     def _check_training_data_dir(self, FLAGS):
         """Check training directory's data is valid
