@@ -14,32 +14,25 @@ import re
 
 SELFMODELPATH = os.path.join(settings.TRAINMODEL_ROOT, 'modelpath')
 
-def unzippedFile(path, name):
-    logger.info("get to unzip func")
+def unzippedFile(path, id, name):
+    # logger.info("get to unzip func")
     logger.info(path)
     while not os.path.exists(path):
         time.sleep(3)
         
-    logger.info("file gets existed")
-    # logger.info(os.path.dirname(path))
-    # logger.info(os.path.basename(path))
-    # logger.info(settings.VAR_DIR)
-    # logger.info(settings.TRAINMODEL_ROOT)
-    # zip_ref = zipfile.ZipFile(path)
-    # logger.info(type(path))
-    newfolder = name
-    logger.info(os.path.join(settings.TRAINMODEL_ROOT, newfolder))
-    newpath = os.path.join(settings.TRAINMODEL_ROOT, newfolder)
+    # logger.info("file gets existed")
+    
+    newpath = name
     with zipfile.ZipFile(path, 'r') as zip_ref:
         zip_ref.extractall(path=newpath)
         logger.info("extracting: " + str(newpath))
 
-    if os.path.exists(os.path.join(newpath, 'meta')):
-        os.remove(os.path.join(newpath, 'meta'))
+    # if os.path.exists(os.path.join(newpath, 'meta')):
+    #     os.remove(os.path.join(newpath, 'meta'))
     
     # if from detector folder, the remove not needed
-    os.remove(path)
-    logger.info("gets extracted")
+    # os.remove(path)
+    # logger.info("gets extracted")
     return newpath
 
 def updateConfig(path):
@@ -83,10 +76,16 @@ def set2model(path):
     writefile.close()
 
 class Zip2Model():
-    def __init__(self, path, name):
-        self.file = unzippedFile(path, name)
+    def __init__(self, path, id):
+        logger.info(path)
+        logger.info(id)
+        name = str(path)[:-4]
+        # if not str(path).endswith('.zip'):
+        #     raise FileError("only zip can accepted")
+        logger.info(name)
+        self.file = unzippedFile(path, id, name)
         self.configPath = os.path.join(self.file, 'pipeline.config')
-        logger.info(self.configPath)
+        # logger.info(self.configPath)
         self.newconfig = updateConfig(self.configPath)
         # os.remove(self.configPath)
         # with open(self.configPath, 'w') as cg:

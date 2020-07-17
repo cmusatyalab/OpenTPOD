@@ -36,36 +36,24 @@ class DetectorModelViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         user = self.request.user
         # Don't filter queryset for admin
-        if auth.has_admin_role(user) or self.detail:
-            return queryset
-        else:
-            return queryset.filter(Q(owner=user)).distinct()
+        # if auth.has_admin_role(user) or self.detail:
+        #     return queryset
+        # else:
+        return queryset.filter(Q(owner=user)).distinct()
             
     def perform_create(self, serializer):
         selfmodel = serializer.save()
 
     def perform_destroy(self, selfmodel):
         logger.info('get delete in view')
-        shutil.rmtree(selfmodel.getPath())
+        path = selfmodel.getFilePath()
+        folder = path[:-4]
+        shutil.rmtree(folder)
+        os.remove(path)
         selfmodel.delete()
 
-    def setmodelt2default(seld, selfmodel):
-        return selfmodel.getFilePath()
-    #     logger.info("this is a test in view")
-    #     currentModel = serializer.save()
-    #     logger.info(currentModel.name)
-    #     logger.info(currentModel.getPath())
-        # with zipfile.ZipFile(currentModel.getPath(), 'r') as zip_ref:
-        #     zip_ref.extractall()
-        # if request.method == 'POST':
-        #     logger.info("this is a post request")
-
-    # def put(self, request, filename, format=None):
-    #     logger.info("detail view")
-    # def upload_file(request):
-    #     logger.info("detail view")
-    # def perform_destroy(self, currentModel):
-    #     os.remove(currentModel.getPath())
+    # def setmodelt2default(seld, selfmodel):
+    #     return selfmodel.getFilePath()
 
 class DetectorViewSet(viewsets.ModelViewSet):
     queryset = models.Detector.objects.all()

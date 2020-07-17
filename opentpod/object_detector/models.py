@@ -56,7 +56,8 @@ class TrainSet(models.Model):
         return self.name
 
 def upload_file_handler(instance, filename):
-    return os.path.join('TrainModel', filename)
+    logger.info(instance.owner.id)
+    return os.path.join('TrainModel', str(instance.owner.id), filename)
 
 class DetectorModel(models.Model):
     # name = models.CharField(max_length=256, unique=True)
@@ -89,22 +90,18 @@ class DetectorModel(models.Model):
         # savingpath = os.path.abspath(self.file.name)
         # logger.info(self.file.path)
         # str(pathlib.Path(settings.VAR_DIR)) + '/TrainModel/' + self.file.name
-        # with concurrent.futures.ThreadPoolExecutor() as executor:
-        #     future = executor.submit(Zip2Model, self.file.path, self.name)
-        #     self.unzipresult = future.result()
-            # unzipprocess = threading.Thread(target=Zip2Model, args=(self.file.path, self.name,))
-            # unzipprocess.start()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(Zip2Model, os.path.abspath(self.file.path), self.owner.id)
+            self.unzipresult = future.result()
         
         logger.info("after thread")
-    
-    # def getPath(self):
-    #     return os.path.join(settings.TRAINMODEL_ROOT, self.name)
 
     # def getUnzip(self):
-    #     return self.unzipresult
 
-    # def getFilePath(self):
-    #     return self.unzipprocess.file
+    #     return self.unzipresult.file
+
+    def getFilePath(self):
+        return os.path.abspath(self.file.path)
 
     # def getFileName(self):
     #     return self.file.name
@@ -153,6 +150,8 @@ class Detector(models.Model):
 
     # def get_pretrain_dir(self):
     #     return self.get_dir() / 'pretrain'
+    def getId(self):
+        return self.owner.id
 
     def get_export_file_path(self):
         return self.get_dir() / '{}-frozen-graph.zip'.format(self.name)
