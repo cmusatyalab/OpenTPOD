@@ -154,7 +154,7 @@ def dump_detector_annotations(
         display_name=dump_format)
 
     count = 0
-    logger.info("this is a testtt")
+    # logger.info("this is a testtt")
     logger.info(output_dir)
     labels = []
     # call cvat dump tool on each video in the trainset

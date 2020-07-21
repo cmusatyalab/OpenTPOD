@@ -22,10 +22,43 @@ from opentpod.object_detector import tasks as bg_tasks
 from logzero import logger
 import zipfile
 
+from opentpod.object_detector.helper import set2model
+
 class TrainSetViewSet(viewsets.ModelViewSet):
     queryset = models.TrainSet.objects.all()
     serializer_class = serializers.TrainSetSerializer
     search_fields = ("name", "owner__username")
+
+class ModelPathViewSet(viewsets.ModelViewSet):
+    queryset = models.ModelPath.objects.all()
+    serializer_class = serializers.ModelPathSerializer
+    search_fields = ("owner__username")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        return queryset.filter(Q(owner=user)).distinct()
+
+    def perform_create(self, serializer):
+        # logger.info(modelpath.path)
+        modelpath = serializer.save()
+        logger.info(modelpath.path)
+        logger.info(modelpath.owner.id)
+        set2model(modelpath.path, modelpath.owner.id)
+        # modelpath.delete()
+
+    @staticmethod
+    @action(detail=False, methods=['GET'], url_path='currentpath')
+    def currentPath(request):
+        logger.info("get to current path")
+        file_path = os.path.abspath(os.path.realpath(os.path.join(settings.TRAINMODEL_ROOT, str(request.user.id), 'modelpath')))
+        result = ""
+        if os.path.exists(file_path):
+            fp = open(file_path, 'r')
+            result = fp.read()[len(str(os.path.abspath(os.path.realpath(os.path.join(settings.TRAINMODEL_ROOT, str(request.user.id)))))) + 1:]
+            fp.close()
+        return Response(data=json.dumps(result))   
+
 
 class DetectorModelViewSet(viewsets.ModelViewSet):
     queryset = models.DetectorModel.objects.all()
@@ -96,7 +129,9 @@ class DetectorViewSet(viewsets.ModelViewSet):
         (detector type 2, human readable label 2),
         ]
         """
+        logger.info('hit types')
         dnn_types = provider.DNN_TYPE_DB_CHOICES
+        # dnn_types = provider.getDB(request.user.id)
         return Response(data=json.dumps(dnn_types))
 
     @staticmethod
@@ -171,9 +206,17 @@ def task_data(request, task_id, data_path):
     Using django-xsenfile in order to serve files with web server
     https://github.com/johnsensible/django-sendfile
     """
+    # logger.info(request.user)
+    # logger.info(request.user.id)
     db_tasks = Task.objects.filter(pk=task_id, owner=request.user)
     if len(db_tasks) < 1:
         raise Http404
     db_task = db_tasks[0]
     file_path = os.path.abspath(os.path.realpath(os.path.join(db_task.get_task_dirname(), data_path)))
+    return sendfile.sendfile(request, file_path)
+
+@login_required
+def model_path(request):
+    logger.info(request.user)
+    file_path = os.path.abspath(os.path.realpath(os.path.join(settings.TRAINMODEL_ROOT, str(request.user.id), 'modelpath')))
     return sendfile.sendfile(request, file_path)

@@ -55,6 +55,17 @@ class TrainSet(models.Model):
     def __str__(self):
         return self.name
 
+class ModelPath(models.Model):
+    path = models.CharField(max_length=500)
+    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return self.path
+
 def upload_file_handler(instance, filename):
     logger.info(instance.owner.id)
     return os.path.join('TrainModel', str(instance.owner.id), filename)
@@ -113,6 +124,11 @@ class DetectorModel(models.Model):
     def getId(self):
         return self.id
 
+def getChoice(instance):
+    logger.info(instance.owner.id)
+    types = provider.getDB(instance.owner.id)
+    return instance.owner.id
+
 class Detector(models.Model):
     """Trained Detector
     """
@@ -122,7 +138,7 @@ class Detector(models.Model):
     updated_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=32, choices=Status.choices(),
                               default=str(Status.CREATED), null=True, blank=True)
-    dnn_type = models.CharField(max_length=32,
+    dnn_type = models.CharField(max_length=32, #choices=getChoice)
                                 choices=provider.DNN_TYPE_DB_CHOICES)
     # where this model is finetuned from
     parent = models.ForeignKey('self', null=True,

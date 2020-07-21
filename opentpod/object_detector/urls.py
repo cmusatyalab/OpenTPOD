@@ -25,6 +25,7 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register('detectors', views.DetectorViewSet)
 router.register('trainsets', views.TrainSetViewSet)
 router.register('detectormodels', views.DetectorModelViewSet)
+router.register('modelpaths', views.ModelPathViewSet)
 
 urlpatterns = [
     # documentation for API
@@ -34,5 +35,6 @@ urlpatterns = [
     path('api/opentpod/v1/', include((router.urls))),
     # for serving data files
     path('task_data/<int:task_id>/<path:data_path>', views.task_data),
+    path('modelpath/', views.model_path),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
   + static(settings.TRAINMODEL_URL, document_root=settings.TRAINMODEL_ROOT)

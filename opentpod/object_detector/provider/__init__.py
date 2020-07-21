@@ -23,47 +23,6 @@ class Status(Enum):
     def __str__(self):
         return self.value
 
-
-
-# SELFMODELPATH = os.path.join(settings.TRAINMODEL_ROOT, 'modelpath')
-# SELFMODEL = ""
-
-# if os.path.exists(SELFMODELPATH):
-#     premodel = open(SELFMODELPATH, 'r')
-#     SELFMODEL = premodel.read()
-#     premodel.close()
-
-# CONFIGPATH = os.path.join(SELFMODEL, 'pipeline.config')
-# TEMPLATE = ""
-# if os.path.exists(CONFIGPATH):
-#     f = open(CONFIGPATH, 'r')
-#     TEMPLATE = f.read()
-#     logger.info('update TEMPLATE')
-#     f.close()
-
-# content = f.read()
-# logger.info(content)
-# logger.info(CONFIGPATH)
-
-# logger.info("trying to test changing")
-# logger.info(type(TEMPLATE))
-
-# class DetectorSelfModel(TFODDetector):
-#     TRAINING_PARAMETERS = {'batch_size': 2, 'num_steps': 20000}
-
-#     def __init__(self, config):
-#         super().__init__(config)
-#         logger.info('init in self model')
-
-#     @property
-#     def pretrained_model_url(self):
-#         logger.info('get url')
-#         return SELFMODEL
-
-#     @property
-#     def pipeline_config_template(self):
-#         return TEMPLATE
-
 _SUPPORTED_DNN_TYPE = [
     # class name, db type name, human readable name
     (TFODFasterRCNNResNet101, 'tensorflow_faster_rcnn_resnet101', 'Tensorflow Faster-RCNN ResNet 101'),
@@ -78,10 +37,34 @@ DNN_TYPE_DB_CHOICES = [
     for dnn_info in _SUPPORTED_DNN_TYPE
 ]
 
+def getDB(id):
+    logger.info('this is a test')
+    logger.info(id)
+    choices = []
+    for i in _SUPPORTED_DNN_TYPE:
+        logger.info(i[2])
+        if i[2] == 'Self-trained':
+            path = os.path.join(settings.TRAINMODEL_ROOT, str(id), 'modelpath')
+            logger.info(path)
+            if os.path.exists(path):
+                fp = open(path, 'r')
+                content = fp.read()
+                logger.info(content)
+                if os.path.exists(content):
+                    name = path[len(str(os.path.join(settings.TRAINMODELs_ROOT, str(id) + 1))):]
+                    logger.info(name)
+                    choices.append((i[1], i[2] + ' - ' + name))
+        else:
+            logger.info('this is not ' + i[2])
+            # logger.info(i[2])
+            choices.append((i[1], i[2]))
+
+    return choices
+
+
 DNN_TYPE_TO_CLASS = {
     dnn_info[1]: dnn_info[0] for dnn_info in _SUPPORTED_DNN_TYPE
 }
-
 
 def get(dnn_type, default=None):
     if dnn_type in DNN_TYPE_TO_CLASS:

@@ -52,6 +52,14 @@ class TrainSetSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('created_date', )
 
+
+class ModelPathSerializer(serializers.ModelSerializer):
+    tasks = SimpleTaskSerializer(many=True, read_only=True)
+    class Meta:
+        model = models.ModelPath
+        fields = '__all__'
+        read_only_fields = ('created_date', )
+
 class DetectorModelSerializer(serializers.ModelSerializer):
     tasks = SimpleTaskSerializer(many=True, read_only=True)
     class Meta:
