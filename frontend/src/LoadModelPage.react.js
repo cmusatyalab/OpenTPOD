@@ -16,6 +16,7 @@ import "./App.css";
 import { PaginatedInfoCardList } from "./CardPageTemplateForModel.react";
 
 import { NewDetectorForm } from "./LoadModelForm.react";
+import { SetModelForm } from "./SetModelForm.react"
 
 const fetchModel = id => {
     /* Get model json from backend*/
@@ -71,6 +72,7 @@ const LoadModelPage = ({ ...props }) => {
     let history = useHistory();
     const [models, setModels] = useState(null);
     const [curPage, setCurPage] = useState(null);
+    const [currentModel, setCurrentModel] = useState(null);
 
     const loadModels = newPage => {
         if (models !== null)
@@ -88,10 +90,36 @@ const LoadModelPage = ({ ...props }) => {
         loadModels(1);
     }, []);
 
+    const fetchCurrentModel = () => {
+        fetchJSON(endpoints.currentmodel, "GET").then(resp => {
+            let model = JSON.parse(resp);
+            // console.log(model)
+            // let typeOptions = types.map(item => ({
+            //     value: item[0],
+            //     label: item[1]
+            // }));
+            setCurrentModel(model);
+        });
+    };
+
+    useEffect(() => {
+        fetchCurrentModel();
+    }, []);
+
     return (
         <SiteWrapper>
             <Page.Content>
                 <Page.Header title="Load Model">
+                {/* <Grid.Col width={1} offset={2}> */}
+                    {
+                        currentModel == null ? (
+                            <Dimmer active loader />
+                        ) : (
+                            // console.log(currentModel);
+                            lineWrap('(current self-train model: ' + currentModel.toString() + ')')
+                    )}
+                {/* </Grid.Col> */}
+                    
                     <Grid.Col width={1} offset={6}>
                         <Button
                             outline
@@ -111,6 +139,14 @@ const LoadModelPage = ({ ...props }) => {
                         <Form.Input icon="search" placeholder="Search" />
                     </Grid.Col>
                 </Page.Header>
+                
+                <Page.Content>
+                    {/* <Page.Header title="Set Model"></Page.Header> */}
+                    <Grid>
+                        {/* <NewDetectorForm {...props} /> */}
+                        <SetModelForm {...props} />
+                    </Grid>
+                </Page.Content>
                 {models == null ? (
                     <Dimmer active loader />
                 ) : (
@@ -153,6 +189,7 @@ const ModelNewPage = ({ ...props }) => {
                 <Page.Header title="Load New Model"></Page.Header>
                 <Grid>
                     <NewDetectorForm {...props} />
+                    {/* <SetModelForm {...props} /> */}
                 </Grid>
             </Page.Content>
         </SiteWrapper>

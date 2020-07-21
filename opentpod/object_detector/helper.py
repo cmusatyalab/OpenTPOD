@@ -70,9 +70,18 @@ def updateConfig(path):
 
     return result
 
-def set2model(path):
-    writefile = open(SELFMODELPATH, 'w+')
-    writefile.write(str(path))
+def set2model(path, id):
+    userfolder = os.path.join(settings.TRAINMODEL_ROOT, str(id))
+    if not os.path.exists(userfolder):
+        os.mkdir(userfolder)
+    writepath = os.path.join(settings.TRAINMODEL_ROOT, str(id), 'modelpath')
+    logger.info(writepath)
+    writefile = open(writepath, 'w+')
+    if path.endswith('.zip'):
+        path = path[:-4]
+    abspath = os.path.join(settings.TRAINMODEL_ROOT, str(id), path)
+    logger.info(abspath)
+    writefile.write(str(abspath))
     writefile.close()
 
 class Zip2Model():

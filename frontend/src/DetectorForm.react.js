@@ -115,7 +115,7 @@ const NewDetectorForm = ({ strings = {} }) => {
                     setTrainingConfigLoading(false);
                 });
         }
-        console.log("this is two")
+        // console.log("this is two")
         console.log(curFormValues)
     };
 
