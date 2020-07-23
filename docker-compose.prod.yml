@@ -75,7 +75,6 @@ services:
             - REDIS_URL
             - REDIS_CACHE_URL
             - DATABASE_URL
-            - CELERY_BROKER_URL
             - NVIDIA_VISIBLE_DEVICES=all # needed for this to be cuda devices to be visible
             - NVIDIA_DRIVER_CAPABILITIES=compute,utility
         depends_on:
