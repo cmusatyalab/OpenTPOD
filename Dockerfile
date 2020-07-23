@@ -16,46 +16,40 @@ ENV TERM=xterm \
     TZ=${TZ}
 
 # Install necessary apt packages
-# mostly are dependencies for cvat
-RUN apt-get update && \
-    apt-get install -yq \
-    software-properties-common \
-    wget
-
 # some python package requires gcc when installing from conda, therefore
-# installing build-essential
-RUN add-apt-repository ppa:deadsnakes/ppa -y && \
-    apt-get update && \
+# installing build-essential, some other dependencies are for cvat
+RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq \
     build-essential \
     ffmpeg \
     libgeos-dev \
     libpq-dev \
-    tzdata \
-    unzip \
-    unrar \
     p7zip-full \
-    vim && \
-    ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata && \
-    rm -rf /var/lib/apt/lists/*
+    software-properties-common \
+    tzdata \
+    unrar \
+    unzip \
+    vim \
+    wget \
+ && apt-get clean && rm -rf /var/lib/apt/lists/* \
+ && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
+ && dpkg-reconfigure -f noninteractive tzdata
 
 # use conda to manage requirements
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
-    /opt/conda/bin/conda clean -tipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O ~/miniconda.sh \
+ && /bin/bash ~/miniconda.sh -b -p /opt/conda \
+ && rm ~/miniconda.sh \
+ && /opt/conda/bin/conda clean -tipsy \
+ && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+ && sed -i 's/mesg n/test -t 0 \&\& mesg n/' ~/.profile
+SHELL ["/bin/bash", "-lc"]
 
 # Install and initialize CVAT, copy all necessary files
-RUN mkdir -p /root/openTPOD
+COPY requirements/ /root/openTPOD/requirements/
 WORKDIR /root/openTPOD
 
-COPY requirements/ ./requirements/
-
-RUN ["/bin/bash", "-lc", "conda env create -f requirements/environment.yml"]
-RUN ["/bin/bash", "-lc", "echo 'conda activate opentpod-env' >> ~/.bashrc"]
+RUN conda env create -f requirements/environment.yml \
+ && echo 'conda activate opentpod-env' >> ~/.profile
 
 EXPOSE 8000
-CMD ["/bin/bash", "-lc", "conda activate opentpod-env && ./build_frontend.sh && supervisord -n -c supervisord/production.conf"]
+CMD ./build_frontend.sh && supervisord -n -c supervisord/production.conf
