@@ -47,6 +47,8 @@ class TFODDetector():
         self._config = config
         self._input_dir = pathlib.Path(self._config['input_dir'])
         self._output_dir = pathlib.Path(self._config['output_dir'])
+        logger.info(self._input_dir)
+        logger.info(self._output_dir)
 
         # find appropriate model to finetune from
         self.cache_pretrained_model()
@@ -76,6 +78,7 @@ class TFODDetector():
 
     def cache_pretrained_model(self):
         """Download and cache pretrained model if not existed."""
+        logger.info('not get override')
         if str(self.__class__.__name__) != 'DetectorSelfModel':
             if utils.get_cache_entry(self.pretrained_model_cache_entry) is None:
                 logger.info('downloading and caching pretrained model from tensorflow website')
@@ -265,6 +268,18 @@ class TFODDetector():
             shutil.copy2(self._config['eval_input_path'], subdir)
             # shutil.move(filesrc, subdir_model)
 
+            file_stem = str(pathlib.Path(output_file_path).parent
+                            / pathlib.Path(output_file_path).stem)
+            logger.debug(file_stem)
+            shutil.make_archive(
+                file_stem,
+                'zip',
+                temp_dir)
+
+    def export4google(self, output_file_path, filepath):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            shutil.copy2(os.path.join(filepath, 'info.csv'), temp_dir)
+            shutil.copytree(os.path.join(filepath, 'data'), os.path.join(temp_dir, 'data'))
             file_stem = str(pathlib.Path(output_file_path).parent
                             / pathlib.Path(output_file_path).stem)
             logger.debug(file_stem)
