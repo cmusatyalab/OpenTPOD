@@ -18,6 +18,9 @@ import collections
 import json
 from logzero import logger
 import shutil
+from xml.dom.minidom import parse
+
+# from helper import getXml
 
 tf.enable_eager_execution()
 
@@ -44,6 +47,7 @@ def dump_cvat_task_annotations(
     """Use CVAT's utilities to dump annotations for a task."""
     task_id = db_task.id
     task_image_dir = db_task.get_data_dirname()
+    logger.info(task_image_dir)
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     output_file_path = os.path.join(db_task.get_task_dirname(),
                                     '{}.{}.{}.{}'.format(db_task.id,
@@ -183,6 +187,21 @@ def dump_detector_annotations(
                         labels.append(item.name)
         else:
             # logger.info("works")
+            # dump_format_pascal = 'PASCAL VOC ZIP 1.0'
+            # db_dumper_pascal = cvat_models.AnnotationDumper.objects.get(display_name=dump_format_pascal)
+            # task_annotations_file_path_pascal = dump_cvat_task_annotations(db_task,
+            #                                                         db_user,
+            #                                                         db_dumper_pascal,
+            #                                                         scheme,
+            #                                                         host)
+            # # logger.info(task_annotations_file_path_pascal)
+            # xmlpath = os.path.abspath(os.path.join(db_task.get_data_dirname(), os.pardir, 'xml'))
+            # logger.info(xmlpath)
+            # if not os.path.exists(xmlpath):
+            #     os.mkdir(xmlpath)
+            # with ZipFile(task_annotations_file_path_pascal) as cur_zip:
+            #     cur_zip.extractall(xmlpath)
+            # os.remove(task_annotations_file_path_pascal)
             task_annotations_file_path = dump_cvat_task_annotations(db_task,
                                                                     db_user,
                                                                     db_dumper,
@@ -203,14 +222,104 @@ def dump_detector_annotations(
             logger.info(task_labels)
             logger.info(task_annotations_file_path)
             for label in task_labels:
-                logger.info(label)
+                # logger.info(label)
                 if label not in labels:
                     labels.append(label)
             os.remove(task_annotations_file_path)
 
     _dump_labelmap_file(labels, output_labelmap_file_path)
     split_train_eval_tfrecord(output_dir)
-        # count += 1
+
+def getXml(xmlfile, storage_path, tasknum):
+    tree = parse(xmlfile)
+    root = tree.documentElement
+    # print(root.nodeName)
+    filename = root.getElementsByTagName('filename')[0].childNodes[0].data
+    # logger.info(filename.split('_')[1])
+    # logger.info(int(filename.split('_')[1]))
+    filename = int(filename.split('_')[1])
+    filename = str(filename) + '.jpg'
+    fileinstorage = os.path.join('gs://', storage_path, 'data', tasknum, filename)
+    width = float(root.getElementsByTagName('width')[0].childNodes[0].data)
+    height = float(root.getElementsByTagName('height')[0].childNodes[0].data)
+    obj = root.getElementsByTagName('object')
+    strpre = 'UNASSIGNED' + ',' + fileinstorage + ','
+    result = ""
+    for i in obj:
+        name = i.getElementsByTagName("name")[0].childNodes[0].data
+        xmin = float(i.getElementsByTagName("xmin")[0].childNodes[0].data) / width
+        ymin = float(i.getElementsByTagName("ymin")[0].childNodes[0].data) / height
+        xmax = float(i.getElementsByTagName("xmax")[0].childNodes[0].data) / width
+        ymax = float(i.getElementsByTagName("ymax")[0].childNodes[0].data) / height
+        strafter = strpre + name + ',' + str(xmin) + ',' + str(ymin) + ',,,' + str(xmax) + ',' + str(ymax) + ',,\n'
+        result += strafter
+
+    return result
+
+def dump_detector_annotations4google_cloud(
+        db_detector,
+        db_tasks,
+        db_user,
+        scheme,
+        host):
+    """Dump annotation data for detector training.
+    Output is placed into the detector's ondisk dir.
+    """
+    output_dir = db_detector.get_dir()
+    datadir = os.path.join(output_dir, 'data')
+    if not os.path.exists(datadir):
+        os.mkdir(datadir)
+    # another type is: TFRecord ZIP 1.0, see cvat.apps.annotation
+    # dump_format = 'COCO JSON 1.0'
+    dump_format_pascal = 'PASCAL VOC ZIP 1.0'
+    db_dumper_pascal = cvat_models.AnnotationDumper.objects.get(display_name=dump_format_pascal)
+
+    # call cvat dump tool on each video in the trainset
+    result = ""
+    for db_task in db_tasks:
+        task_annotations_file_path_pascal = dump_cvat_task_annotations(db_task,
+                                                                db_user,
+                                                                db_dumper_pascal,
+                                                                scheme,
+                                                                host)
+        # logger.info(task_annotations_file_path_pascal)
+        data = db_task.get_data_dirname()
+        currdir = os.path.abspath(os.path.join(db_task.get_data_dirname(), os.pardir))
+        xmlpath = os.path.join(currdir, 'xml')
+        # logger.info(xmlpath)
+        tasknum = os.path.basename(currdir)
+        # logger.info(tasknum)
+        outputfolder = os.path.join(datadir, tasknum)
+
+        if not os.path.exists(outputfolder):
+            os.mkdir(outputfolder)
+
+        if not os.path.exists(xmlpath):
+            os.mkdir(xmlpath)
+        with ZipFile(task_annotations_file_path_pascal) as cur_zip:
+            cur_zip.extractall(xmlpath)
+        os.remove(task_annotations_file_path_pascal)
+        filedir = sorted(os.listdir(xmlpath))
+        
+        for fp in filedir:
+            # logger.info(fp)
+            result += getXml(os.path.join(xmlpath, fp), db_detector.name, tasknum)
+
+        for root, dirs, files in os.walk(data):
+            if len(files) != 0:
+                for i in files:
+                    if i.endswith('.jpg'):
+                        src = os.path.join(root, i)
+                        dest = os.path.join(outputfolder, i)
+                        shutil.copy2(src, dest)
+            # print(root)
+            # print(dirs)
+            # print(sorted(files))
+            # print()
+        # print(result)
+    writecsv = open(os.path.join(output_dir, 'info.csv'), 'w+')
+    writecsv.write(result)
+    writecsv.close()
             
 
 

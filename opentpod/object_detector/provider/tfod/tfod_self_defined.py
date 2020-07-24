@@ -34,4 +34,22 @@ class DetectorSelfModel(TFODDetector):
             logger.info('update TEMPLATE')
             f.close()
         return self.TEMPLATE
+
+class DetectorGoogleAutoML(TFODDetector):
+    TRAINING_PARAMETERS = {'storage name': ""}
+
+    def __init__(self, config):
+        super().__init__(config)
+
+    @property
+    def pretrained_model_url(self):
+        return None
+
+    @property
+    def pipeline_config_template(self):
+        return None
+
+    def cache_pretrained_model(self):
+        logger.info('get override')
+        return 
         
