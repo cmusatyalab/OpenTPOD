@@ -42,15 +42,15 @@ class ModelPathViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # logger.info(modelpath.path)
         modelpath = serializer.save()
-        logger.info(modelpath.path)
-        logger.info(modelpath.owner.id)
+        # logger.info(modelpath.path)
+        # logger.info(modelpath.owner.id)
         set2model(modelpath.path, modelpath.owner.id)
         # modelpath.delete()
 
     @staticmethod
     @action(detail=False, methods=['GET'], url_path='currentpath')
     def currentPath(request):
-        logger.info("get to current path")
+        # logger.info("get to current path")
         file_path = os.path.abspath(os.path.realpath(os.path.join(settings.TRAINMODEL_ROOT, str(request.user.id), 'modelpath')))
         result = ""
         if os.path.exists(file_path):
@@ -78,7 +78,7 @@ class DetectorModelViewSet(viewsets.ModelViewSet):
         selfmodel = serializer.save()
 
     def perform_destroy(self, selfmodel):
-        logger.info('get delete in view')
+        # logger.info('get delete in view')
         path = selfmodel.getFilePath()
         folder = path[:-4]
         shutil.rmtree(folder)
@@ -129,7 +129,7 @@ class DetectorViewSet(viewsets.ModelViewSet):
         (detector type 2, human readable label 2),
         ]
         """
-        logger.info('hit types')
+        # logger.info('hit types')
         dnn_types = provider.DNN_TYPE_DB_CHOICES
         # dnn_types = provider.getDB(request.user.id)
         return Response(data=json.dumps(dnn_types))
@@ -217,6 +217,6 @@ def task_data(request, task_id, data_path):
 
 @login_required
 def model_path(request):
-    logger.info(request.user)
+    # logger.info(request.user)
     file_path = os.path.abspath(os.path.realpath(os.path.join(settings.TRAINMODEL_ROOT, str(request.user.id), 'modelpath')))
     return sendfile.sendfile(request, file_path)

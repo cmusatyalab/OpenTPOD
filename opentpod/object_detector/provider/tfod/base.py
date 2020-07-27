@@ -47,8 +47,8 @@ class TFODDetector():
         self._config = config
         self._input_dir = pathlib.Path(self._config['input_dir'])
         self._output_dir = pathlib.Path(self._config['output_dir'])
-        logger.info(self._input_dir)
-        logger.info(self._output_dir)
+        # logger.info(self._input_dir)
+        # logger.info(self._output_dir)
 
         # find appropriate model to finetune from
         self.cache_pretrained_model()
@@ -78,7 +78,7 @@ class TFODDetector():
 
     def cache_pretrained_model(self):
         """Download and cache pretrained model if not existed."""
-        logger.info('not get override')
+        # logger.info('not get override')
         if str(self.__class__.__name__) != 'DetectorSelfModel':
             if utils.get_cache_entry(self.pretrained_model_cache_entry) is None:
                 logger.info('downloading and caching pretrained model from tensorflow website')
@@ -87,7 +87,7 @@ class TFODDetector():
                     self.pretrained_model_url, self.pretrained_model_cache_entry)
 
     def get_pretrained_model_checkpoint(self, id):
-        logger.info('get to get ckpt')
+        # logger.info('get to get ckpt')
         if str(self.__class__.__name__) != 'DetectorSelfModel':
             cache_entry_dir = utils.get_cache_entry(self.pretrained_model_cache_entry)
             potential_pretained_model_files = list(cache_entry_dir.glob('**/model.ckpt*'))
@@ -97,21 +97,22 @@ class TFODDetector():
             return str(fine_tune_model_dir.resolve() / 'model.ckpt')
         else:
             modelpath = os.path.join(settings.TRAINMODEL_ROOT, str(id), 'modelpath')
-            logger.info(modelpath)
+            # logger.info(modelpath)
             if not os.path.exists(modelpath):
                 return None # raise error
             premodel = open(modelpath, 'r')
             model = premodel.read()
             premodel.close()
-            logger.info(model)
-            logger.info(os.path.isdir(model))
+            # logger.info(model)
+            # logger.info(os.path.isdir(model))
             if os.path.isdir(model):
-                logger.info('ckpt exist')
+                # logger.info('ckpt exist')
                 return str(os.path.join(model, 'model.ckpt'))
-            logger.info('ckpt not exist')
+            # logger.info('ckpt not exist')
             return None
 
     def prepare_config(self, id):
+        # logger.info(self.training_parameters)
         # num_classes are the number of classes to learn
         with open(self._config['label_map_path'], 'r') as f:
             content = f.read()
@@ -125,30 +126,34 @@ class TFODDetector():
             self._config['fine_tune_checkpoint'] = self.get_pretrained_model_checkpoint(id)
 
         # use default values for training parameters if not given
+        # logger.info(self.training_parameters)
         for parameter, value in self.training_parameters.items():
             if parameter not in self._config:
                 self._config[parameter] = value
 
     def prepare_config_pipeline_file(self, id):
         if str(self.__class__.__name__) != 'DetectorSelfModel':
+            # logger.info(**self._config)
+            # logger.info(self._config)
+            # logger.info(self.training_parameters)
             pipeline_config = template.Template(
                 self.pipeline_config_template).render(**self._config)
             with open(self._config['pipeline_config_path'], 'w') as f:
                 f.write(pipeline_config)
         else:
             modelpath = os.path.join(settings.TRAINMODEL_ROOT, str(id), 'modelpath')
-            logger.info(modelpath)
+            # logger.info(modelpath)
             if not os.path.exists(modelpath):
                 return None # raise error
             premodel = open(modelpath, 'r')
             path = premodel.read()
             premodel.close()
-            logger.info(path)
+            # logger.info(path)
             if not os.path.exists(path):
                 logger.info(path + ' not exist')
                 return None
             configpath = os.path.join(path, 'pipeline.config')
-            logger.info(configpath)
+            # logger.info(configpath)
             if not os.path.exists(configpath):
                 logger.info(configpath + ' not exist')
                 return None
@@ -164,6 +169,26 @@ class TFODDetector():
         """Prepare files needed for training."""
         self.prepare_config(id)
         self.prepare_config_pipeline_file(id)
+
+    def writexml(self, xml, output_dir):
+        # self.prepare_config()
+        # logger.info(self._config)
+        # logger.info(self.training_parameters)
+        if 'bucket name' in self._config.keys():
+            storage_path = self._config['bucket name']
+        else:
+            storage_path = self.training_parameters['bucket name']
+        logger.info(storage_path)
+        fileinstorage = 'UNASSIGNED' + ',' + str(os.path.join('gs://', storage_path, 'data'))
+        content = ""
+        for i in xml:
+            strpre = os.path.join(fileinstorage, i[0], i[1])
+            content += strpre
+            content += i[2]
+
+        writecsv = open(os.path.join(output_dir, 'info.csv'), 'w+')
+        writecsv.write(content)
+        writecsv.close()
 
     def _check_training_data_dir(self, FLAGS):
         """Check training directory's data is valid

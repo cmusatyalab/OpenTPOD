@@ -47,7 +47,7 @@ def dump_cvat_task_annotations(
     """Use CVAT's utilities to dump annotations for a task."""
     task_id = db_task.id
     task_image_dir = db_task.get_data_dirname()
-    logger.info(task_image_dir)
+    # logger.info(task_image_dir)
     timestamp = datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     output_file_path = os.path.join(db_task.get_task_dirname(),
                                     '{}.{}.{}.{}'.format(db_task.id,
@@ -159,13 +159,13 @@ def dump_detector_annotations(
 
     count = 0
     # logger.info("this is a testtt")
-    logger.info(output_dir)
+    # logger.info(output_dir)
     labels = []
     # call cvat dump tool on each video in the trainset
     for db_task in db_tasks:
-        logger.info(db_task)
-        logger.info(db_task.get_data_dirname())
-        logger.info(os.path.abspath(db_task.get_data_dirname() + "/../.upload"))
+        # logger.info(db_task)
+        # logger.info(db_task.get_data_dirname())
+        # logger.info(os.path.abspath(db_task.get_data_dirname() + "/../.upload"))
         
         if (str(db_task).endswith('.tfrecord')):
             filePath = os.path.abspath(db_task.get_data_dirname() + "/../.upload/" + str(db_task))
@@ -175,7 +175,7 @@ def dump_detector_annotations(
             # logger.info("get here")
         elif (str(db_task).endswith('.pbtxt')):
             filePath = os.path.abspath(db_task.get_data_dirname() + "/../.upload/" + str(db_task))
-            logger.info(filePath)
+            # logger.info(filePath)
             with open(filePath, 'r') as f:
                 content = f.read()
                 # labelsForHere = []
@@ -183,25 +183,9 @@ def dump_detector_annotations(
                 text_format.Merge(content, cur_label_map)
                 for item in cur_label_map.item:
                     if item.name not in labels:
-                        logger.info(item.name)
+                        # logger.info(item.name)
                         labels.append(item.name)
         else:
-            # logger.info("works")
-            # dump_format_pascal = 'PASCAL VOC ZIP 1.0'
-            # db_dumper_pascal = cvat_models.AnnotationDumper.objects.get(display_name=dump_format_pascal)
-            # task_annotations_file_path_pascal = dump_cvat_task_annotations(db_task,
-            #                                                         db_user,
-            #                                                         db_dumper_pascal,
-            #                                                         scheme,
-            #                                                         host)
-            # # logger.info(task_annotations_file_path_pascal)
-            # xmlpath = os.path.abspath(os.path.join(db_task.get_data_dirname(), os.pardir, 'xml'))
-            # logger.info(xmlpath)
-            # if not os.path.exists(xmlpath):
-            #     os.mkdir(xmlpath)
-            # with ZipFile(task_annotations_file_path_pascal) as cur_zip:
-            #     cur_zip.extractall(xmlpath)
-            # os.remove(task_annotations_file_path_pascal)
             task_annotations_file_path = dump_cvat_task_annotations(db_task,
                                                                     db_user,
                                                                     db_dumper,
@@ -215,12 +199,12 @@ def dump_detector_annotations(
                 os.path.splitext(
                     os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
             )
-            logger.info(os.path.splitext(os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
+            # logger.info(os.path.splitext(os.path.basename(task_annotations_file_path))[0] + '.tfrecord')
             task_labels = get_label_map_from_cvat_tfrecord_zip(
                 task_annotations_file_path
             )
-            logger.info(task_labels)
-            logger.info(task_annotations_file_path)
+            # logger.info(task_labels)
+            # logger.info(task_annotations_file_path)
             for label in task_labels:
                 # logger.info(label)
                 if label not in labels:
@@ -230,29 +214,24 @@ def dump_detector_annotations(
     _dump_labelmap_file(labels, output_labelmap_file_path)
     split_train_eval_tfrecord(output_dir)
 
-def getXml(xmlfile, storage_path, tasknum):
+def getXml(xmlfile, tasknum):
     tree = parse(xmlfile)
     root = tree.documentElement
-    # print(root.nodeName)
     filename = root.getElementsByTagName('filename')[0].childNodes[0].data
-    # logger.info(filename.split('_')[1])
-    # logger.info(int(filename.split('_')[1]))
     filename = int(filename.split('_')[1])
     filename = str(filename) + '.jpg'
-    fileinstorage = os.path.join('gs://', storage_path, 'data', tasknum, filename)
     width = float(root.getElementsByTagName('width')[0].childNodes[0].data)
     height = float(root.getElementsByTagName('height')[0].childNodes[0].data)
     obj = root.getElementsByTagName('object')
-    strpre = 'UNASSIGNED' + ',' + fileinstorage + ','
-    result = ""
+    result = []
     for i in obj:
         name = i.getElementsByTagName("name")[0].childNodes[0].data
         xmin = float(i.getElementsByTagName("xmin")[0].childNodes[0].data) / width
         ymin = float(i.getElementsByTagName("ymin")[0].childNodes[0].data) / height
         xmax = float(i.getElementsByTagName("xmax")[0].childNodes[0].data) / width
         ymax = float(i.getElementsByTagName("ymax")[0].childNodes[0].data) / height
-        strafter = strpre + name + ',' + str(xmin) + ',' + str(ymin) + ',,,' + str(xmax) + ',' + str(ymax) + ',,\n'
-        result += strafter
+        strafter = ',' + name + ',' + str(xmin) + ',' + str(ymin) + ',,,' + str(xmax) + ',' + str(ymax) + ',,\n'
+        result.append((tasknum, filename, strafter))
 
     return result
 
@@ -275,7 +254,7 @@ def dump_detector_annotations4google_cloud(
     db_dumper_pascal = cvat_models.AnnotationDumper.objects.get(display_name=dump_format_pascal)
 
     # call cvat dump tool on each video in the trainset
-    result = ""
+    result = []
     for db_task in db_tasks:
         task_annotations_file_path_pascal = dump_cvat_task_annotations(db_task,
                                                                 db_user,
@@ -303,7 +282,7 @@ def dump_detector_annotations4google_cloud(
         
         for fp in filedir:
             # logger.info(fp)
-            result += getXml(os.path.join(xmlpath, fp), db_detector.name, tasknum)
+            result += getXml(os.path.join(xmlpath, fp), tasknum)
 
         for root, dirs, files in os.walk(data):
             if len(files) != 0:
@@ -317,9 +296,10 @@ def dump_detector_annotations4google_cloud(
             # print(sorted(files))
             # print()
         # print(result)
-    writecsv = open(os.path.join(output_dir, 'info.csv'), 'w+')
-    writecsv.write(result)
-    writecsv.close()
+    return result
+    # writecsv = open(os.path.join(output_dir, 'info.csv'), 'w+')
+    # writecsv.write(result)
+    # writecsv.close()
             
 
 
