@@ -1,5 +1,5 @@
 # should be used together with docker-compose for production development
-# docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# docker-compose -f docker-compose.prod.yml up -d
 version: "3.2"
 volumes:
     opentpod-data-var:
@@ -29,15 +29,9 @@ services:
     opentpod-redis:
         container_name: opentpod-redis
         image: redis:4.0.5-alpine
-        command: redis-server --appendonly yes
+        command: --appendonly yes --requirepass "$$OPENTPOD_REDIS_PASSWORD"
         volumes:
             - opentpod-redis-data:/data
-        command:
-            [
-                "sh",
-                "-c",
-                'exec redis-server --requirepass "$OPENTPOD_REDIS_PASSWORD"',
-            ]
     opentpod-nginx:
         image: nginx:latest
         container_name: opentpod-nginx
