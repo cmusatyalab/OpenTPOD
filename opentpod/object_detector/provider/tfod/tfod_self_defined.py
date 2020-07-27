@@ -11,11 +11,11 @@ class DetectorSelfModel(TFODDetector):
 
     def __init__(self, config):
         super().__init__(config)
-        logger.info('init self detector')
+        # logger.info('init self detector')
 
     @property
     def pretrained_model_url(self):
-        logger.info('url ing')
+        # logger.info('url ing')
         self.SELFMODEL = ""
         if os.path.exists(SELFMODELPATH):
             premodel = open(SELFMODELPATH, 'r')
@@ -25,18 +25,18 @@ class DetectorSelfModel(TFODDetector):
 
     @property
     def pipeline_config_template(self):
-        logger.info('config ing')
+        # logger.info('config ing')
         self.TEMPLATE = ""
         CONFIGPATH = os.path.join(self.SELFMODEL, 'pipeline.config')
         if os.path.exists(CONFIGPATH):
             f = open(CONFIGPATH, 'r')
             self.TEMPLATE = f.read()
-            logger.info('update TEMPLATE')
+            # logger.info('update TEMPLATE')
             f.close()
         return self.TEMPLATE
 
 class DetectorGoogleAutoML(TFODDetector):
-    TRAINING_PARAMETERS = {'storage name': ""}
+    TRAINING_PARAMETERS = {'bucket name': ""}
 
     def __init__(self, config):
         super().__init__(config)
@@ -50,6 +50,6 @@ class DetectorGoogleAutoML(TFODDetector):
         return None
 
     def cache_pretrained_model(self):
-        logger.info('get override')
+        # logger.info('get override')
         return 
         

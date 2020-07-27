@@ -67,7 +67,7 @@ class ModelPath(models.Model):
         return self.path
 
 def upload_file_handler(instance, filename):
-    logger.info(instance.owner.id)
+    # logger.info(instance.owner.id)
     return os.path.join('TrainModel', str(instance.owner.id), filename)
 
 class DetectorModel(models.Model):
@@ -77,7 +77,7 @@ class DetectorModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     file = models.FileField(upload_to=upload_file_handler)
 
-    logger.info(owner)
+    # logger.info(owner)
     # logger.info(name)
     # logger.info(self.file.name)
     # temp = provider.DetectorSelfModel(name, file.name, feature_extractor_type)
@@ -97,7 +97,7 @@ class DetectorModel(models.Model):
 
     def save(self, *args, **kwargs):
         super(DetectorModel, self).save(*args, **kwargs)
-        logger.info("able to get here")
+        # logger.info("able to get here")
         # savingpath = os.path.abspath(self.file.name)
         # logger.info(self.file.path)
         # str(pathlib.Path(settings.VAR_DIR)) + '/TrainModel/' + self.file.name
@@ -105,7 +105,7 @@ class DetectorModel(models.Model):
             future = executor.submit(Zip2Model, os.path.abspath(self.file.path), self.owner.id)
             self.unzipresult = future.result()
         
-        logger.info("after thread")
+        # logger.info("after thread")
 
     # def getUnzip(self):
 
@@ -125,7 +125,7 @@ class DetectorModel(models.Model):
         return self.id
 
 def getChoice(instance):
-    logger.info(instance.owner.id)
+    # logger.info(instance.owner.id)
     types = provider.getDB(instance.owner.id)
     return instance.owner.id
 
@@ -180,6 +180,7 @@ class Detector(models.Model):
 
     def get_detector_object(self):
         config = self.get_train_config()
+        # logger.info(config)
         config['input_dir'] = self.get_training_data_dir().resolve()
         config['output_dir'] = self.get_model_dir().resolve()
         detector_class = provider.get(self.dnn_type)

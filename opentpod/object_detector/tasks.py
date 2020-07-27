@@ -17,7 +17,7 @@ def _train(db_detector,
     """Launch the transfer learning of a DNN."""
     # dump annotations
     if db_detector.dnn_type == 'GoogleAutoML':
-        datasets.dump_detector_annotations4google_cloud(db_detector,
+        xmldata = datasets.dump_detector_annotations4google_cloud(db_detector,
                                        db_tasks,
                                        db_user,
                                        scheme,
@@ -33,13 +33,15 @@ def _train(db_detector,
     detector = db_detector.get_detector_object()
     db_detector.status = str(models.Status.TRAINING)
     db_detector.save()
-    logger.info(db_detector.name)
-    logger.info(db_detector.dnn_type)
+    # logger.info(db_detector.name)
+    # logger.info(db_detector.dnn_type)
 
     try:
         if db_detector.dnn_type != 'GoogleAutoML':
             detector.prepare(db_detector.getId())
             detector.train()
+        else:
+            detector.writexml(xmldata, db_detector.get_dir())
 
         # refresh db obj as a long time has passed after training
         db_detector = models.Detector.objects.get(id=db_detector.id)
