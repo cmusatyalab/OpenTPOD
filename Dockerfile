@@ -44,12 +44,24 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86
  && sed -i 's/mesg n/test -t 0 \&\& mesg n/' ~/.profile
 SHELL ["/bin/bash", "-lc"]
 
-# Install and initialize CVAT, copy all necessary files
+# Install python dependencies
 COPY requirements/ /root/openTPOD/requirements/
 WORKDIR /root/openTPOD
-
 RUN conda env create -f requirements/environment.yml \
  && echo 'conda activate opentpod-env' >> ~/.profile
 
+# Install nodejs dependencies
+COPY frontend/package.json /root/openTPOD/frontend/
+RUN cd frontend && npm install
+
+# Copy frontend source and build npm static files
+COPY frontend /root/openTPOD/frontend/
+RUN cd frontend && npm run-script build
+
+VOLUME /root/openTPOD/www
+
+# Copy rest of the opentpod source
+COPY . /root/openTPOD/
+
 EXPOSE 8000
-CMD ./build_frontend.sh && supervisord -n -c supervisord/production.conf
+CMD ./run-development.sh

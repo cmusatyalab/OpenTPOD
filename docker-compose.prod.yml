@@ -1,10 +1,11 @@
 # should be used together with docker-compose for production development
-# docker-compose -f docker-compose.prod.yml up -d
+# docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 version: "3.2"
 volumes:
     opentpod-data-var:
     opentpod-db-data:
     opentpod-redis-data:
+    opentpod-www-static:
 services:
     opentpod-db:
         image: postgres:12.0-alpine
@@ -40,24 +41,16 @@ services:
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/opentpod.nginx.conf:/etc/nginx/opentpod.nginx.conf:ro
-            - ./static:/root/openTPOD/static:ro
-            - ./www:/root/openTPOD/www:ro
+            - opentpod-www-static:/root/openTPOD/www:ro
             - opentpod-data-var:/root/openTPOD/var
         depends_on:
             - opentpod
     opentpod:
-        build: .
+        image: opentpod:stable
         container_name: opentpod
+        command: [ "./run-frontend.sh" ]
         volumes:
-            - ./config:/root/openTPOD/config:ro
-            - ./cvat:/root/openTPOD/cvat:ro
-            - ./opentpod:/root/openTPOD/opentpod:ro
-            - ./build_frontend.sh:/root/openTPOD/build_frontend.sh:ro
-            - ./manage.py:/root/openTPOD/manage.py:ro
-            - ./static:/root/openTPOD/static
-            - ./frontend:/root/openTPOD/frontend
-            - ./www:/root/openTPOD/www
-            - ./supervisord:/root/openTPOD/supervisord
+            - opentpod-www-static:/root/openTPOD/www
             - opentpod-data-var:/root/openTPOD/var
         ports:
             - 127.0.0.1:20001:8000
@@ -69,8 +62,31 @@ services:
             - REDIS_URL
             - REDIS_CACHE_URL
             - DATABASE_URL
-            - NVIDIA_VISIBLE_DEVICES=all # needed for this to be cuda devices to be visible
-            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
         depends_on:
             - opentpod-db
             - opentpod-redis
+    opentpod-worker:
+        image: opentpod:stable
+        command: [ "./run-worker.sh", "default" ]
+        volumes:
+            - opentpod-data-var:/root/openTPOD/var
+        environment:
+            - PYTHONDONTWRITEBYTECODE
+            - DJANGO_DEBUG
+            - DJANGO_SECRET_KEY
+            - REDIS_URL
+            - DATABASE_URL
+        depends_on:
+            - opentpod
+    opentpod-tensorboard:
+        extends: opentpod-worker
+        command: [ "./run-worker.sh", "tensorboard" ]
+        environment:
+            - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    opentpod-trainer:
+        extends: opentpod-worker
+        command: [ "./run-worker.sh", "low" ]
+        environment:
+            - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
