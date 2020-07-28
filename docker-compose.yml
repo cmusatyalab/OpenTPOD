@@ -1,0 +1,43 @@
+# base docker-compose.yml
+# use with docker-compose.override.yml for development
+#   docker-compose up -d
+#
+# or with docker-compose.prod.yml for production
+#   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+version: "3.2"
+volumes:
+    opentpod-data-var:
+    opentpod-db-data:
+    opentpod-redis-data:
+    opentpod-www-static:
+services:
+    opentpod-db:
+        container_name: opentpod-db
+        image: postgres:12.0-alpine
+        restart: always
+        volumes:
+            - opentpod-db-data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_DB: ${OPENTPOD_DB}
+            POSTGRES_PASSWORD: ${OPENTPOD_DB_PASSWORD}
+    opentpod-redis:
+        container_name: opentpod-redis
+        image: redis:4.0.5-alpine
+        command: --appendonly yes --requirepass "${OPENTPOD_REDIS_PASSWORD}"
+        restart: always
+        volumes:
+            - opentpod-redis-data:/data
+    opentpod:
+        extends:
+            file: docker-compose.common.yml
+            service: opentpod_djangoapp
+        container_name: opentpod
+    opentpod-worker:
+        extends:
+            file: docker-compose.common.yml
+            service: opentpod_djangoapp
+        container_name: opentpod-worker
+        depends_on:
+            - opentpod

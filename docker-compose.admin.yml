@@ -1,0 +1,15 @@
+# admin services, used to run individual 'maintenance' containers
+# for db introspection, etc.
+#
+# docker-compose -f docker-compose.yml -f docker-compose.admin.yml \
+#       run db-viewer
+#
+version: "3.2"
+services:
+    db-viewer:
+        container_name: opentpod-db-viewer
+        image: adminer
+        ports:
+            - 127.0.0.1:18080:8080
+        depends_on:
+            - opentpod-db

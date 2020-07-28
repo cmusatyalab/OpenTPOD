@@ -23,5 +23,8 @@ cp -r frontend/build/* www/
 
 printf "Static files collected!\n"
 
-printf "Starting processes\n"
-supervisord -n -c supervisord/dev.conf
+printf "Starting opentpod\n"
+# SSH_AUTH_SOCK to prevent CVAT from blocking when generating ssh keys
+export SSH_AUTH_SOCK="fix"
+/usr/bin/env python manage.py migrate && \
+    /usr/bin/env gunicorn config.wsgi:application --log-file - --log-level debug -b :8000"

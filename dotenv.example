@@ -1,0 +1,19 @@
+#
+# example '.env' file for docker-compose environment.
+#
+################################################################
+# Change the variables below for access and security.
+################################################################
+
+DJANGO_ALLOWED_HOSTS="127.0.0.1,localhost,hostname,ip-of-your-server"
+DJANGO_SECRET_KEY="secret!change me!"
+OPENTPOD_DB_PASSWORD="secret!change me!"
+OPENTPOD_REDIS_PASSWORD="secret!change me!"
+
+
+################################################################
+# Default environment setup.
+# Do not change, unless you know what you are doing
+################################################################
+
+OPENTPOD_DB="opentpod"

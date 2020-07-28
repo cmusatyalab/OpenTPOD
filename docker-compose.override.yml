@@ -1,0 +1,35 @@
+# docker-compose.override.yml for development. Only brings up minimal set
+# of containers, postgresql, redis, opentpod and one opentpod-worker that
+# handles all jobs.
+#
+#     docker-compose up -d
+#
+version: "3.2"
+services:
+    opentpod:
+        build: .
+        command: [ "./run-development.sh" ]
+        volumes:
+            - ./config:/root/openTPOD/config:ro
+            - ./cvat:/root/openTPOD/cvat:ro
+            - ./frontend:/root/openTPOD/frontend
+            - ./manage.py:/root/openTPOD/manage.py:ro
+            - ./opentpod:/root/openTPOD/opentpod:ro
+        ports:
+            - 127.0.0.1:20000:8000
+        environment:
+            - DJANGO_DEBUG=true
+
+    opentpod-worker:
+        build: .
+        command: [ "./run-worker.sh", "default", "tensorboard", "low"]
+        volumes:
+            - ./config:/root/openTPOD/config:ro
+            - ./cvat:/root/openTPOD/cvat:ro
+            - ./frontend:/root/openTPOD/frontend
+            - ./manage.py:/root/openTPOD/manage.py:ro
+            - ./opentpod:/root/openTPOD/opentpod:ro
+        environment:
+            - DJANGO_DEBUG=true
+            - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
