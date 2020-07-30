@@ -20,7 +20,7 @@ services:
             - opentpod-db-data:/var/lib/postgresql/data
         environment:
             POSTGRES_USER: root
-            POSTGRES_DB: ${OPENTPOD_DB}
+            POSTGRES_DB: opentpod
             POSTGRES_PASSWORD: ${OPENTPOD_DB_PASSWORD}
     opentpod-redis:
         container_name: opentpod-redis
@@ -29,15 +29,22 @@ services:
         restart: always
         volumes:
             - opentpod-redis-data:/data
-    opentpod:
-        extends:
-            file: docker-compose.common.yml
-            service: opentpod_djangoapp
+    opentpod: &opentpod-djangoapp
         container_name: opentpod
-    opentpod-worker:
-        extends:
-            file: docker-compose.common.yml
-            service: opentpod_djangoapp
-        container_name: opentpod-worker
+        image: opentpod:stable
+        volumes:
+            - opentpod-data-var:/root/openTPOD/var
+        environment:
+            - DJANGO_ALLOWED_HOSTS
+            - DJANGO_SECRET_KEY
+            - DJANGO_DEBUG=false
+            - PYTHONDONTWRITEBYTECODE=1
+            - REDIS_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/0
+            - REDIS_CACHE_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/1
+            - DATABASE_URL=postgres://root:${OPENTPOD_DB_PASSWORD}@opentpod-db:5432/opentpod
         depends_on:
-            - opentpod
+            - opentpod-db
+            - opentpod-redis
+    opentpod-worker:
+        <<: *opentpod-djangoapp
+        container_name: opentpod-worker

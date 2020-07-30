@@ -8,6 +8,7 @@ version: "3.2"
 services:
     opentpod:
         build: .
+        image: opentpod:latest
         command: [ "./run-development.sh" ]
         volumes:
             - ./config:/root/openTPOD/config:ro
@@ -22,7 +23,8 @@ services:
 
     opentpod-worker:
         build: .
-        command: [ "./run-worker.sh", "default", "tensorboard", "low"]
+        image: opentpod:latest
+        command: [ "./run-worker.sh", "default", "tensorboard", "low" ]
         volumes:
             - ./config:/root/openTPOD/config:ro
             - ./cvat:/root/openTPOD/cvat:ro

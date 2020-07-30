@@ -22,18 +22,18 @@ services:
             - opentpod-www-static:/root/openTPOD/www
         environment:
             - DJANGO_ALLOWED_HOSTS  # pass from .env
-    opentpod-worker:
+    opentpod-worker: &opentpod-worker
         command: [ "./run-worker.sh", "default" ]
         restart: always
     opentpod-tensorboard:
-        extends: opentpod-worker
+        <<: *opentpod-worker
         container_name: opentpod-tensorboard
         command: [ "./run-worker.sh", "tensorboard" ]
         environment:
             - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
             - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     opentpod-trainer:
-        extends: opentpod-worker
+        <<: *opentpod-worker
         container_name: opentpod-trainer
         command: [ "./run-worker.sh", "low" ]
         environment:
