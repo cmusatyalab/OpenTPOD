@@ -2,3 +2,6 @@
 !.coveragerc
 !.env
 !.pylintrc
+frontend/build/
+frontend/node_modules/
+frontend/package_lock.json

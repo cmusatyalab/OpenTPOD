@@ -1,19 +1,12 @@
 FROM ubuntu:18.04
 
-ARG http_proxy
-ARG https_proxy
-ARG no_proxy
-ARG socks_proxy
 ARG TZ
 
 ENV TERM=xterm \
-    http_proxy=${http_proxy}   \
-    https_proxy=${https_proxy} \
-    no_proxy=${no_proxy} \
-    socks_proxy=${socks_proxy} \
     LANG='C.UTF-8'  \
     LC_ALL='C.UTF-8' \
-    TZ=${TZ}
+    TZ=${TZ} \
+    BASH_ENV=/etc/profile
 
 # Install necessary apt packages
 # some python package requires gcc when installing from conda, therefore
@@ -31,32 +24,32 @@ RUN apt-get update && \
     unzip \
     vim \
     wget \
- && apt-get clean && rm -rf /var/lib/apt/lists/* \
- && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
- && dpkg-reconfigure -f noninteractive tzdata
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # use conda to manage requirements
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86_64.sh -O ~/miniconda.sh \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Linux-x86_64.sh -O ~/miniconda.sh \
  && /bin/bash ~/miniconda.sh -b -p /opt/conda \
  && rm ~/miniconda.sh \
  && /opt/conda/bin/conda clean -tipsy \
- && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
- && sed -i 's/mesg n/test -t 0 \&\& mesg n/' ~/.profile
-SHELL ["/bin/bash", "-lc"]
+ && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+SHELL [ "/bin/bash", "-c" ]
 
 # Install python dependencies
 COPY requirements/ /root/openTPOD/requirements/
 WORKDIR /root/openTPOD
+
 RUN conda env create -f requirements/environment.yml \
- && echo 'conda activate opentpod-env' >> ~/.profile
+ && echo 'conda activate opentpod-env' > /etc/profile.d/opentpod.sh
 
 # Install nodejs dependencies
 COPY frontend/package.json /root/openTPOD/frontend/
 RUN cd frontend && npm install
 
-# Copy frontend source and build npm static files
+# Copy frontend source and build npm static files and set local timezone
 COPY frontend /root/openTPOD/frontend/
-RUN cd frontend && npm run-script build
+RUN cd frontend && npm run-script build \
+ && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
+ && echo ${TZ} > /etc/timezone
 
 VOLUME /root/openTPOD/www
 
@@ -64,4 +57,4 @@ VOLUME /root/openTPOD/www
 COPY . /root/openTPOD/
 
 EXPOSE 8000
-CMD ./run-development.sh
+CMD [ "/bin/bash" ]
