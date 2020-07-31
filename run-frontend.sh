@@ -7,7 +7,7 @@ mkdir -p www
 rm -rf www/*
 
 # collect CVAT static files we don't need database or redis cache for that.
-( DATABASE_URL="sqlite:///" REDIS_URL="" REDIS_CACHE_URL="" \
+( DATABASE_URL="sqlite:///" REDIS_URL="" CACHE_URL="" \
   python manage.py collectstatic --noinput --clear )
 
 # install nodejs static files

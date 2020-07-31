@@ -351,7 +351,7 @@ RQ_EXCEPTION_HANDLERS = ['cvat.apps.engine.views.rq_handler']
 
 # Cache DB access (e.g. for engine.task.get_frame)
 # https://github.com/Suor/django-cacheops
-CACHEOPS_REDIS = env('REDIS_CACHE_URL')
+CACHEOPS_REDIS = env('CACHE_URL')
 CACHEOPS = {
     # Automatically cache any Task.objects.get() calls for 15 minutes
     # This also includes .first() and .last() calls.

@@ -40,7 +40,7 @@ services:
             - DJANGO_DEBUG=false
             - PYTHONDONTWRITEBYTECODE=1
             - REDIS_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/0
-            - REDIS_CACHE_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/1
+            - CACHE_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/1
             - DATABASE_URL=postgres://root:${OPENTPOD_DB_PASSWORD}@opentpod-db:5432/opentpod
         depends_on:
             - opentpod-db
