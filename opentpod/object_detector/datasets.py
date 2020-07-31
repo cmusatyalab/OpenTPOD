@@ -19,8 +19,10 @@ import json
 from logzero import logger
 import shutil
 from xml.dom.minidom import parse
-
+from opentpod.object_detector.google_cloud import create_bucket, upload_blob
 # from helper import getXml
+# from google.cloud import storage
+# from google.cloud import automl
 
 tf.compat.v1.enable_eager_execution()
 
@@ -215,7 +217,7 @@ def dump_detector_annotations(
     _dump_labelmap_file(labels, output_labelmap_file_path)
     split_train_eval_tfrecord(output_dir)
 
-def getXml(xmlfile, tasknum):
+def getXml(xmlfile, tasknum, bucket_name):
     tree = parse(xmlfile)
     root = tree.documentElement
     filename = root.getElementsByTagName('filename')[0].childNodes[0].data
@@ -224,15 +226,17 @@ def getXml(xmlfile, tasknum):
     width = float(root.getElementsByTagName('width')[0].childNodes[0].data)
     height = float(root.getElementsByTagName('height')[0].childNodes[0].data)
     obj = root.getElementsByTagName('object')
-    result = []
+    strconstant = 'UNASSIGNED' + ',' + 'gs://' + bucket_name
+    result = ""
     for i in obj:
         name = i.getElementsByTagName("name")[0].childNodes[0].data
         xmin = float(i.getElementsByTagName("xmin")[0].childNodes[0].data) / width
         ymin = float(i.getElementsByTagName("ymin")[0].childNodes[0].data) / height
         xmax = float(i.getElementsByTagName("xmax")[0].childNodes[0].data) / width
         ymax = float(i.getElementsByTagName("ymax")[0].childNodes[0].data) / height
+        strbefore = os.path.join(strconstant, tasknum + '-' + filename)
         strafter = ',' + name + ',' + str(xmin) + ',' + str(ymin) + ',,,' + str(xmax) + ',' + str(ymax) + ',,\n'
-        result.append((tasknum, filename, strafter))
+        result += strbefore + strafter
 
     return result
 
@@ -245,6 +249,10 @@ def dump_detector_annotations4google_cloud(
     """Dump annotation data for detector training.
     Output is placed into the detector's ondisk dir.
     """
+    logger.info(db_detector.id)
+    bucket_name = 'bucket-' + str(db_detector.id)
+    create_bucket(bucket_name)
+    logger.info(bucket_name)
     output_dir = db_detector.get_dir()
     datadir = os.path.join(output_dir, 'data')
     if not os.path.exists(datadir):
@@ -255,7 +263,7 @@ def dump_detector_annotations4google_cloud(
     db_dumper_pascal = cvat_models.AnnotationDumper.objects.get(display_name=dump_format_pascal)
 
     # call cvat dump tool on each video in the trainset
-    result = []
+    result = ""
     for db_task in db_tasks:
         task_annotations_file_path_pascal = dump_cvat_task_annotations(db_task,
                                                                 db_user,
@@ -269,7 +277,7 @@ def dump_detector_annotations4google_cloud(
         # logger.info(xmlpath)
         tasknum = os.path.basename(currdir)
         # logger.info(tasknum)
-        outputfolder = os.path.join(datadir, tasknum)
+        outputfolder = datadir
 
         if not os.path.exists(outputfolder):
             os.mkdir(outputfolder)
@@ -283,26 +291,26 @@ def dump_detector_annotations4google_cloud(
         
         for fp in filedir:
             # logger.info(fp)
-            result += getXml(os.path.join(xmlpath, fp), tasknum)
+            result += getXml(os.path.join(xmlpath, fp), tasknum, bucket_name)
 
         for root, dirs, files in os.walk(data):
             if len(files) != 0:
                 for i in files:
                     if i.endswith('.jpg'):
                         src = os.path.join(root, i)
-                        dest = os.path.join(outputfolder, i)
+                        outname = tasknum + '-' + i
+                        dest = os.path.join(outputfolder, outname)
                         shutil.copy2(src, dest)
+                        upload_blob(bucket_name, dest, outname)
             # print(root)
             # print(dirs)
             # print(sorted(files))
             # print()
         # print(result)
-    return result
-    # writecsv = open(os.path.join(output_dir, 'info.csv'), 'w+')
-    # writecsv.write(result)
-    # writecsv.close()
-            
-
+    writecsv = open(os.path.join(output_dir, 'info.csv'), 'w+')
+    writecsv.write(result)
+    writecsv.close()
+    upload_blob(bucket_name, os.path.join(output_dir, 'info.csv'), 'info.csv')           
 
 def split_train_eval_tfrecord(data_dir):
     """Split tfrecord in the data_dir into train and eval sets."""

@@ -9,3 +9,5 @@ DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,hostname,ip-of-your-server
 DJANGO_SECRET_KEY=secret!change me!
 OPENTPOD_DB_PASSWORD=secret!change me!
 OPENTPOD_REDIS_PASSWORD=secret!change me!
+
+GOOGLE_AUTOML_CREDENTIALS=/path/to/creds.json

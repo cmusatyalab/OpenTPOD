@@ -29,6 +29,7 @@ services:
         image: opentpod:stable
         volumes:
             - opentpod-data-var:/root/openTPOD/var
+            - ${GOOGLE_AUTOML_CREDENTIALS}:/root/openTPOD/config/automl_credentials.json
         environment:
             - DJANGO_ALLOWED_HOSTS
             - DJANGO_SECRET_KEY
@@ -37,6 +38,7 @@ services:
             - REDIS_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/0
             - CACHE_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/1
             - DATABASE_URL=postgres://root:${OPENTPOD_DB_PASSWORD}@opentpod-db:5432/opentpod
+            - GOOGLE_APPLICATION_CREDENTIALS=/root/openTPOD/config/automl_credentials.json
         depends_on:
             - opentpod-db
             - opentpod-redis

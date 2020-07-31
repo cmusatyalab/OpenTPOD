@@ -19,6 +19,7 @@ from proxy.views import proxy_view
 from opentpod.object_detector.provider import utils
 from django.conf import settings
 
+from opentpod.object_detector.google_cloud import create_dataset, import_data, train_model
 
 class TFODDetector():
     """Tensorflow Object Detection API
@@ -170,25 +171,27 @@ class TFODDetector():
         self.prepare_config(id)
         self.prepare_config_pipeline_file(id)
 
-    def writexml(self, xml, output_dir):
-        # self.prepare_config()
-        # logger.info(self._config)
-        # logger.info(self.training_parameters)
-        if 'bucket name' in self._config.keys():
-            storage_path = self._config['bucket name']
+    def importData(self, db_detector):
+        if 'project id' in self._config.keys():
+            project_id = self._config['project id']
         else:
-            storage_path = self.training_parameters['bucket name']
-        logger.info(storage_path)
-        fileinstorage = 'UNASSIGNED' + ',' + str(os.path.join('gs://', storage_path, 'data'))
-        content = ""
-        for i in xml:
-            strpre = os.path.join(fileinstorage, i[0], i[1])
-            content += strpre
-            content += i[2]
+            project_id = self.training_parameters['project id']
+        logger.info(project_id)
+        if project_id == '':
+            raise InputError('project id is needed')
+        bucket_name = 'bucket-' + str(db_detector.id)
+        display_name = 'dataset' + str(db_detector.id)
+        dataset_id = create_dataset(project_id, display_name)
+        csvpath = os.path.join('gs://' + bucket_name, 'info.csv')
+        logger.info(csvpath)
+        import_data(project_id, dataset_id, csvpath)
 
-        writecsv = open(os.path.join(output_dir, 'info.csv'), 'w+')
-        writecsv.write(content)
-        writecsv.close()
+        return project_id, dataset_id
+
+    def cloudTrain(self, db_detector, project_id, dataset_id):
+        display_name = db_detector.name
+        train_model(project_id, dataset_id, display_name)
+        return
 
     def _check_training_data_dir(self, FLAGS):
         """Check training directory's data is valid
