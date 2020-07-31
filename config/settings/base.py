@@ -156,16 +156,16 @@ MIDDLEWARE = [
 # STATIC
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-#STATIC_ROOT = ROOT_DIR / "static"
-STATIC_ROOT = ROOT_DIR / "www" / "static"
+STATIC_ROOT = ROOT_DIR / "static"
 os.makedirs(STATIC_ROOT, exist_ok=True)
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-# STATICFILES_DIRS = [
+STATICFILES_DIRS = [
 #     APPS_DIR / "static",
 #     ROOT_DIR / "cvat/apps/engine/static"  # for cvat's static files
-# ]
+    ROOT_DIR / "frontend" / "build" / "static",
+]
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -193,7 +193,10 @@ TEMPLATES = [
         # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATES-BACKEND
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # https://docs.djangoproject.com/en/dev/ref/settings/#template-dirs
-        "DIRS": [APPS_DIR / "templates"],
+        "DIRS": [
+            APPS_DIR / "templates",
+            ROOT_DIR / "frontend" / "build",
+        ],
         "OPTIONS": {
             # https://docs.djangoproject.com/en/dev/ref/settings/#template-loaders
             # https://docs.djangoproject.com/en/dev/ref/templates/api/#loader-types

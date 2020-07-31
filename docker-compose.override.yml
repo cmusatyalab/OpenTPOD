@@ -11,9 +11,10 @@ services:
         image: opentpod:latest
         command: [ "./run-development.sh" ]
         volumes:
+            # mount local source into container
             - ./config:/root/openTPOD/config:ro
             - ./cvat:/root/openTPOD/cvat:ro
-            - ./frontend:/root/openTPOD/frontend
+            - ./frontend/src:/root/openTPOD/frontend/src:ro
             - ./manage.py:/root/openTPOD/manage.py:ro
             - ./opentpod:/root/openTPOD/opentpod:ro
         ports:
@@ -28,7 +29,6 @@ services:
         volumes:
             - ./config:/root/openTPOD/config:ro
             - ./cvat:/root/openTPOD/cvat:ro
-            - ./frontend:/root/openTPOD/frontend
             - ./manage.py:/root/openTPOD/manage.py:ro
             - ./opentpod:/root/openTPOD/opentpod:ro
         environment:

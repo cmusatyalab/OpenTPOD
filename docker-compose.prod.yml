@@ -11,7 +11,7 @@ services:
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/opentpod.nginx.conf:/etc/nginx/opentpod.nginx.conf:ro
-            - opentpod-www-static:/root/openTPOD/www:ro
+            - opentpod-www-static:/root/openTPOD/static:ro
             - opentpod-data-var:/root/openTPOD/var
         depends_on:
             - opentpod
@@ -19,7 +19,7 @@ services:
         command: [ "./run-frontend.sh" ]
         restart: always
         volumes:
-            - opentpod-www-static:/root/openTPOD/www
+            - opentpod-www-static:/root/openTPOD/static
         environment:
             - DJANGO_ALLOWED_HOSTS  # pass from .env
     opentpod-worker: &opentpod-worker
