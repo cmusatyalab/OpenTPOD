@@ -31,7 +31,8 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Linux
  && /bin/bash ~/miniconda.sh -b -p /opt/conda \
  && rm ~/miniconda.sh \
  && /opt/conda/bin/conda clean -tipsy \
- && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+ && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+ && echo ". /etc/profile" >> ~/.bashrc  # used by docker exec/run
 SHELL [ "/bin/bash", "-c" ]
 
 # Install python dependencies
@@ -51,7 +52,7 @@ RUN cd frontend && npm run-script build \
  && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
  && echo ${TZ} > /etc/timezone
 
-VOLUME /root/openTPOD/www
+VOLUME /root/openTPOD/static
 
 # Copy rest of the opentpod source
 COPY . /root/openTPOD/
