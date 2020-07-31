@@ -17,7 +17,7 @@ urlpatterns = [
      path('api/v1/auth/', include('cvat.apps.authentication.api_urls')),
      path('api/v1/', include((router.urls, 'cvat'), namespace='v1')),
 
-    path("cvat-ui/", include("opentpod.cvat_ui_adapter.urls")),
+    path("cvat-ui", include("opentpod.cvat_ui_adapter.urls")),
     # use rest_auth for authentication and registration
     path("auth/", include("rest_auth.urls")),
     path("auth/registration/", include('rest_auth.registration.urls')),
