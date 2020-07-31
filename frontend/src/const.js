@@ -12,7 +12,7 @@ const endpoints = {
     detectorVisualizationField: "visualization/index.html",
     trainsets: "/api/opentpod/v1/trainsets",
     mediaData: "/task_data/",
-    logo: "/tpod-logo.png",
+    logo: "/static/tpod-logo.png",
     // front end handled routes
     uiSignup: "/signup",
     uiLogin: "/login",
