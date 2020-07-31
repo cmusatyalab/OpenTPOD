@@ -6,11 +6,6 @@
 #   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
 version: "3.2"
-volumes:
-    opentpod-data-var:
-    opentpod-db-data:
-    opentpod-redis-data:
-    opentpod-www-static:
 services:
     opentpod-db:
         container_name: opentpod-db
@@ -48,3 +43,7 @@ services:
     opentpod-worker:
         <<: *opentpod-djangoapp
         container_name: opentpod-worker
+volumes:
+    opentpod-data-var:
+    opentpod-db-data:
+    opentpod-redis-data:
