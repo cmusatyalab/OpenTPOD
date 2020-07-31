@@ -17,17 +17,19 @@ description: Explains how to setup and administer an OpenTPOD server.
 * opentpod: Main Django module for OpenTPOD.
 * cvat: a symlink to third_party/cvat. Integrated third party annotation tool CVAT. This symlink is needed here for it to be treated as a Django module as well.
 * keys: a keys directory with an empty module to make CVAT behave nicely.
-* supervisord: supervisord configurations to launch the server.
 * nginx: nginx configuration files.
-* docker-compose.debug.yml: debug Docker compose file.
+* docker-compose.yml/docker-compose.override.yml: debug Docker compose file.
 * docker-compose.prod.yml: Docker compose file for deployment.
 * Dockerfile: Dockerfile to build the openTPOD container image.
-* .envrc.example: Example environment variables to set.
+* dotenv.example: Example environment variables to set as a ".env" file.
 * manage.py: Django manage.py file to run Django default functionalities.
 * third_party: git submodules referencing CVAT releases.
 * frontend: React-based frontend. Created using the create-react-app.
-* build_frontend.sh: Script to build frontend React code and collect Django
-  static files together into static and www directory for serving.
+* run-development.sh: Script to rebuild frontend React code and Django
+  server in development mode.
+* run-frontend.sh: Script to collect React and Django static files together into
+  static directory and run a production server.
+* run-worker.sh: Script to run individual Django-RQ workers.
 * docs: documentation
 
 ## Installation
@@ -42,8 +44,8 @@ Then, configure the environmental variables, mostly setting passwords by copying
 and editing .envrc.example file.
 
 ```
-$ cp .envrc.example .envrc.prod
-$ vi .envrc.prod
+$ cp dotenv.example .env
+$ vi .env
 ```
 
 The server can be started in either **deployment** or **debug** configurations.
@@ -53,43 +55,48 @@ The server can be started in either **deployment** or **debug** configurations.
 This configurations runs everything inside containers.
 
 ```bash
-$ # make sure you have copied and modified .envrc.example to .envrc.prod
-$ source .envrc.prod
-$ docker-compose -f docker-compose.prod.yml build
-$ docker-compose -f docker-compose.prod.yml up
+$ # make sure you have copied and modified dotenv.example to .env
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 ```
 
-The server may take a few mintues to start up, as it builds its React frontend. After the server is up, indicated by log message "listening at..", create an administrative account with the following command.
+The server may take a few minutes to start up as it pull the current docker
+image and initializes it's state. After the server is up, indicated by log
+message "listening at..", create an administrative account with the following
+command.
 
 ```bash
-docker-compose -f docker-compose.prod.yml exec opentpod bash -lc '/opt/conda/envs/opentpod-env/bin/python manage.py createsuperuser'
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec opentpod python manage.py createsuperuser
 ```
 
 Now, you can access the website with the admin account at **http://host-or-ip-name:20000/**.
 
 ### Debugging Backend inside Containers (Recommended)
 
-This would create infrastructures inside containers while running the django
-development server natively on the host.
+This runs the django development server inside of the container, but uses
+the local source.
 
 ```bash
-$ # make sure you have copied and modified .envrc.example to .envrc.prod
-$ source .envrc.prod
-$ docker-compose -f docker-compose.debug.yml build
-$ docker-compose -f docker-compose.debug.yml up
+$ # make sure you have copied and modified dotenv.example to .env
+$ docker-compose up -d --build
 $ # access opentpod container
-$ docker-compose -f docker-compose.debug.yml exec opentpod /bin/bash
-$ # inside opentpod container
-$ # modify the code as you see fit
-$ # to launch the server and testing
-$ ./build_frontend.sh
-$ python manage.py migrate
-$ python manage.py rqworker default low tensorboard &
-$ python manage.py runserver 0.0.0.0:8000
+```
+
+At this point you can modify the frontend or backend code as you see fit and
+it should automatically recompile in case an update doesn't seem to get picked
+up, or when the django/npm daemons have stopped working, rerun 'docker-compose
+up -d --build' to restart. It will then rebuild the container, picking up any
+missed changes.
+
+```bash
+$ # to see logging from the container either drop the '-d' or
+$ docker-compose logs -f opentpod
+$ # to poke around inside the container
+$ docker-compose exec opentpod bash
 ```
 
 ### Debugging Backend and Frontend without Containers 
-```
+
+```bash
 $ # install all the dependencies, follow Dockerfile
 $ # run backend server
 $ python manage.py migrate
@@ -107,9 +114,9 @@ $ npm run-script watch
 ## Uninstallation
 
 ```bash
-$ docker-compose -f docker-compose.prod.yml down
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
 $ # or if you want to remove all your data as well, use
-$ docker-compose -f docker-compose.prod.yml down -v
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml down -v
 ```
 
 
