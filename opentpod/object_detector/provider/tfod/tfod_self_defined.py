@@ -36,7 +36,7 @@ class DetectorSelfModel(TFODDetector):
         return self.TEMPLATE
 
 class DetectorGoogleAutoML(TFODDetector):
-    TRAINING_PARAMETERS = {'bucket name': ""}
+    TRAINING_PARAMETERS = {'project id': ""}
 
     def __init__(self, config):
         super().__init__(config)

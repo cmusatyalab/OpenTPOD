@@ -46,11 +46,13 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86
     rm ~/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc 
 
 # Install and initialize CVAT, copy all necessary files
 RUN mkdir -p /root/openTPOD
 WORKDIR /root/openTPOD
+
+ENV GOOGLE_APPLICATION_CREDENTIALS=/root/openTPOD/config/<google_account_credential_json>
 
 COPY requirements/ ./requirements/
 

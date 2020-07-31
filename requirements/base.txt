@@ -68,3 +68,9 @@ supervisor==4.1.0
 
 # logging
 logzero==1.5.0
+
+# google cloud auto ml training
+grpcio==1.30.0
+gunicorn==19.9.0
+google-cloud-storage
+google-cloud-automl
