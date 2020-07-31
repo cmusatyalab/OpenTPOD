@@ -19,4 +19,4 @@ printf "nginx should serve DIR: $(readlink -f www)\n"
 # SSH_AUTH_SOCK to prevent CVAT from blocking when generating ssh keys
 export SSH_AUTH_SOCK="fix"
 /usr/bin/env python manage.py migrate && \
-    /usr/bin/env gunicorn config.wsgi:application --log-file - --log-level debug -b :8000"
+    /usr/bin/env gunicorn config.wsgi:application --log-file - --log-level debug -b :8000
