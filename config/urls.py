@@ -5,18 +5,18 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 from django.views import defaults as default_views
 
-from cvat.apps.engine.urls import router
+# CVAT engine.urls is redirecting 'unknown url' to /dashboard/ which
+# messes with our routing of unknown paths to index.html for reactjs
+# so we have to strip the client entry point from cvat url patterns
+from cvat.apps.engine.urls import urlpatterns as cvat_urlpatterns
+cvat_urlpatterns = cvat_urlpatterns[1:]
 
 urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # use CVAT for labeling
-    # CVAT engine.urls is redirecting 'unknown url' to /dashboard/ which
-    # messes with our routing of unknown paths to index.html for reactjs
     #path("", include("cvat.apps.engine.urls")),
-     path('api/v1/auth/', include('cvat.apps.authentication.api_urls')),
-     path('api/v1/', include((router.urls, 'cvat'), namespace='v1')),
-
+    path("", include(cvat_urlpatterns)),
     path("cvat-ui", include("opentpod.cvat_ui_adapter.urls")),
     # use rest_auth for authentication and registration
     path("auth/", include("rest_auth.urls")),
