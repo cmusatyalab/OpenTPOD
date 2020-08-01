@@ -94,7 +94,7 @@ $ # to poke around inside the container
 $ docker-compose exec opentpod bash
 ```
 
-### Debugging Backend and Frontend without Containers 
+### Debugging Backend and Frontend without Containers
 
 ```bash
 $ # install all the dependencies, follow Dockerfile
@@ -124,9 +124,9 @@ $ docker-compose -f docker-compose.yml -f docker-compose.prod.yml down -v
 
 #### Create User Accounts
 
-Users can create accounts by following the *sign up* link on the login page. 
-However, newly created accounts do not have access to the website functionalities 
-until an administrator explicitly gives the account permission. 
+Users can create accounts by following the *sign up* link on the login page.
+However, newly created accounts do not have access to the website functionalities
+until an administrator explicitly gives the account permission.
 See [below](####Grant-users-permission-to-access-the-system) for granting users permissions to access the website.
 
 #### Grant users permission to access the system

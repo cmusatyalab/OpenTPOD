@@ -13,6 +13,6 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
 # restore
 # cat data.tgz | docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
 #   exec -T opentpod tar -xzf - -C /root/openTPOD/var
-#     
+#
 # zcat pgdump.gz | docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
 #   exec opentpod-db psql -U root
