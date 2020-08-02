@@ -2,9 +2,14 @@
 
 set -e
 
+printf "Fixing permissions on uploaded files\n"
+# fix permissions of uploaded files so that non-root nginx has access
+find /root/openTPOD/var/data -type d -name .upload -exec chmod -R go+r {} \;
+
 # because we're running from a prebuilt container, we only have to
 # make sure to re-populate the www-static volume which is shared with
 # an nginx container
+printf "Collecting static files\n"
 mkdir -p static
 rm -rf static/*
 
