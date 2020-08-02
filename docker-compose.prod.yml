@@ -9,10 +9,9 @@ services:
         ports:
             - 0.0.0.0:20000:80
         volumes:
-            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-            - ./nginx/opentpod.nginx.conf:/etc/nginx/opentpod.nginx.conf:ro
-            - opentpod-www-static:/root/openTPOD/static:ro
-            - opentpod-data-var:/root/openTPOD/var
+            - ./nginx/opentpod.conf:/etc/nginx/conf.d/default.conf:ro
+            - opentpod-www-static:/var/www/static
+            - opentpod-data-var:/var/lib/openTPOD
         depends_on:
             - opentpod
     opentpod:
@@ -25,19 +24,38 @@ services:
     opentpod-worker: &opentpod-worker
         command: [ "./run-worker.sh", "default" ]
         restart: always
+        # copied from docker-compose.yml because yaml anchors don't work across files
+        image: opentpod:stable
+        volumes:
+            - opentpod-data-var:/root/openTPOD/var
+        environment:
+            - DJANGO_ALLOWED_HOSTS
+            - DJANGO_SECRET_KEY
+            - DJANGO_DEBUG=false
+            - PYTHONDONTWRITEBYTECODE=1
+            - REDIS_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/0
+            - CACHE_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/1
+            - DATABASE_URL=postgres://root:${OPENTPOD_DB_PASSWORD}@opentpod-db:5432/opentpod
+
+            # should be only for nvidia workers, but anchors don't seem to merge these lists
+            - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        depends_on:
+            - opentpod-db
+            - opentpod-redis
     opentpod-tensorboard:
         <<: *opentpod-worker
         container_name: opentpod-tensorboard
         command: [ "./run-worker.sh", "tensorboard" ]
-        environment:
-            - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
-            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        #environment:
+        #    - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
+        #    - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     opentpod-trainer:
         <<: *opentpod-worker
         container_name: opentpod-trainer
         command: [ "./run-worker.sh", "low" ]
-        environment:
-            - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
-            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        #environment:
+        #    - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
+        #    - NVIDIA_DRIVER_CAPABILITIES=compute,utility
 volumes:
     opentpod-www-static:
