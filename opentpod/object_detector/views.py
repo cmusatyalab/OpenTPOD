@@ -139,10 +139,12 @@ class DetectorViewSet(viewsets.ModelViewSet):
 def task_data(request, task_id, data_path):
     """serving user's task data with permission checking.
     CVAT doesn't provide APIs to access all task data, e.g. uploaded videos.
-    Using django-xsenfile in order to serve files with web server
+    Using django-xsendfile in order to serve files with web server
     https://github.com/johnsensible/django-sendfile
     """
-    db_tasks = Task.objects.filter(pk=task_id, owner=request.user)
+    db_tasks = Task.objects.filter(pk=task_id)
+    if not auth.has_admin_role(request.user):
+        db_tasks.filter(Q(owner=request.user))
     if len(db_tasks) < 1:
         raise Http404
     db_task = db_tasks[0]
