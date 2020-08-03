@@ -1,0 +1,17 @@
+Google Cloud Auto ML on OpenTPOD Instruction
+Because the google cloud auto ml training is charged, the user has to deploy their own opentpod and set the relative account credential. We will keep working on it and try to make the process more convenient.
+1. Follow https://cloud.google.com/docs/authentication/getting-started#linux-or-macos to obtain the google account credential in json. 
+2. Store the credential file in ~/opentpod/config folder. 
+3. Modify line 55 in Dockerfile: set the GOOGLE_APPLICATION_CREDENTIALS to the path of your credential file. 
+4. Launch opentpod
+5. In tpod, select the videos in "Training Videos" (i.e. tfrecord files cannot work)
+6. In tpod, select "GoogleAutoML" in "Detector Types"
+7. In tpod, put the project id in google cloud platform to the shown line. 
+8. In tpod, click "Create Detector". 
+9. The trained model will be viewed in your google cloud platform. 
+ 
+Google Cloud Platform:
+1. Creating projects is paid and one project can be used multi-times, so user will need to choose create project or re-use previous project on Google Cloud Platform. Only the project id is needed on opentpod. 
+2. TPOD will create bucket in the user's google storage with the name "bucket-<detector id>", so please make sure there is no duplicated name. 
+3. TPOD will create dataset for training with the name "dataset<detector id>". Please make sure there is no duplicated name.
+4. For TPOD, one dataset will only train one model. For any other operations the user want to apply to the dataset, please directly use the Google Cloud Platform.  
