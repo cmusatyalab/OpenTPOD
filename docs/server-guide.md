@@ -18,8 +18,8 @@ description: Explains how to setup and administer an OpenTPOD server.
 * cvat: a symlink to third_party/cvat. Integrated third party annotation tool CVAT. This symlink is needed here for it to be treated as a Django module as well.
 * keys: a keys directory with an empty module to make CVAT behave nicely.
 * nginx: nginx configuration files.
-* docker-compose.yml/docker-compose.override.yml: debug Docker compose file.
-* docker-compose.prod.yml: Docker compose file for deployment.
+* docker-compose.yml/docker-compose.override.yml: Docker compose file for development.
+* docker-compose.prod.yml: Docker compose file for production deployment.
 * Dockerfile: Dockerfile to build the openTPOD container image.
 * dotenv.example: Example environment variables to set as a ".env" file.
 * manage.py: Django manage.py file to run Django default functionalities.
@@ -40,8 +40,8 @@ First, clone this repository with submodules.
 git clone --recurse-submodules https://github.com/cmusatyalab/OpenTPOD.git
 ```
 
-Then, configure the environmental variables, mostly setting passwords by copying
-and editing .envrc.example file.
+Then, configure the configuration variables, mostly setting passwords by copying
+and editing the `dotenv.example` file to `.env`.
 
 ```
 $ cp dotenv.example .env
@@ -52,23 +52,24 @@ The server can be started in either **deployment** or **debug** configurations.
 
 ### Deployment
 
-This configurations runs everything inside containers.
+This configuration runs everything inside containers.
 
 ```bash
 $ # make sure you have copied and modified dotenv.example to .env
 $ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 ```
 
-The server may take a few minutes to start up as it pull the current docker
+The server may take a few minutes to start up as it pulls the current docker
 image and initializes it's state. After the server is up, indicated by log
 message "listening at..", create an administrative account with the following
 command.
 
 ```bash
-$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec opentpod bash -c "python manage.py createsuperuser"
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec opentpod bash
+opentpod# python ./manage.py createsuperuser
 ```
 
-Now, you can access the website with the admin account at **http://host-or-ip-name:20000/**.
+Now, you can access the website with the admin account at **http://localhost:20000/**.
 
 ### Debugging Backend inside Containers (Recommended)
 
@@ -77,7 +78,7 @@ the local source.
 
 ```bash
 $ # make sure you have copied and modified dotenv.example to .env
-$ docker-compose up -d --build
+$ docker-compose up --build -d
 $ # access opentpod container
 ```
 
@@ -92,6 +93,19 @@ $ # to see logging from the container either drop the '-d' or
 $ docker-compose logs -f opentpod
 $ # to poke around inside the container
 $ docker-compose exec opentpod bash
+```
+
+NOTE: (developing the production environment hack). If you want to promote the
+current 'development' container to production status you can tag the
+opentpod:latest image as opentpod:stable and then the production deployment
+will deploy it instead of pulling down the existing stable container.
+
+```bash
+$ # make sure opentpod:latest matches the current development tree
+$ docker-compose build
+$ # tag and redeploy production
+$ docker tag opentpod:latest opentpod:stable
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 ### Debugging Backend and Frontend without Containers
