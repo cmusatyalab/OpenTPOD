@@ -1,11 +1,8 @@
 FROM ubuntu:18.04
 
-ARG TZ
-
 ENV TERM=xterm \
     LANG='C.UTF-8'  \
     LC_ALL='C.UTF-8' \
-    TZ=${TZ} \
     BASH_ENV=/etc/profile
 
 # Install necessary apt packages
@@ -48,9 +45,7 @@ RUN cd frontend && npm install
 
 # Copy frontend source and build npm static files and set local timezone
 COPY frontend /root/openTPOD/frontend/
-RUN cd frontend && npm run-script build \
- && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime \
- && echo ${TZ} > /etc/timezone
+RUN cd frontend && npm run-script build
 
 VOLUME /root/openTPOD/static
 
