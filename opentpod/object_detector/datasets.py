@@ -17,7 +17,7 @@ from cvat.apps.annotation import models as cvat_models
 import collections
 import json
 
-tf.enable_eager_execution()
+tf.compat.v1.enable_eager_execution()
 
 
 def _cvat_get_frame_path(base_dir, frame):

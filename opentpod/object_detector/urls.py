@@ -24,7 +24,7 @@ router.register('trainsets', views.TrainSetViewSet)
 
 urlpatterns = [
     # documentation for API
-    path('api/opentpod/swagger.<slug:format>$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('api/opentpod/swagger.<slug:format>', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('api/opentpod/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/opentpod/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/opentpod/v1/', include((router.urls))),
