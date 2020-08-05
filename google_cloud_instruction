@@ -1,8 +1,8 @@
 Google Cloud Auto ML on OpenTPOD Instruction
 Because the google cloud auto ml training is charged, the user has to deploy their own opentpod and set the relative account credential. We will keep working on it and try to make the process more convenient.
 1. Follow https://cloud.google.com/docs/authentication/getting-started#linux-or-macos to obtain the google account credential in json. 
-2. Store the credential file in ~/opentpod/config folder. 
-3. Modify line 55 in Dockerfile: set the GOOGLE_APPLICATION_CREDENTIALS to the path of your credential file. 
+2. Store the credential file somewhere on your local disk.
+3. Modify the .env file: set the GOOGLE_AUTOML_CREDENTIALS to the path of your credential file. 
 4. Launch opentpod
 5. In tpod, select the videos in "Training Videos" (i.e. tfrecord files cannot work)
 6. In tpod, select "GoogleAutoML" in "Detector Types"
