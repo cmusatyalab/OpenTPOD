@@ -21,11 +21,10 @@ services:
             - 127.0.0.1:20000:8000
         environment:
             - DJANGO_DEBUG=true
-
-    opentpod-worker:
+    opentpod-worker: &opentpod-worker
         build: .
         image: opentpod:latest
-        command: [ "./run-worker.sh", "default", "tensorboard", "low" ]
+        command: [ "./run-worker.sh", "default", "tensorboard" ]
         volumes:
             - ./config:/root/openTPOD/config:ro
             - ./cvat:/root/openTPOD/cvat:ro
@@ -35,3 +34,6 @@ services:
             - DJANGO_DEBUG=true
             - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
             - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    opentpod-trainer:
+        <<: *opentpod-worker
+        command: [ "./run-worker.sh", "low" ]

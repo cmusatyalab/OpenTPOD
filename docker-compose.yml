@@ -43,6 +43,9 @@ services:
     opentpod-worker:
         <<: *opentpod-djangoapp
         container_name: opentpod-worker
+    opentpod-trainer:
+        <<: *opentpod-djangoapp
+        container_name: opentpod-trainer
 volumes:
     opentpod-data-var:
     opentpod-db-data:
