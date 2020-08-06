@@ -12,6 +12,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq \
     build-essential \
     ffmpeg \
+    git \
     libgeos-dev \
     libpq-dev \
     p7zip-full \
