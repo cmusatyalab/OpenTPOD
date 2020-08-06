@@ -1,12 +1,14 @@
 #!/bin/sh
 
-NOW=$(date -Iseconds)
+set -e
+
+PREFIX=${1:-$(date -Iseconds)}
 
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
-    exec -T opentpod tar -cf - -C /root/openTPOD/var . > ${NOW}_data.tar
+    exec -T opentpod tar -cf - -C /root/openTPOD/var . > ${PREFIX}_data.tar
 
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
-    exec opentpod-db pg_dumpall -c -U root | gzip -9 --rsyncable > ${NOW}_pgdump.gz
+    exec opentpod-db pg_dumpall -c -U root | gzip -9 --rsyncable > ${PREFIX}_pgdump.gz
 
 ##
 ## RESTORE
