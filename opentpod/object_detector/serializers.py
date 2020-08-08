@@ -16,18 +16,23 @@ class SimpleTaskSerializer(serializers.ModelSerializer):
     """A simplied task serializer for showing task information.
     """
     labels = LabelSerializer(many=True, source='label_set', partial=True, read_only=True)
-    image_quality = serializers.IntegerField(min_value=0, max_value=100, read_only=True)
+    size = serializers.ReadOnlyField(source='data.size')
+    image_quality = serializers.ReadOnlyField(source='data.image_quality')
+    start_frame = serializers.ReadOnlyField(source='data.start_frame')
+    stop_frame = serializers.ReadOnlyField(source='data.stop_frame')
+    frame_filter = serializers.ReadOnlyField(source='data.frame_filter')
+    data = serializers.ReadOnlyField(source='data.id')
 
     class Meta:
         model = cvat_models.Task
         fields = ('id', 'name', 'size', 'mode', 'owner', 'assignee',
                   'bug_tracker', 'created_date', 'updated_date', 'overlap',
                   'status', 'labels', 'image_quality', 'start_frame',
-                  'stop_frame', 'frame_filter')
+                  'stop_frame', 'frame_filter', 'data')
         read_only_fields = ('name', 'size', 'mode', 'owner', 'assignee',
                             'bug_tracker', 'created_date', 'updated_date', 'overlap',
                             'status', 'labels', 'image_quality', 'start_frame',
-                            'stop_frame', 'frame_filter')
+                            'stop_frame', 'frame_filter', 'data')
         ordering = ['-id']
 
 

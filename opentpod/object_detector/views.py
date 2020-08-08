@@ -148,5 +148,6 @@ def task_data(request, task_id, data_path):
     if len(db_tasks) < 1:
         raise Http404
     db_task = db_tasks[0]
-    file_path = os.path.abspath(os.path.realpath(os.path.join(db_task.get_task_dirname(), data_path)))
+    data_dirname = db_task.data.get_data_dirname()
+    file_path = os.path.abspath(os.path.realpath(os.path.join(data_dirname, data_path)))
     return sendfile.sendfile(request, file_path)

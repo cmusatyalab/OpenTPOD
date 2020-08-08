@@ -90,7 +90,6 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "cvat.apps.authentication",  # needed to take CVAT permission system into account
     "cvat.apps.engine",
-    "cvat.apps.annotation",
     "opentpod.object_detector",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -110,6 +109,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 DJANGO_AUTH_TYPE = 'BASIC'
+DJANGO_AUTH_DEFAULT_GROUPS = []
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 # LOGIN_REDIRECT_URL = "users:redirect"
@@ -368,11 +368,20 @@ CACHEOPS_DEGRADE_ON_FAILURE = True
 
 # cvat settings
 # ------------------------------------------------------------------------------
-BASE_DIR = ROOT_DIR
-SHARE_ROOT = VAR_DIR / 'share'
-os.makedirs(SHARE_ROOT, exist_ok=True)
-MODELS_ROOT = VAR_DIR / 'models'
+BASE_DIR = VAR_DIR
+#DATA_ROOT = VAR_DIR / 'data'  # defined earlier
+MEDIA_DATA_ROOT = DATA_ROOT / 'data'
+MODELS_ROOT = BASE_DIR / 'models'
+TASKS_ROOT = DATA_ROOT / 'tasks'
+LOGS_ROOT = BASE_DIR / 'logs'
+MIGRATIONS_LOGS_ROOT = LOGS_ROOT / 'migrations'
+SHARE_ROOT = BASE_DIR / 'share'
+
+os.makedirs(MEDIA_DATA_ROOT, exist_ok=True)
 os.makedirs(MODELS_ROOT, exist_ok=True)
+os.makedirs(TASKS_ROOT, exist_ok=True)
+os.makedirs(MIGRATIONS_LOGS_ROOT, exist_ok=True)
+os.makedirs(SHARE_ROOT, exist_ok=True)
 
 # tpod requirements
 # ------------------------------------------------------------------------------

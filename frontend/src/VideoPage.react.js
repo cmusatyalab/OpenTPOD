@@ -93,7 +93,7 @@ const VideoCardBody = ({ resourceObj }) => {
                 url={URI.joinPaths(
                     endpoints.mediaData,
                     resourceObj.id.toString(),
-                    ".upload",
+                    "raw",
                     resourceObj.name
                 )}
                 width="100%"
