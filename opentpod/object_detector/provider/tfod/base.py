@@ -20,6 +20,9 @@ from opentpod.object_detector.provider import utils
 from django.conf import settings
 
 from opentpod.object_detector.google_cloud import create_dataset, import_data, train_model
+from opentpod.object_detector.pytorch_resnet18 import prepareData
+
+import torch
 
 class TFODDetector():
     """Tensorflow Object Detection API
@@ -171,6 +174,25 @@ class TFODDetector():
         self.prepare_config(id)
         self.prepare_config_pipeline_file(id)
 
+    def writeresnet18info(self, savedir, class_names):
+        infopath = os.path.join(savedir, 'info.txt')
+        fp = open(infopath, 'w+')
+        for i in range(len(class_names)):
+            fp.write(str(i) + ":" + class_names[i] + '\n')
+        fp.close()
+
+    def pytorchtrain(self, db_detector):
+        if 'num_epochs' in self._config.keys():
+            num_epochs = self._config['num_epochs']
+        else:
+            num_epochs = self.training_parameters['num_epochs']
+        output_dir = db_detector.get_dir()
+        datadir = os.path.join(output_dir, 'data')
+        logger.info(datadir)
+        model, class_names = prepareData(datadir, int(num_epochs))
+        torch.save(model, os.path.join(db_detector.get_dir(), 'result.pth'))
+        self.writeresnet18info(db_detector.get_dir(), class_names)
+
     def importData(self, db_detector):
         if 'project id' in self._config.keys():
             project_id = self._config['project id']
@@ -249,7 +271,7 @@ class TFODDetector():
         # as there are multiple files ending in .meta, .index, .data-...
         return os.path.splitext(max_step_model_path)[0]
 
-    def export(self, output_file_path):
+    def export(self, output_file_path, filepath=None):
         """Export TF model.
         Both the frozen graph and training artifacts are exported to allow
         inference and future training.
@@ -304,17 +326,29 @@ class TFODDetector():
                 'zip',
                 temp_dir)
 
-    def export4google(self, output_file_path, filepath):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            shutil.copy2(os.path.join(filepath, 'info.csv'), temp_dir)
-            shutil.copytree(os.path.join(filepath, 'data'), os.path.join(temp_dir, 'data'))
-            file_stem = str(pathlib.Path(output_file_path).parent
-                            / pathlib.Path(output_file_path).stem)
-            logger.debug(file_stem)
-            shutil.make_archive(
-                file_stem,
-                'zip',
-                temp_dir)
+    # def export4google(self, output_file_path, filepath):
+    #     with tempfile.TemporaryDirectory() as temp_dir:
+    #         shutil.copy2(os.path.join(filepath, 'info.csv'), temp_dir)
+    #         shutil.copytree(os.path.join(filepath, 'data'), os.path.join(temp_dir, 'data'))
+    #         file_stem = str(pathlib.Path(output_file_path).parent
+    #                         / pathlib.Path(output_file_path).stem)
+    #         logger.debug(file_stem)
+    #         shutil.make_archive(
+    #             file_stem,
+    #             'zip',
+    #             temp_dir)
+
+    # def export4pytorch_classfication(self, output_file_path, filepath):
+    #     with tempfile.TemporaryDirectory() as temp_dir:
+    #         # shutil.copy2(os.path.join(filepath, 'info.csv'), temp_dir)
+    #         shutil.copytree(os.path.join(filepath, 'data'), os.path.join(temp_dir, 'data'))
+    #         file_stem = str(pathlib.Path(output_file_path).parent
+    #                         / pathlib.Path(output_file_path).stem)
+    #         logger.debug(file_stem)
+    #         shutil.make_archive(
+    #             file_stem,
+    #             'zip',
+    #             temp_dir)
 
     def _is_tensorboard_subprocess_running(self, pinfo_file_path):
         if pinfo_file_path.exists():

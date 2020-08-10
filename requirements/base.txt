@@ -74,3 +74,8 @@ grpcio==1.30.0
 gunicorn==19.9.0
 google-cloud-storage
 google-cloud-automl
+
+# pytorch
+scikit-learn
+torch
+torchvision

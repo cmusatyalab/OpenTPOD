@@ -15,27 +15,27 @@ from xml.dom.minidom import parse
 
 SELFMODELPATH = os.path.join(settings.TRAINMODEL_ROOT, 'modelpath')
 
-def getXml(xmlfile, storage_path):
+def getXmlInfo(xmlfile):
     tree = parse(xmlfile)
     root = tree.documentElement
     # print(root.nodeName)
     filename = root.getElementsByTagName('filename')[0].childNodes[0].data
-    fileinstorage = os.path.join(storage_path, filename)
+    filename = int(filename.split('_')[1])
+    filename = str(filename) + '.jpg'
     width = float(root.getElementsByTagName('width')[0].childNodes[0].data)
     height = float(root.getElementsByTagName('height')[0].childNodes[0].data)
     obj = root.getElementsByTagName('object')
-    strpre = TYPE + ',' + fileinstorage + ','
-    result = ""
+    result = []
     for i in obj:
         name = i.getElementsByTagName("name")[0].childNodes[0].data
-        xmin = float(i.getElementsByTagName("xmin")[0].childNodes[0].data) / width
-        ymin = float(i.getElementsByTagName("ymin")[0].childNodes[0].data) / height
-        xmax = float(i.getElementsByTagName("xmax")[0].childNodes[0].data) / width
-        ymax = float(i.getElementsByTagName("ymax")[0].childNodes[0].data) / height
-        strafter = strpre + name + ',' + str(xmin) + ',' + str(ymin) + ',,,' + str(xmax) + ',' + str(ymax) + ',,\n'
-        result += strafter
+        xmin = float(i.getElementsByTagName("xmin")[0].childNodes[0].data) #/ width
+        ymin = float(i.getElementsByTagName("ymin")[0].childNodes[0].data) #/ height
+        xmax = float(i.getElementsByTagName("xmax")[0].childNodes[0].data) #/ width
+        ymax = float(i.getElementsByTagName("ymax")[0].childNodes[0].data) #/ height
+        
+        result.append((name, xmin, ymin, xmax, ymax))
 
-    return result
+    return filename, result
 
 def unzippedFile(path, id, name):
     # logger.info("get to unzip func")

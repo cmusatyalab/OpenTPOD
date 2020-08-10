@@ -19,8 +19,10 @@ import json
 from logzero import logger
 import shutil
 from xml.dom.minidom import parse
+from sklearn.model_selection import train_test_split
+from PIL import Image
 from opentpod.object_detector.google_cloud import create_bucket, upload_blob
-# from helper import getXml
+from opentpod.object_detector.helper import getXmlInfo
 # from google.cloud import storage
 # from google.cloud import automl
 
@@ -238,6 +240,81 @@ def getXml(xmlfile, tasknum, bucket_name):
         result += strbefore + strafter
 
     return result
+
+def dump_detector_annotations4classfication(
+        db_detector,
+        db_tasks,
+        db_user,
+        scheme,
+        host):
+    logger.info(db_detector.id)
+    output_dir = db_detector.get_dir()
+    datadir = os.path.join(output_dir, 'data')
+    if not os.path.exists(datadir):
+        os.mkdir(datadir)
+    traindir = os.path.join(output_dir, 'data', 'train')
+    if not os.path.exists(traindir):
+        os.mkdir(traindir)
+    valdir = os.path.join(output_dir, 'data', 'val')
+    if not os.path.exists(valdir):
+        os.mkdir(valdir)
+    dump_format_pascal = 'PASCAL VOC ZIP 1.0'
+    db_dumper_pascal = cvat_models.AnnotationDumper.objects.get(display_name=dump_format_pascal)
+    for db_task in db_tasks:
+        task_annotations_file_path_pascal = dump_cvat_task_annotations(db_task,
+                                                                db_user,
+                                                                db_dumper_pascal,
+                                                                scheme,
+                                                                host)
+        data = db_task.get_data_dirname()
+        currdir = os.path.abspath(os.path.join(db_task.get_data_dirname(), os.pardir))
+        xmlpath = os.path.join(currdir, 'xml')
+        tasknum = os.path.basename(currdir)
+        outputfolder = datadir
+        # logger.info(xmlpath)
+        # logger.info(tasknum)
+        if not os.path.exists(outputfolder):
+            os.mkdir(outputfolder)
+
+        if not os.path.exists(xmlpath):
+            os.mkdir(xmlpath)
+        with ZipFile(task_annotations_file_path_pascal) as cur_zip:
+            cur_zip.extractall(xmlpath)
+
+        img2path = {}
+        for root, dirs, files in os.walk(data):
+            if len(files) != 0:
+                for i in files:
+                    if i.endswith('.jpg'):
+                        imgpath = os.path.join(root, i)
+                        img2path[i] = imgpath
+
+        # logger.info(img2path)
+        train, val = train_test_split(os.listdir(xmlpath),test_size=0.1)
+        # logger.info(os.listdir(xmlpath))
+        for x in os.listdir(xmlpath):
+            imgname, info = getXmlInfo(os.path.join(xmlpath, x))
+            # logger.info(imgname)
+            # logger.info(info)
+            imgpath = img2path[imgname]
+            img = Image.open(imgpath)
+            if x in train:
+                savedir = traindir
+            else:
+                savedir = valdir
+            
+            for i in info:
+                resultfolder = os.path.join(savedir, i[0])
+                if not os.path.exists(resultfolder):
+                    os.mkdir(resultfolder)
+                outputname = tasknum + '-' + i[0] + '-' + imgname
+                # logger.info("xmin: " + str(i[1]))
+                # logger.info("ymin: " + str(i[2]))
+                # logger.info("xmax: " + str(i[3]))
+                # logger.info("ymax: " + str(i[4]))
+                cropImg = img.crop((i[1], i[2], i[3], i[4]))
+                cropImg.save(os.path.join(resultfolder, outputname), 'JPEG')
+    
 
 def dump_detector_annotations4google_cloud(
         db_detector,

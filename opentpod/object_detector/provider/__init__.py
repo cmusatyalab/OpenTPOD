@@ -1,4 +1,4 @@
-from .tfod import TFODFasterRCNNResNet101, TFODFasterRCNNResNet50, TFODSSDMobileNetV2, DetectorSelfModel, DetectorGoogleAutoML
+from .tfod import TFODFasterRCNNResNet101, TFODFasterRCNNResNet50, TFODSSDMobileNetV2, DetectorSelfModel, DetectorGoogleAutoML, DetectorPytorchClassfication
 
 from enum import Enum
 
@@ -30,6 +30,7 @@ _SUPPORTED_DNN_TYPE = [
     (TFODSSDMobileNetV2, 'tensorflow_ssd_mobilenet_v2', 'Tensorflow SSD MobileNet V2'),
     (DetectorSelfModel, 'Self-trained', 'Self-trained'),
     (DetectorGoogleAutoML, 'GoogleAutoML', 'GoogleAutoML'),
+    (DetectorPytorchClassfication, 'pytorch_classfication_resnet18', 'Pytorch Classfication ResNet18')
 ]
 
 # dnn type string to use for db and human readable text

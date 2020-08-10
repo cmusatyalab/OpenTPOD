@@ -1,0 +1,6 @@
+# packages used for doing classfication with pytorch resnet18 model
+torch==1.6.0
+torchvision==0.7.0
+numpy
+os
+Pillow

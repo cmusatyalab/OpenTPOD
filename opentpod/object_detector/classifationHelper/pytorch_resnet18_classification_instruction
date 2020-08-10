@@ -1,0 +1,20 @@
+Instruction for Pytorch ResNet18 Usage:
+1. Do usual labeling work on TPOD
+2. Select "Detector Types" as "Pytorch Classification ResNet18"
+3. Select videos to train models (only videos can be used to train)
+4. Choose suitable epoch number. The default number is 25. 
+5. Start to train. 
+6. Till the training finishing, download the trained model. 
+
+Optional:
+7. Set the model directory path and the image containing the classifying item in pytorch_classification_infer.py (Note: only the directory path is needed)
+8. Run the pytorch_classfication_infer.py, and the name of the classified item would be printed. 
+
+The parameters setted in OpenTPOD:
+Batch size = 4
+num worker = 4
+learning rate = 0.001
+momentum = 0.9
+# Decay learning rate by a factor of 0.1 every 7 epochs
+factor = 0.1
+epoch number = 7
