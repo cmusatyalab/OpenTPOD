@@ -10,7 +10,7 @@ Optional:
 7. Set the model directory path and the image containing the classifying item in pytorch_classification_infer.py (Note: only the directory path is needed)
 8. Run the pytorch_classfication_infer.py, and the name of the classified item would be printed. 
 
-The parameters setted in OpenTPOD:
+The parameters setting in OpenTPOD:
 Batch size = 4
 num worker = 4
 learning rate = 0.001
