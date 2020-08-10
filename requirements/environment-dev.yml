@@ -15,6 +15,6 @@ dependencies:
     - pudb
     - rope
     - nodejs
-    - tensorflow-gpu=1.15.2
+    - tensorflow-gpu=1.15.0
     - pip:
           - -r local.txt
