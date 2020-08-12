@@ -81,10 +81,10 @@ def fix_cvat_tfrecord(cvat_image_dir, cvat_tf_record_zip, output_file_path):
 
                 # add image data
                 _add_image_data_to_cvat_tfexample(example, cvat_image_dir)
-                # fix source id type
-                source_id = example.features.feature['image/source_id'].int64_list.value.pop()
-                example.features.feature['image/source_id'].bytes_list.value.append(
-                    str(source_id).encode('utf-8'))
+                ## fix source id type
+                #source_id = example.features.feature['image/source_id'].int64_list.value.pop()
+                #example.features.feature['image/source_id'].bytes_list.value.append(
+                #    str(source_id).encode('utf-8'))
                 # change class label to -1. force TF to use class/text
                 for i in range(len(example.features.feature['image/object/class/label'].int64_list.value)):
                     example.features.feature['image/object/class/label'].int64_list.value[i] = -1
