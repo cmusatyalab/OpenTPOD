@@ -59,7 +59,8 @@ def _add_image_data_to_cvat_tfexample(tfexample, cvat_image_dir):
     cvat_frame_id = int(re.findall(r'\d+', image_file_name)[0])
     with open(_cvat_get_frame_path(cvat_image_dir, cvat_frame_id), 'rb') as f:
         frame_data = f.read()
-        tfexample.features.feature['image/encoded'].bytes_list.value.append(frame_data)
+        tfexample.features.feature['image/encoded'].bytes_list.value[0] = frame_data
+        tfexample.features.feature['image/format'].bytes_list.value[0] = str('jpeg').encode('utf-8')
 
 
 def fix_cvat_tfrecord(cvat_image_dir, cvat_tf_record_zip, output_file_path):
