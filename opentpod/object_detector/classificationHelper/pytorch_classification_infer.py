@@ -57,5 +57,5 @@ def classified(image_path):
     resultIndex = np.argmax(output)
     return infodict[resultIndex]
 
-item = classified(IMAGEPATH, infodict)
+item = classified(IMAGEPATH)
 print(item)
