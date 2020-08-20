@@ -6,7 +6,7 @@
     "license": "MIT",
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.9.0",
-        "bcrypt": "^3.0.7",
+        "bcrypt": "^5.0.0",
         "d3-scale": "^3.0.0",
         "email-validator": "^2.0.4",
         "filepond": "^4.4.9",
