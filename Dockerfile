@@ -44,7 +44,7 @@ RUN conda env create -f requirements/environment.yml \
 COPY frontend/package.json /root/openTPOD/frontend/
 RUN cd frontend && npm install
 
-# Copy frontend source and build npm static files and set local timezone
+# Copy frontend source and build npm static files
 COPY frontend /root/openTPOD/frontend/
 RUN cd frontend && npm run-script build
 

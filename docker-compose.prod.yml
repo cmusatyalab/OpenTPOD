@@ -19,8 +19,6 @@ services:
         restart: always
         volumes:
             - opentpod-www-static:/root/openTPOD/static
-        environment:
-            - DJANGO_ALLOWED_HOSTS  # pass from .env
     opentpod-worker: &opentpod-worker
         command: [ "./run-worker.sh", "default" ]
         restart: always
