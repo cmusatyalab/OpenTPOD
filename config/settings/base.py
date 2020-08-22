@@ -383,6 +383,24 @@ os.makedirs(TASKS_ROOT, exist_ok=True)
 os.makedirs(MIGRATIONS_LOGS_ROOT, exist_ok=True)
 os.makedirs(SHARE_ROOT, exist_ok=True)
 
+RESTRICTIONS = {
+    'user_agreements': [],
+
+    # this setting limits the number of tasks for the user
+    'task_limit': None,
+
+    # this setting reduse task visibility to owner and assignee only
+    'reduce_task_visibility': False,
+
+    # allow access to analytics component to users with the following roles
+    'analytics_access': (
+        'engine.role.observer',
+        'engine.role.annotator',
+        'engine.role.user',
+        'engine.role.admin',
+    ),
+}
+
 # tpod requirements
 # ------------------------------------------------------------------------------
 CACHE_DIR = VAR_DIR / '.cache'
