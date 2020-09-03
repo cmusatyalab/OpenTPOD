@@ -65,8 +65,7 @@ message "listening at..", create an administrative account with the following
 command.
 
 ```bash
-$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec opentpod bash
-opentpod# python ./manage.py createsuperuser
+$ docker-compose exec opentpod bash -c 'python ./manage.py createsuperuser'
 ```
 
 Now, you can access the website with the admin account at **http://localhost:20000/**.
