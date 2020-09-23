@@ -115,7 +115,7 @@ $ # run backend server
 $ python manage.py migrate
 $ python manage.py createsuperuser
 $ python manage.py collectstatic
-$ python manage.py rqworker default low tensorboard &
+$ python manage.py rqworker default low &
 $ python manage.py runserver 0.0.0.0:8000
 $
 $ # launch npm dev server for serving frontend code

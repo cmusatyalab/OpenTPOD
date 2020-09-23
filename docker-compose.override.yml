@@ -25,7 +25,7 @@ services:
     opentpod-worker: &opentpod-worker
         build: .
         image: opentpod:latest
-        command: [ "./run-worker.sh", "default", "tensorboard" ]
+        command: [ "./run-worker.sh", "default" ]
         volumes:
             - ./config:/root/openTPOD/config:ro
             - ./cvat:/root/openTPOD/cvat:ro

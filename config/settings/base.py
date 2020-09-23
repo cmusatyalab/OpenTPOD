@@ -344,10 +344,6 @@ RQ_QUEUES = {
         'URL': REDIS_URL,
         'DEFAULT_TIMEOUT': '24h'
     },
-    'tensorboard': {
-        'URL': REDIS_URL,
-        'DEFAULT_TIMEOUT': '24h'
-    },
 }
 RQ_SHOW_ADMIN_LINK = True
 RQ_EXCEPTION_HANDLERS = ['cvat.apps.engine.views.rq_handler']

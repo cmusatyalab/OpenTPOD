@@ -41,13 +41,6 @@ services:
         depends_on:
             - opentpod-db
             - opentpod-redis
-    opentpod-tensorboard:
-        <<: *opentpod-worker
-        container_name: opentpod-tensorboard
-        command: [ "./run-worker.sh", "tensorboard" ]
-        #environment:
-        #    - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
-        #    - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     opentpod-trainer:
         <<: *opentpod-worker
         container_name: opentpod-trainer
