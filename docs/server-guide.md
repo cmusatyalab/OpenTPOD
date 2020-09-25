@@ -56,6 +56,10 @@ This configuration runs everything inside containers.
 
 ```bash
 $ # make sure you have copied and modified dotenv.example to .env
+$ # we don't have a docker image in dockerhub yet so for now we need
+$ # to locally build a copy of the 'stable' image first.
+$ docker-compose build
+$ docker tag opentpod:latest opentpod:stable
 $ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 ```
 
