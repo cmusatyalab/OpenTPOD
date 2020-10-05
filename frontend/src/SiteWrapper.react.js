@@ -55,7 +55,7 @@ class SiteWrapper extends React.Component {
                     note: "Tools for Painless Object Detection.",
                     copyright: (
                         <React.Fragment>
-                            Copyright © 2019
+                            Copyright © 2019-2020
                             <a href="http://gabriel.cs.cmu.edu">
                                 {" "}
                                 Carnegie Mellon University

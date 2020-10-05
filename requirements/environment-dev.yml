@@ -6,6 +6,7 @@ channels:
     - conda-forge
 dependencies:
     - pip=19.1.1
+    - wheel
     - python=3.7
     - setuptools
     - psycopg2==2.8.3

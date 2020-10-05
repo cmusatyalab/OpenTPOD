@@ -8,20 +8,27 @@ ENV TERM=xterm \
 # Install necessary apt packages
 # some python package requires gcc when installing from conda, therefore
 # installing build-essential, some other dependencies are for cvat
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -yq \
-    build-essential \
-    ffmpeg \
-    git \
-    libgeos-dev \
-    libpq-dev \
-    p7zip-full \
-    software-properties-common \
-    tzdata \
-    unrar \
-    unzip \
-    vim \
-    wget \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+        build-essential \
+        ffmpeg \
+        git \
+        libavcodec-dev \
+        libavdevice-dev \
+        libavfilter-dev \
+        libavformat-dev \
+        libavutil-dev \
+        libgeos-dev \
+        libpq-dev \
+        libswresample-dev \
+        libswscale-dev \
+        p7zip-full \
+        pkg-config \
+        software-properties-common \
+        tzdata \
+        unrar \
+        unzip \
+        vim \
+        wget \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # use conda to manage requirements
@@ -37,7 +44,7 @@ SHELL [ "/bin/bash", "-c" ]
 COPY requirements/ /root/openTPOD/requirements/
 WORKDIR /root/openTPOD
 
-RUN conda env create -f requirements/environment.yml \
+RUN MAKEFLAGS=-j8 conda env create -f requirements/environment.yml \
  && echo 'conda activate opentpod-env' > /etc/profile.d/opentpod.sh
 
 # Install nodejs dependencies

@@ -99,7 +99,7 @@ const VideoCardBody = ({ resourceObj }) => {
                 width="100%"
                 height="100%"
                 controls={true}
-                light={URI.joinPaths(resourceObj.url, "/frames/0").toString()} // expects string type
+                light={URI.joinPaths(resourceObj.url, "/data").setQuery({type: "frame", number: 0}).toString()} // expects string type
             />
         </div>
     ) : status && status.state === "Failed" ? (
@@ -158,6 +158,7 @@ const VideoPage = ({ ...props }) => {
                 // file is the actual file object to send
                 const batchOfFiles = new FormData();
                 batchOfFiles.append("client_files[0]", file);
+                batchOfFiles.append("image_quality", 70);
                 const request = new XMLHttpRequest();
                 request.open(
                     "POST",
