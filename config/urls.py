@@ -25,6 +25,8 @@ urlpatterns = [
     path("", include("opentpod.object_detector.urls")),
     # React SPA
     path("manifest.json", TemplateView.as_view(template_name="manifest.json")),
+    path("favicon.ico", default_views.page_not_found,
+         kwargs={"exception": Exception("Page not Found")}),
     re_path(".*", TemplateView.as_view(template_name="index.html")),
 ] + static(
     settings.STATIC_URL,
