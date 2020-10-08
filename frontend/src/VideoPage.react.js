@@ -99,7 +99,7 @@ const VideoCardBody = ({ resourceObj }) => {
                 width="100%"
                 height="100%"
                 controls={true}
-                light={URI.joinPaths(resourceObj.url, "/data").setQuery({type: "frame", number: 0}).toString()} // expects string type
+                light={URI.joinPaths(resourceObj.url, "/data").setQuery({type: "preview"}).toString()} // expects string type
             />
         </div>
     ) : status && status.state === "Failed" ? (
