@@ -39,3 +39,6 @@ services:
     opentpod-trainer:
         <<: *opentpod-worker
         command: [ "./run-worker.sh", "low" ]
+    opentpod-rqscheduler:
+        <<: *opentpod-worker
+        command: [ "bash", "-c", "rqscheduler --host=opentpod-redis --port=6379 --db=0 --password=${OPENTPOD_REDIS_PASSWORD}" ]

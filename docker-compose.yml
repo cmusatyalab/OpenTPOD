@@ -34,6 +34,7 @@ services:
             - DJANGO_SECRET_KEY
             - DJANGO_DEBUG=false
             - PYTHONDONTWRITEBYTECODE=1
+            - OPENTPOD_REDIS_PASSWORD
             - REDIS_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/0
             - CACHE_URL=redis://:${OPENTPOD_REDIS_PASSWORD}@opentpod-redis:6379/1
             - DATABASE_URL=postgres://root:${OPENTPOD_DB_PASSWORD}@opentpod-db:5432/opentpod
@@ -46,6 +47,10 @@ services:
     opentpod-trainer:
         <<: *opentpod-djangoapp
         container_name: opentpod-trainer
+    opentpod-rqscheduler:
+        <<: *opentpod-djangoapp
+        container_name: opentpod-rqscheduler
+
 volumes:
     opentpod-data-var:
     opentpod-db-data:

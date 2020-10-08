@@ -48,5 +48,10 @@ services:
         #environment:
         #    - NVIDIA_VISIBLE_DEVICES=all # needed for cuda devices to be visible
         #    - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    opentpod-rqscheduler:
+        <<: *opentpod-worker
+        container_name: opentpod-rqscheduler
+        command: [ "bash", "-c", "rqscheduler --host=opentpod-redis --port=6379 --db=0 --password=${OPENTPOD_REDIS_PASSWORD}" ]
+
 volumes:
     opentpod-www-static:
