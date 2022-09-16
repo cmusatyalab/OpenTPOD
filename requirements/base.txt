@@ -79,7 +79,7 @@ PyYAML>=5.1.1
 
 # object detector
 tf-object-detection
-mako==1.1.0
+mako==1.2.2
 psutil==5.6.7
 
 # logging
